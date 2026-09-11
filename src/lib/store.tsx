@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import {
   User,
   UserRole,
+  Etablissement,
   Classe,
   Inscription,
   Cours,
@@ -14,6 +15,7 @@ import {
 } from "@/types";
 import {
   initialUsers,
+  initialEtablissements,
   initialClasses,
   initialInscriptions,
   initialCourses,
@@ -28,6 +30,12 @@ interface StoreContextType {
   users: User[];
   switchRole: (role: UserRole) => void;
 
+  // Etablissements (Multi-Écoles)
+  etablissements: Etablissement[];
+  createEtablissement: (data: Omit<Etablissement, "id" | "createdAt" | "classesCount" | "studentsCount">) => Etablissement;
+  updateEtablissement: (id: string, data: Partial<Etablissement>) => void;
+  deleteEtablissement: (id: string) => void;
+
   // Classes
   classes: Classe[];
   createClass: (newClass: Omit<Classe, "id" | "createdAt" | "teacherId" | "teacherName" | "enrolledCount" | "pendingCount">) => Classe;
@@ -37,6 +45,7 @@ interface StoreContextType {
   // Inscriptions
   inscriptions: Inscription[];
   applyToClass: (classeId: string, motivation?: string) => void;
+  joinClassByCode: (classCode: string, motivation?: string) => { success: boolean; message: string; classe?: Classe };
   approveInscription: (inscriptionId: string) => void;
   rejectInscription: (inscriptionId: string) => void;
 
@@ -65,8 +74,22 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
-  const [users] = useState<User[]>(initialUsers);
+  const [users, setUsers] = useState<User[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("alfasle_users");
+      if (saved) return JSON.parse(saved);
+    }
+    return initialUsers;
+  });
   const [currentUser, setCurrentUser] = useState<User>(initialUsers[0]); // Default: Teacher Sarah
+
+  const [etablissements, setEtablissements] = useState<Etablissement[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("alfasle_etablissements");
+      if (saved) return JSON.parse(saved);
+    }
+    return initialEtablissements;
+  });
 
   const [classes, setClasses] = useState<Classe[]>(() => {
     if (typeof window !== "undefined") {
@@ -119,6 +142,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   // Sync to localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
+      localStorage.setItem("alfasle_users", JSON.stringify(users));
+      localStorage.setItem("alfasle_etablissements", JSON.stringify(etablissements));
       localStorage.setItem("alfasle_classes", JSON.stringify(classes));
       localStorage.setItem("alfasle_inscriptions", JSON.stringify(inscriptions));
       localStorage.setItem("alfasle_courses", JSON.stringify(courses));
@@ -126,11 +151,94 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("alfasle_submissions", JSON.stringify(submissions));
       localStorage.setItem("alfasle_notifications", JSON.stringify(notifications));
     }
-  }, [classes, inscriptions, courses, assignments, submissions, notifications]);
+  }, [users, etablissements, classes, inscriptions, courses, assignments, submissions, notifications]);
 
   const switchRole = (role: UserRole) => {
     const found = users.find((u) => u.role === role);
     if (found) setCurrentUser(found);
+  };
+
+  // Etablissement Management
+  const createEtablissement = (data: Omit<Etablissement, "id" | "createdAt" | "classesCount" | "studentsCount">) => {
+    const etabId = `etab_${Date.now()}`;
+    const starterClassId = `cls_${Date.now()}`;
+
+    // 1. Create starter class for this new school
+    const starterClass: Classe = {
+      id: starterClassId,
+      classCode: `${data.code.replace(/[^A-Z0-9]/gi, "").substring(0, 4).toUpperCase()}-101`,
+      etablissementId: etabId,
+      etablissementName: data.name,
+      title: `Tronc Commun & Pédagogie - ${data.name}`,
+      description: `Classe inaugurale de l'établissement ${data.name}. Cours, devoirs et ressources partagés.`,
+      level: "Tous Niveaux",
+      category: "Général",
+      capacity: data.maxStudentsQuota || 250,
+      enrollmentMode: "OPEN",
+      status: "ACTIVE",
+      teacherId: "u_teacher_sarah",
+      teacherName: "Prof. Sarah Mansouri",
+      coverImage: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80",
+      createdAt: new Date().toISOString(),
+      enrolledCount: 0,
+      pendingCount: 0,
+      coursesCount: 1,
+      assignmentsCount: 0,
+    };
+
+    const newEtab: Etablissement = {
+      ...data,
+      id: etabId,
+      classesCount: 1,
+      studentsCount: 0,
+      createdAt: new Date().toISOString(),
+    };
+
+    setEtablissements((prev) => [newEtab, ...prev]);
+    setClasses((prev) => [starterClass, ...prev]);
+
+    // 2. If director has email, provision Director user in system
+    if (data.directorEmail && data.directorName) {
+      const directorUser: User = {
+        id: `u_dir_${Date.now()}`,
+        name: data.directorName,
+        email: data.directorEmail,
+        role: "ADMIN",
+        etablissementId: etabId,
+        etablissementName: data.name,
+        avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+        bio: `Directeur / Responsable de l'établissement ${data.name}.`,
+        createdAt: new Date().toISOString(),
+      };
+      setUsers((prev) => {
+        if (prev.some((u) => u.email.toLowerCase() === data.directorEmail?.toLowerCase())) {
+          return prev;
+        }
+        return [...prev, directorUser];
+      });
+    }
+
+    setNotifications((prev) => [
+      {
+        id: `notif_${Date.now()}`,
+        userId: currentUser.id,
+        title: "Nouvel établissement déployé 🏫",
+        message: `L'établissement « ${newEtab.name} » (.${newEtab.subdomain}.alfasle.xyz) est maintenant actif avec sa classe inaugurale.`,
+        type: "SYSTEM",
+        isRead: false,
+        createdAt: new Date().toISOString(),
+      },
+      ...prev,
+    ]);
+    return newEtab;
+  };
+
+  const updateEtablissement = (id: string, data: Partial<Etablissement>) => {
+    setEtablissements((prev) => prev.map((e) => (e.id === id ? { ...e, ...data } : e)));
+  };
+
+  const deleteEtablissement = (id: string) => {
+    setEtablissements((prev) => prev.filter((e) => e.id !== id));
   };
 
   // Class Management
@@ -224,6 +332,107 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       },
       ...prev,
     ]);
+  };
+
+  // Rejoindre une classe avec code unique (ex: AF-DEV-101, AF-MATH-202)
+  const joinClassByCode = (classCode: string, motivation?: string) => {
+    const cleanCode = classCode.trim().toUpperCase();
+    const targetClass = classes.find(
+      (c) => c.classCode?.toUpperCase() === cleanCode || c.id.toUpperCase() === cleanCode
+    );
+
+    if (!targetClass) {
+      return {
+        success: false,
+        message: `Aucune classe trouvée avec le code « ${cleanCode} ». Veuillez vérifier le code fourni par votre établissement ou professeur.`,
+      };
+    }
+
+    const existing = inscriptions.find(
+      (i) => i.classeId === targetClass.id && i.userId === currentUser.id
+    );
+
+    if (existing) {
+      if (existing.status === "APPROVED") {
+        return {
+          success: true,
+          message: `Vous êtes déjà inscrit et actif dans la classe « ${targetClass.title} ». Vos cours sont immédiatement disponibles !`,
+          classe: targetClass,
+        };
+      } else {
+        return {
+          success: false,
+          message: `Votre demande d'inscription pour « ${targetClass.title} » est actuellement en cours de traitement.`,
+          classe: targetClass,
+        };
+      }
+    }
+
+    // Auto-approve or apply
+    const isAutoApprove = targetClass.enrollmentMode === "OPEN";
+
+    const newInscription: Inscription = {
+      id: `ins_${Date.now()}`,
+      userId: currentUser.id,
+      userName: currentUser.name,
+      userEmail: currentUser.email,
+      userAvatar: currentUser.avatarUrl,
+      classeId: targetClass.id,
+      classeTitle: targetClass.title,
+      status: isAutoApprove ? "APPROVED" : "PENDING",
+      motivation: motivation || `Inscription directe via le code classe ${cleanCode}`,
+      appliedAt: new Date().toISOString(),
+      reviewedAt: isAutoApprove ? new Date().toISOString() : undefined,
+    };
+
+    setInscriptions((prev) => [newInscription, ...prev]);
+
+    // Update class counters
+    setClasses((prev) =>
+      prev.map((c) => {
+        if (c.id === targetClass.id) {
+          return {
+            ...c,
+            enrolledCount: isAutoApprove ? (c.enrolledCount || 0) + 1 : c.enrolledCount,
+            pendingCount: !isAutoApprove ? (c.pendingCount || 0) + 1 : c.pendingCount,
+          };
+        }
+        return c;
+      })
+    );
+
+    // Notify student & teacher
+    setNotifications((prev) => [
+      {
+        id: `notif_${Date.now()}`,
+        userId: currentUser.id,
+        title: isAutoApprove ? "Inscription réussie 🎉" : "Demande transmise ⏳",
+        message: isAutoApprove
+          ? `Vous avez rejoint « ${targetClass.title} » (${targetClass.etablissementName}). Vos cours sont prêts !`
+          : `Votre demande pour « ${targetClass.title} » a été transmise à la direction.`,
+        type: "INSCRIPTION",
+        isRead: false,
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: `notif_${Date.now() + 1}`,
+        userId: targetClass.teacherId,
+        title: "Nouvel étudiant inscrit",
+        message: `${currentUser.name} a rejoint la classe ${targetClass.title} via le code ${cleanCode}.`,
+        type: "INSCRIPTION",
+        isRead: false,
+        createdAt: new Date().toISOString(),
+      },
+      ...prev,
+    ]);
+
+    return {
+      success: true,
+      message: isAutoApprove
+        ? `Félicitations ! Vous avez rejoint la classe « ${targetClass.title} » avec succès.`
+        : `Demande envoyée pour validation auprès de la direction de « ${targetClass.etablissementName} ».`,
+      classe: targetClass,
+    };
   };
 
   const approveInscription = (inscriptionId: string) => {
@@ -451,12 +660,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         setCurrentUser,
         users,
         switchRole,
+        etablissements,
+        createEtablissement,
+        updateEtablissement,
+        deleteEtablissement,
         classes,
         createClass,
         updateClass,
         archiveClass,
         inscriptions,
         applyToClass,
+        joinClassByCode,
         approveInscription,
         rejectInscription,
         courses,

@@ -16,7 +16,12 @@ import {
 } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
 
-export function Navbar() {
+interface NavbarProps {
+  onLogoutToLanding?: () => void;
+  onOpenSuperAdmin?: () => void;
+}
+
+export function Navbar({ onLogoutToLanding, onOpenSuperAdmin }: NavbarProps) {
   const {
     currentUser,
     users,
@@ -34,17 +39,29 @@ export function Navbar() {
 
   const getRoleBadge = (role: UserRole) => {
     switch (role) {
+      case "SUPER_ADMIN":
+        return {
+          label: "Super Admin (Root)",
+          icon: <Shield className="w-3.5 h-3.5 text-amber-400" />,
+          color: "bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm",
+        };
       case "TEACHER":
         return {
           label: "Enseignant",
           icon: <BookOpen className="w-3.5 h-3.5" />,
-          color: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30",
+          color: "bg-blue-500/20 text-blue-300 border-blue-500/30",
         };
       case "STUDENT":
         return {
-          label: "Étudiant",
+          label: "Élève",
           icon: <GraduationCap className="w-3.5 h-3.5" />,
-          color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+          color: "bg-sky-500/20 text-sky-300 border-sky-500/30",
+        };
+      case "PARENT":
+        return {
+          label: "Parent",
+          icon: <User className="w-3.5 h-3.5" />,
+          color: "bg-purple-500/20 text-purple-300 border-purple-500/30",
         };
       case "ADMIN":
         return {
@@ -91,6 +108,18 @@ export function Navbar() {
 
       {/* Right Controls: Role Switcher & Notifications & Profile */}
       <div className="flex items-center gap-3 sm:gap-4">
+        {/* Direct Super Admin button for Admins */}
+        {(currentUser.role === "ADMIN" || currentUser.role === "SUPER_ADMIN") && onOpenSuperAdmin && (
+          <button
+            onClick={onOpenSuperAdmin}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-600/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold font-mono transition-all transform hover:-translate-y-0.5 shadow-sm"
+          >
+            <Shield className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden sm:inline">Console Super Admin</span>
+            <span className="sm:hidden">Super Admin</span>
+          </button>
+        )}
+
         {/* Role Switcher Pill */}
         <div className="relative">
           <button
@@ -219,12 +248,23 @@ export function Navbar() {
           <img
             src={currentUser.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100"}
             alt={currentUser.name}
-            className="w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/30"
+            className="w-8 h-8 rounded-full object-cover ring-2 ring-blue-500/30"
           />
           <div className="hidden lg:block text-left">
             <p className="text-xs font-semibold text-slate-200 leading-none">{currentUser.name}</p>
             <p className="text-[10px] text-slate-400 leading-tight mt-0.5">{currentUser.email}</p>
           </div>
+
+          {onLogoutToLanding && (
+            <button
+              onClick={onLogoutToLanding}
+              title="Page d'accueil / Changer de compte"
+              className="ml-2 p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition-colors flex items-center gap-1.5 text-xs font-medium"
+            >
+              <span>🚪</span>
+              <span className="hidden sm:inline">Accueil / Connexion</span>
+            </button>
+          )}
         </div>
       </div>
     </header>

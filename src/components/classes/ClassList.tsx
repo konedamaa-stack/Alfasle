@@ -21,12 +21,18 @@ import { ApplyModal } from "./ApplyModal";
 interface ClassListProps {
   onOpenCreateClass: () => void;
   onSelectClassForCourses?: (classId: string) => void;
+  onOpenJoinClassModal?: () => void;
 }
 
-export function ClassList({ onOpenCreateClass, onSelectClassForCourses }: ClassListProps) {
-  const { currentUser, classes, inscriptions } = useStore();
+export function ClassList({
+  onOpenCreateClass,
+  onSelectClassForCourses,
+  onOpenJoinClassModal,
+}: ClassListProps) {
+  const { currentUser, classes, inscriptions, etablissements } = useStore();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedEtablissement, setSelectedEtablissement] = useState("ALL");
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [selectedLevel, setSelectedLevel] = useState("ALL");
 
@@ -40,10 +46,12 @@ export function ClassList({ onOpenCreateClass, onSelectClassForCourses }: ClassL
     const matchesSearch =
       c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.teacherName.toLowerCase().includes(searchQuery.toLowerCase());
+      c.teacherName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (c.classCode && c.classCode.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesEtab = selectedEtablissement === "ALL" || c.etablissementId === selectedEtablissement;
     const matchesCat = selectedCategory === "ALL" || c.category.includes(selectedCategory);
     const matchesLevel = selectedLevel === "ALL" || c.level === selectedLevel;
-    return matchesSearch && matchesCat && matchesLevel;
+    return matchesSearch && matchesEtab && matchesCat && matchesLevel;
   });
 
   const getStudentStatusForClass = (classId: string) => {
@@ -68,43 +76,69 @@ export function ClassList({ onOpenCreateClass, onSelectClassForCourses }: ClassL
           </p>
         </div>
 
-        {currentUser.role === "TEACHER" && (
-          <button
-            onClick={onOpenCreateClass}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30 transition-all self-start sm:self-auto"
-          >
-            <PlusCircle className="w-4 h-4" />
-            Créer une Nouvelle Classe
-          </button>
-        )}
+        <div className="flex items-center gap-2.5">
+          {onOpenJoinClassModal && (
+            <button
+              onClick={onOpenJoinClassModal}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-300 border border-blue-500/30 text-xs font-semibold shadow-md transition-all self-start sm:self-auto"
+            >
+              <span>🔑</span>
+              <span>Rejoindre avec un Code</span>
+            </button>
+          )}
+
+          {(currentUser.role === "TEACHER" || currentUser.role === "ADMIN") && (
+            <button
+              onClick={onOpenCreateClass}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all self-start sm:self-auto"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>Créer une Nouvelle Classe</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Filter Bar */}
       <div className="glass-panel rounded-2xl p-4 border border-slate-800 flex flex-col md:flex-row gap-4 justify-between items-center">
         {/* Search */}
-        <div className="w-full md:w-80 relative">
+        <div className="w-full md:w-72 relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
           <input
             type="text"
-            placeholder="Filtrer par mot-clé, professeur..."
+            placeholder="Filtrer par mot-clé, code, prof..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+            className="w-full pl-9 pr-4 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
           />
         </div>
 
+        {/* Établissement Filter */}
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <label className="text-xs text-slate-400 whitespace-nowrap">Établissement :</label>
+          <select
+            value={selectedEtablissement}
+            onChange={(e) => setSelectedEtablissement(e.target.value)}
+            className="px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+          >
+            <option value="ALL">Tous les campus ({etablissements.length})</option>
+            {etablissements.map((etab) => (
+              <option key={etab.id} value={etab.id}>
+                🏫 {etab.name} ({etab.city})
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* Category & Level pills */}
-        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          <span className="text-xs text-slate-400 flex items-center gap-1">
-            <Filter className="w-3.5 h-3.5" /> Matière :
-          </span>
+        <div className="flex flex-wrap items-center gap-1.5 w-full md:w-auto">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
                 selectedCategory === cat
-                  ? "bg-indigo-600 text-white font-semibold"
+                  ? "bg-blue-600 text-white font-semibold shadow-sm"
                   : "bg-slate-800/80 text-slate-400 hover:text-slate-200 border border-slate-700"
               }`}
             >
@@ -132,7 +166,7 @@ export function ClassList({ onOpenCreateClass, onSelectClassForCourses }: ClassL
             return (
               <div
                 key={cls.id}
-                className="glass-card rounded-2xl overflow-hidden border border-slate-800 flex flex-col justify-between group"
+                className="glass-card rounded-2xl overflow-hidden border border-slate-800 flex flex-col justify-between group hover:border-slate-700 transition-all shadow-lg"
               >
                 {/* Image Cover */}
                 <div className="h-40 w-full relative overflow-hidden bg-slate-800">
@@ -147,17 +181,17 @@ export function ClassList({ onOpenCreateClass, onSelectClassForCourses }: ClassL
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
 
                   {/* Level & Category badges */}
-                  <div className="absolute top-3 left-3 flex gap-2">
-                    <span className="px-2.5 py-0.5 rounded-md bg-slate-900/85 backdrop-blur-md text-indigo-300 border border-indigo-500/30 text-[10px] font-bold">
-                      {cls.level}
+                  <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
+                    <span className="px-2.5 py-0.5 rounded-md bg-slate-900/90 backdrop-blur-md text-blue-300 border border-blue-500/30 text-[10px] font-bold font-mono">
+                      {cls.classCode}
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-md bg-slate-900/85 backdrop-blur-md text-purple-300 border border-purple-500/30 text-[10px] font-bold">
-                      {cls.category}
+                    <span className="px-2 py-0.5 rounded-md bg-slate-900/90 backdrop-blur-md text-slate-200 border border-slate-700 text-[10px] font-medium">
+                      {cls.level}
                     </span>
                   </div>
 
                   {/* Enrollment mode */}
-                  <span className="absolute top-3 right-3 px-2 py-0.5 rounded-md bg-slate-900/85 backdrop-blur-md text-amber-300 border border-amber-500/30 text-[10px] font-medium">
+                  <span className="absolute top-3 right-3 px-2 py-0.5 rounded-md bg-slate-900/90 backdrop-blur-md text-amber-300 border border-amber-500/30 text-[10px] font-medium">
                     {cls.enrollmentMode === "MANUAL_APPROVAL" ? "Sur sélection" : "Accès direct"}
                   </span>
                 </div>
@@ -165,7 +199,12 @@ export function ClassList({ onOpenCreateClass, onSelectClassForCourses }: ClassL
                 {/* Content */}
                 <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
                   <div className="space-y-2">
-                    <h3 className="text-base font-bold text-white group-hover:text-indigo-300 transition-colors line-clamp-2">
+                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-400">
+                      <span>🏫</span>
+                      <span className="truncate">{cls.etablissementName}</span>
+                    </div>
+
+                    <h3 className="text-base font-bold text-white group-hover:text-blue-300 transition-colors line-clamp-2">
                       {cls.title}
                     </h3>
                     <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
@@ -175,7 +214,7 @@ export function ClassList({ onOpenCreateClass, onSelectClassForCourses }: ClassL
 
                   {/* Teacher info */}
                   <div className="flex items-center gap-2 pt-2 border-t border-slate-800/80">
-                    <div className="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-bold flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-bold flex items-center justify-center">
                       👨‍🏫
                     </div>
                     <span className="text-xs text-slate-300 font-medium">{cls.teacherName}</span>

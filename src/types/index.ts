@@ -1,4 +1,4 @@
-export type UserRole = "ADMIN" | "TEACHER" | "STUDENT";
+export type UserRole = "SUPER_ADMIN" | "ADMIN" | "TEACHER" | "STUDENT" | "PARENT";
 
 export interface User {
   id: string;
@@ -7,6 +7,34 @@ export interface User {
   role: UserRole;
   avatarUrl?: string;
   bio?: string;
+  etablissementId?: string;
+  etablissementName?: string;
+  childrenStudentIds?: string[]; // For PARENT role
+  createdAt: string;
+}
+
+export interface Etablissement {
+  id: string;
+  name: string;
+  code: string; // e.g. "ALF-LYC-01"
+  subdomain: string; // e.g. "polytech-kone", "lycee-excellence", "el-manar"
+  type: "LYCEE" | "COLLEGE" | "UNIVERSITE" | "INSTITUT" | "ECOLE_PRIMAIRE";
+  city: string;
+  country: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  description: string;
+  logoUrl?: string;
+  coverImage?: string;
+  directorName?: string;
+  directorEmail?: string;
+  status?: "ACTIVE" | "SUSPENDED" | "PENDING";
+  subscriptionPlan?: "STANDARD" | "PREMIUM" | "ENTERPRISE";
+  maxStudentsQuota?: number;
+  maxClassesQuota?: number;
+  classesCount?: number;
+  studentsCount?: number;
   createdAt: string;
 }
 
@@ -15,6 +43,9 @@ export type ClassStatus = "DRAFT" | "ACTIVE" | "ARCHIVED";
 
 export interface Classe {
   id: string;
+  classCode: string; // e.g. "AF-TERM-S", "AF-L1-DEV"
+  etablissementId: string;
+  etablissementName: string;
   title: string;
   description: string;
   level: string; // e.g., "Débutant", "Intermédiaire", "Avancé", "Terminale", "Licence 1"
