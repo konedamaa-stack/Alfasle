@@ -76,71 +76,69 @@ interface StoreContextType {
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
+function loadInitialData<T extends { id: string }>(key: string, initialData: T[]): T[] {
+  if (typeof window !== "undefined") {
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const existingIds = new Set(parsed.map((item: T) => item.id));
+          const missingFromInitial = initialData.filter((item) => !existingIds.has(item.id));
+          let merged = [...parsed, ...missingFromInitial];
+
+          // Auto-sync u_admin_arqam with djibril / 123
+          if (key === "alfasle_users") {
+            merged = (merged as unknown as User[]).map((u) => {
+              if (u.id === "u_admin_arqam" || u.username === "admin.arqam") {
+                return {
+                  ...u,
+                  name: "Djibril (Directeur Dar Al-Arqam)",
+                  username: "djibril",
+                  email: u.email || "djibril@alarqam.alfasle.edu",
+                  password: "123",
+                  etablissementId: "etab_dar_alarqam",
+                  etablissementName: "Groupe Scolaire & Institut Dar Al-Arqam",
+                };
+              }
+              return u;
+            }) as unknown as T[];
+          }
+
+          return merged;
+        }
+      }
+    } catch (e) {
+      console.error(`Erreur de chargement localStorage pour ${key}:`, e);
+    }
+  }
+  return initialData;
+}
+
 export function StoreProvider({ children }: { children: React.ReactNode }) {
-  const [users, setUsers] = useState<User[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("alfasle_users");
-      if (saved) return JSON.parse(saved);
-    }
-    return initialUsers;
-  });
+  const [users, setUsers] = useState<User[]>(() => loadInitialData("alfasle_users", initialUsers));
   const [currentUser, setCurrentUser] = useState<User>(initialUsers[0]); // Default: Teacher Sarah
-
-  const [etablissements, setEtablissements] = useState<Etablissement[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("alfasle_etablissements");
-      if (saved) return JSON.parse(saved);
-    }
-    return initialEtablissements;
-  });
-
-  const [classes, setClasses] = useState<Classe[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("alfasle_classes");
-      if (saved) return JSON.parse(saved);
-    }
-    return initialClasses;
-  });
-
-  const [inscriptions, setInscriptions] = useState<Inscription[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("alfasle_inscriptions");
-      if (saved) return JSON.parse(saved);
-    }
-    return initialInscriptions;
-  });
-
-  const [courses, setCourses] = useState<Cours[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("alfasle_courses");
-      if (saved) return JSON.parse(saved);
-    }
-    return initialCourses;
-  });
-
-  const [assignments, setAssignments] = useState<Devoir[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("alfasle_assignments");
-      if (saved) return JSON.parse(saved);
-    }
-    return initialAssignments;
-  });
-
-  const [submissions, setSubmissions] = useState<Soumission[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("alfasle_submissions");
-      if (saved) return JSON.parse(saved);
-    }
-    return initialSubmissions;
-  });
-
-  const [notifications, setNotifications] = useState<AppNotification[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("alfasle_notifications");
-      if (saved) return JSON.parse(saved);
-    }
-    return initialNotifications;
-  });
+  const [etablissements, setEtablissements] = useState<Etablissement[]>(() =>
+    loadInitialData("alfasle_etablissements", initialEtablissements)
+  );
+  const [classes, setClasses] = useState<Classe[]>(() =>
+    loadInitialData("alfasle_classes", initialClasses)
+  );
+  const [inscriptions, setInscriptions] = useState<Inscription[]>(() =>
+    loadInitialData("alfasle_inscriptions", initialInscriptions)
+  );
+  const [courses, setCourses] = useState<Cours[]>(() =>
+    loadInitialData("alfasle_courses", initialCourses)
+  );
+  const [assignments, setAssignments] = useState<Devoir[]>(() =>
+    loadInitialData("alfasle_assignments", initialAssignments)
+  );
+  const [submissions, setSubmissions] = useState<Soumission[]>(() =>
+    loadInitialData("alfasle_submissions", initialSubmissions)
+  );
+  const [notifications, setNotifications] = useState<AppNotification[]>(() =>
+    loadInitialData("alfasle_notifications", initialNotifications)
+  );
 
   // Sync to localStorage
   useEffect(() => {

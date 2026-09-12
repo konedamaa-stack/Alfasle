@@ -295,17 +295,30 @@ export function SuperAdminDashboard({
     return matchesSearch && matchesType && matchesStatus;
   });
 
-  const filteredUsers = users.filter((u) => {
-    const cleanSearch = userSearchQuery.toLowerCase();
-    const matchesSearch =
-      u.name.toLowerCase().includes(cleanSearch) ||
-      u.email.toLowerCase().includes(cleanSearch) ||
-      (u.username && u.username.toLowerCase().includes(cleanSearch)) ||
-      (u.etablissementName && u.etablissementName.toLowerCase().includes(cleanSearch));
-    const matchesRole = selectedUserRole === "ALL" || u.role === selectedUserRole;
-    const matchesSchool = selectedUserSchool === "ALL" || u.etablissementId === selectedUserSchool;
-    return matchesSearch && matchesRole && matchesSchool;
-  });
+  const filteredUsers = users
+    .filter((u) => {
+      const cleanSearch = userSearchQuery.toLowerCase();
+      const matchesSearch =
+        u.name.toLowerCase().includes(cleanSearch) ||
+        u.email.toLowerCase().includes(cleanSearch) ||
+        (u.username && u.username.toLowerCase().includes(cleanSearch)) ||
+        (u.etablissementName && u.etablissementName.toLowerCase().includes(cleanSearch));
+      const matchesRole = selectedUserRole === "ALL" || u.role === selectedUserRole;
+      const matchesSchool = selectedUserSchool === "ALL" || u.etablissementId === selectedUserSchool;
+      return matchesSearch && matchesRole && matchesSchool;
+    })
+    .sort((a, b) => {
+      const rolePriority: Record<UserRole, number> = {
+        ADMIN: 1,
+        SUPER_ADMIN: 2,
+        TEACHER: 3,
+        STUDENT: 4,
+        PARENT: 5,
+      };
+      const pA = rolePriority[a.role] || 99;
+      const pB = rolePriority[b.role] || 99;
+      return pA - pB;
+    });
 
   const totalClassesCount = classes.length;
   const totalEnrolledStudents = classes.reduce((acc, c) => acc + (c.enrolledCount || 0), 0);

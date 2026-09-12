@@ -65,7 +65,7 @@ export function Navbar({ onLogoutToLanding, onOpenSuperAdmin }: NavbarProps) {
         };
       case "ADMIN":
         return {
-          label: "Admin",
+          label: "Directeur",
           icon: <Shield className="w-3.5 h-3.5" />,
           color: "bg-amber-500/20 text-amber-300 border-amber-500/30",
         };

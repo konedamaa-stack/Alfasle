@@ -28,20 +28,29 @@ export default function middleware(req: NextRequest) {
   if (hostWithoutPort.endsWith(".localhost")) {
     subdomain = hostWithoutPort.replace(".localhost", "");
   }
-  // 2. Production with Root Domain: e.g. "polytech-kone.alfasle.com"
+  // 2. Vercel deployment support: e.g. "raya1.alfasle.vercel.app"
+  else if (hostWithoutPort.endsWith(".vercel.app")) {
+    const vParts = hostWithoutPort.split(".");
+    // Only extract subdomain if 4+ parts (e.g. raya1.alfasle.vercel.app)
+    if (vParts.length >= 4) {
+      subdomain = vParts[0];
+    } else {
+      subdomain = "";
+    }
+  }
+  // 3. Production with Root Domain: e.g. "polytech-kone.alfasle.xyz"
   else if (rootDomain && hostWithoutPort.endsWith(`.${rootDomain}`)) {
     subdomain = hostWithoutPort.replace(`.${rootDomain}`, "");
   }
-  // 3. Fallback for alfasle or generic domain parts: "subdomain.example.com"
+  // 4. Fallback for custom multi-part domains: "subdomain.example.com"
   else if (hostWithoutPort.includes(".")) {
     const parts = hostWithoutPort.split(".");
-    // If it's a subdomain like "polytech-kone.mondomaine.com" (3 parts or more)
     if (parts.length >= 3) {
       subdomain = parts[0];
     }
   }
 
-  // Exclude system subdomains like "www", "app", "api", "admin" if needed
+  // Exclude system subdomains like "www", "app", "api", "admin"
   if (subdomain === "www" || subdomain === "app" || subdomain === "api") {
     subdomain = "";
   }
