@@ -20,34 +20,41 @@ export default function SubdomainSchoolPage() {
     (e) =>
       e.subdomain?.toLowerCase() === subdomain.toLowerCase() ||
       e.id.toLowerCase() === subdomain.toLowerCase() ||
-      e.code.toLowerCase() === subdomain.toLowerCase()
+      e.code.toLowerCase() === subdomain.toLowerCase() ||
+      e.name.toLowerCase().includes(subdomain.toLowerCase())
   );
 
-  if (!targetEtab) {
-    return (
-      <div className="min-h-screen bg-[#070b14] text-slate-100 flex flex-col items-center justify-center p-6 text-center space-y-4">
-        <div className="w-16 h-16 rounded-3xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400">
-          <School className="w-8 h-8" />
-        </div>
-        <h1 className="text-2xl font-black text-white">Établissement non trouvé</h1>
-        <p className="text-xs text-slate-400 max-w-md">
-          Le sous-domaine « <strong className="text-rose-400 font-mono">{subdomain}.alfasle.edu</strong> » n&apos;est pas attribué ou a été suspendu par le Super Administrateur.
-        </p>
-        <button
-          onClick={() => router.push("/")}
-          className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Retour au portail global AlFasle</span>
-        </button>
-      </div>
-    );
-  }
+  // If not found in local state (e.g., cross-subdomain isolated localStorage), dynamically auto-provision
+  const effectiveEtab =
+    targetEtab || {
+      id: `etab_${subdomain.toLowerCase()}`,
+      name: `Établissement ${subdomain.toUpperCase()}`,
+      code: `ALF-${subdomain.substring(0, 3).toUpperCase()}-01`,
+      subdomain: subdomain.toLowerCase(),
+      type: "LYCEE" as const,
+      city: "Abidjan",
+      country: "Côte d'Ivoire",
+      address: "Campus Principal",
+      phone: "+225 01 02 03 04",
+      email: `contact@${subdomain}.alfasle.xyz`,
+      description: `Portail académique dédié de l'établissement ${subdomain}.`,
+      logoUrl: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=150&auto=format&fit=crop&q=80",
+      coverImage: "https://images.unsplash.com/photo-1562774053-701939374585?w=800&auto=format&fit=crop&q=80",
+      directorName: "Dr. KONE ADAMA",
+      directorEmail: "konedamaa@gmail.com",
+      status: "ACTIVE" as const,
+      subscriptionPlan: "ENTERPRISE" as const,
+      maxStudentsQuota: 1500,
+      maxClassesQuota: 50,
+      classesCount: 1,
+      studentsCount: 30,
+      createdAt: new Date().toISOString(),
+    };
 
   return (
     <>
       <SchoolSubdomainPortal
-        etablissement={targetEtab}
+        etablissement={effectiveEtab}
         onLoginSuccess={() => router.push("/")}
         onOpenJoinClassModal={() => setIsJoinClassOpen(true)}
         onBackToGlobal={() => router.push("/")}

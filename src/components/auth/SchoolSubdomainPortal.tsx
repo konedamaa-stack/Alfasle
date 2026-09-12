@@ -37,10 +37,8 @@ export function SchoolSubdomainPortal({
   const { users, currentUser, setCurrentUser, classes, inscriptions } = useStore();
 
   const [selectedRole, setSelectedRole] = useState<UserRole>("STUDENT");
-  const [identifier, setIdentifier] = useState(
-    selectedRole === "STUDENT" ? "KONE" : etablissement.directorEmail || "directeur@alfasle.edu"
-  );
-  const [password, setPassword] = useState("••••••••");
+  const [identifier, setIdentifier] = useState("KONE");
+  const [password, setPassword] = useState("Madouu1966@");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
 
@@ -52,12 +50,16 @@ export function SchoolSubdomainPortal({
     setSelectedRole(role);
     if (role === "STUDENT") {
       setIdentifier("KONE");
+      setPassword("Madouu1966@");
     } else if (role === "TEACHER") {
       setIdentifier("sarah.mansouri@alfasle.edu");
+      setPassword("Madouu1966@");
     } else if (role === "ADMIN") {
-      setIdentifier(etablissement.directorEmail || "direction@alfasle.edu");
+      setIdentifier(etablissement.directorEmail || "konedamaa@gmail.com");
+      setPassword("Madouu1966@");
     } else if (role === "PARENT") {
       setIdentifier("parent.kone@gmail.com");
+      setPassword("Madouu1966@");
     }
   };
 
@@ -325,6 +327,54 @@ export function SchoolSubdomainPortal({
                   <span>Accéder à mon Espace {etablissement.name}</span>
                 </button>
               </form>
+
+              {/* Quick 1-Click Demo Profiles */}
+              <div className="pt-3 border-t border-slate-800">
+                <p className="text-[11px] font-semibold text-slate-400 mb-2">
+                  ⚡ Connexion Rapide Démo sur ce Campus :
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const st = users.find((u) => u.role === "STUDENT") || users[0];
+                      setCurrentUser({
+                        ...st,
+                        etablissementId: etablissement.id,
+                        etablissementName: etablissement.name,
+                      });
+                      onLoginSuccess();
+                    }}
+                    className="flex items-center gap-2 p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500 text-left transition-all text-xs"
+                  >
+                    <span className="text-base">🎓</span>
+                    <div>
+                      <p className="text-[11px] font-bold text-white">Élève KONE</p>
+                      <p className="text-[9px] text-slate-400">Accès cours & devoirs</p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const tc = users.find((u) => u.role === "TEACHER") || users[0];
+                      setCurrentUser({
+                        ...tc,
+                        etablissementId: etablissement.id,
+                        etablissementName: etablissement.name,
+                      });
+                      onLoginSuccess();
+                    }}
+                    className="flex items-center gap-2 p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500 text-left transition-all text-xs"
+                  >
+                    <span className="text-base">👨‍🏫</span>
+                    <div>
+                      <p className="text-[11px] font-bold text-white">Professeur</p>
+                      <p className="text-[9px] text-slate-400">Gestion pédagogique</p>
+                    </div>
+                  </button>
+                </div>
+              </div>
 
               {/* Classes Preview on Subdomain */}
               {schoolClasses.length > 0 && (
