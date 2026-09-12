@@ -29,6 +29,9 @@ interface StoreContextType {
   setCurrentUser: (user: User) => void;
   users: User[];
   switchRole: (role: UserRole) => void;
+  createUser: (userData: Omit<User, "id" | "createdAt">) => User;
+  updateUser: (id: string, data: Partial<User>) => void;
+  deleteUser: (id: string) => void;
 
   // Etablissements (Multi-Écoles)
   etablissements: Etablissement[];
@@ -156,6 +159,36 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const switchRole = (role: UserRole) => {
     const found = users.find((u) => u.role === role);
     if (found) setCurrentUser(found);
+  };
+
+  // User Management (Super Admin & Admins)
+  const createUser = (userData: Omit<User, "id" | "createdAt">) => {
+    const newUser: User = {
+      ...userData,
+      id: `u_${Date.now()}`,
+      createdAt: new Date().toISOString(),
+    };
+    setUsers((prev) => [newUser, ...prev]);
+    return newUser;
+  };
+
+  const updateUser = (id: string, data: Partial<User>) => {
+    setUsers((prev) =>
+      prev.map((u) => {
+        if (u.id === id) {
+          const updated = { ...u, ...data };
+          if (currentUser.id === id) {
+            setCurrentUser(updated);
+          }
+          return updated;
+        }
+        return u;
+      })
+    );
+  };
+
+  const deleteUser = (id: string) => {
+    setUsers((prev) => prev.filter((u) => u.id !== id));
   };
 
   // Etablissement Management
@@ -660,6 +693,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         setCurrentUser,
         users,
         switchRole,
+        createUser,
+        updateUser,
+        deleteUser,
         etablissements,
         createEtablissement,
         updateEtablissement,

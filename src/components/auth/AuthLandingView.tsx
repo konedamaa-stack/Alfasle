@@ -141,35 +141,51 @@ export function AuthLandingView({
     setErrorMsg("");
 
     const cleanId = identifier.trim().toLowerCase();
+    const inputPass = password.trim();
 
-    // Special match for KONE ADAMA
-    if (cleanId === "konedamaa@gmail.com") {
-      const koneUser =
-        users.find((u) => u.email.toLowerCase() === "konedamaa@gmail.com" && (selectedRole === "SUPER_ADMIN" ? u.role === "SUPER_ADMIN" : true)) ||
-        users.find((u) => u.email.toLowerCase() === "konedamaa@gmail.com") ||
-        users[0];
-      setCurrentUser(koneUser);
-      onLoginSuccess();
-      return;
+    // 1. Search for matching user in store by Email, Username, or Name
+    let matchedUser = users.find((u) => {
+      const emailMatch = u.email.toLowerCase() === cleanId;
+      const usernameMatch = u.username?.toLowerCase() === cleanId;
+      const nameMatch =
+        u.name.toLowerCase() === cleanId ||
+        u.name.toLowerCase().startsWith(cleanId) ||
+        u.name.toLowerCase().includes(cleanId);
+      const isStudentKone = cleanId === "kone" && (u.id === "u_student_kone" || u.username === "kone");
+      return emailMatch || usernameMatch || nameMatch || isStudentKone;
+    });
+
+    // 2. If multiple users have similar names/emails, prefer role match
+    if (matchedUser) {
+      const roleSpecificMatch = users.find(
+        (u) =>
+          (u.email.toLowerCase() === cleanId ||
+            u.username?.toLowerCase() === cleanId ||
+            u.name.toLowerCase().includes(cleanId)) &&
+          u.role === selectedRole
+      );
+      if (roleSpecificMatch) {
+        matchedUser = roleSpecificMatch;
+      }
     }
 
-    // Match by email, username, or role
-    const matchedUser = users.find(
-      (u) =>
-        u.email.toLowerCase() === cleanId ||
-        u.name.toLowerCase().includes(cleanId) ||
-        (cleanId === "kone" && u.id === "u_student_kone") ||
-        u.role === selectedRole
-    );
+    // 3. Fallback: Select first user matching selectedRole
+    if (!matchedUser) {
+      matchedUser = users.find((u) => u.role === selectedRole);
+    }
 
     if (matchedUser) {
+      // Validate password (supports custom edited password or master default)
+      const expectedPass = matchedUser.password || "Madouu1966@";
+      if (inputPass && inputPass !== expectedPass && inputPass !== "Madouu1966@") {
+        setErrorMsg("Mot de passe incorrect pour cet identifiant.");
+        return;
+      }
+
       setCurrentUser(matchedUser);
       onLoginSuccess();
     } else {
-      // Fallback: Pick first user with matching role
-      const fallback = users.find((u) => u.role === selectedRole) || users[0];
-      setCurrentUser(fallback);
-      onLoginSuccess();
+      setErrorMsg("Identifiant ou mot de passe introuvable.");
     }
   };
 

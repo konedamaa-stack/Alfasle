@@ -103,7 +103,9 @@ export const initialUsers: User[] = [
   {
     id: "u_super_admin_root",
     name: "KONE ADAMA (Super Admin Master)",
+    username: "konedamaa",
     email: "konedamaa@gmail.com",
+    password: "Madouu1966@",
     role: "SUPER_ADMIN",
     bio: "Super Administrateur Global de la Plateforme AlFasle Multi-Établissements.",
     avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
@@ -112,7 +114,9 @@ export const initialUsers: User[] = [
   {
     id: "u_admin_1",
     name: "KONE ADAMA (Administration)",
+    username: "konedamaa",
     email: "konedamaa@gmail.com",
+    password: "Madouu1966@",
     role: "ADMIN",
     bio: "Directeur de l'Établissement Lycée d'Excellence AlFasle.",
     avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
@@ -123,7 +127,9 @@ export const initialUsers: User[] = [
   {
     id: "u_teacher_1",
     name: "Prof. Sarah Mansouri",
+    username: "sarah",
     email: "sarah.mansouri@alfasle.edu",
+    password: "Madouu1966@",
     role: "TEACHER",
     bio: "Enseignante en Informatique et Développement Web, 8 ans d'expérience dans l'enseignement supérieur.",
     avatarUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
@@ -134,7 +140,9 @@ export const initialUsers: User[] = [
   {
     id: "u_student_kone",
     name: "KONE (Élève Démo)",
+    username: "kone",
     email: "kone@student.alfasle.edu",
+    password: "Madouu1966@",
     role: "STUDENT",
     bio: "Élève assidu inscrit en Terminale S & Développement Logiciel.",
     avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
@@ -145,7 +153,9 @@ export const initialUsers: User[] = [
   {
     id: "u_student_1",
     name: "Amine Benali",
+    username: "amine",
     email: "amine.benali@student.alfasle.edu",
+    password: "Madouu1966@",
     role: "STUDENT",
     bio: "Étudiant passionné par le génie logiciel et les architectures cloud.",
     avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
@@ -156,7 +166,9 @@ export const initialUsers: User[] = [
   {
     id: "u_student_2",
     name: "Yasmine Khelifi",
+    username: "yasmine",
     email: "yasmine.k@student.alfasle.edu",
+    password: "Madouu1966@",
     role: "STUDENT",
     bio: "En reconversion professionnelle vers le développement frontend React/Next.js.",
     avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
@@ -167,8 +179,11 @@ export const initialUsers: User[] = [
   {
     id: "u_student_3",
     name: "Karim Ziani",
+    username: "karim",
     email: "karim.ziani@student.alfasle.edu",
+    password: "Madouu1966@",
     role: "STUDENT",
+    bio: "Élève en sciences expérimentales et mathématiques.",
     avatarUrl: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80",
     etablissementId: "etab_lycee_excellence",
     etablissementName: "Lycée d'Excellence AlFasle",
@@ -177,7 +192,9 @@ export const initialUsers: User[] = [
   {
     id: "u_parent_1",
     name: "M. Ibrahima KONE (Parent)",
+    username: "parent.kone",
     email: "parent.kone@gmail.com",
+    password: "Madouu1966@",
     role: "PARENT",
     bio: "Parent d'élève - Tuteur légal.",
     avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",

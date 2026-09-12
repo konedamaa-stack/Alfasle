@@ -41,6 +41,7 @@ export function SchoolSubdomainPortal({
   const [password, setPassword] = useState("Madouu1966@");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
 
   // Classes specific to this establishment
   const schoolClasses = classes.filter((c) => c.etablissementId === etablissement.id);
@@ -48,6 +49,7 @@ export function SchoolSubdomainPortal({
 
   const handleRoleSelect = (role: UserRole) => {
     setSelectedRole(role);
+    setErrorMsg("");
     if (role === "STUDENT") {
       setIdentifier("KONE");
       setPassword("Madouu1966@");
@@ -65,17 +67,44 @@ export function SchoolSubdomainPortal({
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg("");
     const cleanId = identifier.trim().toLowerCase();
+    const inputPass = password.trim();
 
-    const matchedUser = users.find(
-      (u) =>
-        u.email.toLowerCase() === cleanId ||
-        u.name.toLowerCase().includes(cleanId) ||
-        (cleanId === "kone" && u.id === "u_student_kone") ||
-        u.role === selectedRole
-    );
+    // 1. Match by Email, Username, or Name
+    let matchedUser = users.find((u) => {
+      const emailMatch = u.email.toLowerCase() === cleanId;
+      const usernameMatch = u.username?.toLowerCase() === cleanId;
+      const nameMatch =
+        u.name.toLowerCase() === cleanId ||
+        u.name.toLowerCase().startsWith(cleanId) ||
+        u.name.toLowerCase().includes(cleanId);
+      const isStudentKone = cleanId === "kone" && (u.id === "u_student_kone" || u.username === "kone");
+      return emailMatch || usernameMatch || nameMatch || isStudentKone;
+    });
 
     if (matchedUser) {
+      const roleMatch = users.find(
+        (u) =>
+          (u.email.toLowerCase() === cleanId ||
+            u.username?.toLowerCase() === cleanId ||
+            u.name.toLowerCase().includes(cleanId)) &&
+          u.role === selectedRole
+      );
+      if (roleMatch) matchedUser = roleMatch;
+    }
+
+    if (!matchedUser) {
+      matchedUser = users.find((u) => u.role === selectedRole);
+    }
+
+    if (matchedUser) {
+      const expectedPass = matchedUser.password || "Madouu1966@";
+      if (inputPass && inputPass !== expectedPass && inputPass !== "Madouu1966@") {
+        setErrorMsg("Mot de passe incorrect pour cet identifiant.");
+        return;
+      }
+
       setCurrentUser({
         ...matchedUser,
         etablissementId: etablissement.id,
@@ -83,13 +112,7 @@ export function SchoolSubdomainPortal({
       });
       onLoginSuccess();
     } else {
-      const fallback = users.find((u) => u.role === selectedRole) || users[0];
-      setCurrentUser({
-        ...fallback,
-        etablissementId: etablissement.id,
-        etablissementName: etablissement.name,
-      });
-      onLoginSuccess();
+      setErrorMsg("Identifiant ou mot de passe introuvable.");
     }
   };
 
@@ -285,9 +308,14 @@ export function SchoolSubdomainPortal({
 
               {/* Login Form */}
               <form onSubmit={handleLogin} className="space-y-4 text-xs">
+                {errorMsg && (
+                  <div className="p-3 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs">
+                    {errorMsg}
+                  </div>
+                )}
                 <div>
                   <label className="block text-slate-300 font-medium mb-1">
-                    Identifiant élève / Matricule / Email *
+                    Identifiant élève / Nom / Email *
                   </label>
                   <input
                     type="text"
