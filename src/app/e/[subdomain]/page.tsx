@@ -7,10 +7,13 @@ import { SchoolSubdomainPortal } from "@/components/auth/SchoolSubdomainPortal";
 import { JoinClassModal } from "@/components/classes/JoinClassModal";
 import { School, ArrowLeft } from "lucide-react";
 
+import { MainAppLayout } from "@/components/layout/MainAppLayout";
+
 export default function SubdomainSchoolPage() {
   const params = useParams();
   const router = useRouter();
   const { etablissements } = useStore();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isJoinClassOpen, setIsJoinClassOpen] = useState(false);
 
   const subdomain = (params?.subdomain as string) || "";
@@ -51,11 +54,15 @@ export default function SubdomainSchoolPage() {
       createdAt: new Date().toISOString(),
     };
 
+  if (isAuthenticated) {
+    return <MainAppLayout onLogout={() => setIsAuthenticated(false)} />;
+  }
+
   return (
     <>
       <SchoolSubdomainPortal
         etablissement={effectiveEtab}
-        onLoginSuccess={() => router.push("/")}
+        onLoginSuccess={() => setIsAuthenticated(true)}
         onOpenJoinClassModal={() => setIsJoinClassOpen(true)}
         onBackToGlobal={() => router.push("/")}
       />
@@ -63,7 +70,7 @@ export default function SubdomainSchoolPage() {
       <JoinClassModal
         isOpen={isJoinClassOpen}
         onClose={() => setIsJoinClassOpen(false)}
-        onSuccessNavigateToCourses={() => router.push("/")}
+        onSuccessNavigateToCourses={() => setIsAuthenticated(true)}
       />
     </>
   );
