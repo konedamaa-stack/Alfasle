@@ -20,6 +20,7 @@ import {
   Users,
   Award,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/common/ThemeToggle";
 
 interface SchoolSubdomainPortalProps {
   etablissement: Etablissement;
@@ -255,13 +256,17 @@ export function SchoolSubdomainPortal({
           </div>
         </div>
 
-        <button
-          onClick={onOpenJoinClassModal}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 text-xs font-semibold shadow-md transition-all"
-        >
-          <KeyRound className="w-3.5 h-3.5 text-blue-400" />
-          <span>Rejoindre une classe ({etablissement.subdomain})</span>
-        </button>
+        <div className="flex items-center gap-2.5">
+          <ThemeToggle />
+
+          <button
+            onClick={onOpenJoinClassModal}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 text-xs font-semibold shadow-md transition-all"
+          >
+            <KeyRound className="w-3.5 h-3.5 text-blue-400" />
+            <span>Rejoindre une classe ({etablissement.subdomain})</span>
+          </button>
+        </div>
       </header>
 
       {/* Center Subdomain Login Card (Split-Screen) */}

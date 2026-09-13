@@ -68,6 +68,10 @@ interface StoreContextType {
   submitAssignment: (devoirId: string, content: string, attachmentName?: string) => void;
   gradeSubmission: (submissionId: string, score: number, feedback: string) => void;
 
+  // Theme Mode (Dark / Light)
+  theme: "dark" | "light";
+  toggleTheme: () => void;
+
   // Notifications
   notifications: AppNotification[];
   markNotificationAsRead: (id: string) => void;
@@ -116,6 +120,45 @@ function loadInitialData<T extends { id: string }>(key: string, initialData: T[]
 }
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    if (typeof window !== "undefined") {
+      const savedTheme = localStorage.getItem("alfasle_theme") as "dark" | "light";
+      if (savedTheme === "light" || savedTheme === "dark") return savedTheme;
+    }
+    return "dark";
+  });
+
+  const toggleTheme = () => {
+    setTheme((prev) => {
+      const next = prev === "dark" ? "light" : "dark";
+      if (typeof window !== "undefined") {
+        localStorage.setItem("alfasle_theme", next);
+        document.documentElement.setAttribute("data-theme", next);
+        if (next === "light") {
+          document.documentElement.classList.add("light");
+          document.documentElement.classList.remove("dark");
+        } else {
+          document.documentElement.classList.add("dark");
+          document.documentElement.classList.remove("light");
+        }
+      }
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      document.documentElement.setAttribute("data-theme", theme);
+      if (theme === "light") {
+        document.documentElement.classList.add("light");
+        document.documentElement.classList.remove("dark");
+      } else {
+        document.documentElement.classList.add("dark");
+        document.documentElement.classList.remove("light");
+      }
+    }
+  }, [theme]);
+
   const [users, setUsers] = useState<User[]>(() => loadInitialData("alfasle_users", initialUsers));
   const [currentUser, setCurrentUser] = useState<User>(initialUsers[0]); // Default: Teacher Sarah
   const [etablissements, setEtablissements] = useState<Etablissement[]>(() =>
@@ -720,6 +763,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         notifications,
         markNotificationAsRead,
         clearAllNotifications,
+        theme,
+        toggleTheme,
       }}
     >
       {children}

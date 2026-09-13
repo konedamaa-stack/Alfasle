@@ -15,6 +15,7 @@ import {
   Search,
 } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
+import { ThemeToggle } from "@/components/common/ThemeToggle";
 
 interface NavbarProps {
   onLogoutToLanding?: () => void;
@@ -107,7 +108,10 @@ export function Navbar({ onLogoutToLanding, onOpenSuperAdmin }: NavbarProps) {
       </div>
 
       {/* Right Controls: Role Switcher & Notifications & Profile */}
-      <div className="flex items-center gap-3 sm:gap-4">
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        {/* Light / Dark Mode Switcher */}
+        <ThemeToggle />
+
         {/* Direct Super Admin button for Admins */}
         {(currentUser.role === "ADMIN" || currentUser.role === "SUPER_ADMIN") && onOpenSuperAdmin && (
           <button

@@ -19,6 +19,7 @@ import {
   ExternalLink,
   Building2,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/common/ThemeToggle";
 
 interface AuthLandingViewProps {
   onLoginSuccess: () => void;
@@ -299,6 +300,8 @@ export function AuthLandingView({
 
         {/* Quick buttons */}
         <div className="flex items-center gap-2.5">
+          <ThemeToggle />
+
           <button
             onClick={onOpenJoinClassModal}
             className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-blue-300 border border-blue-500/30 text-xs font-semibold shadow-md transition-all transform hover:-translate-y-0.5"
