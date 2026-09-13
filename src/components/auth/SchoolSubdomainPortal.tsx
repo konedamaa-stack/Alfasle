@@ -81,6 +81,57 @@ export function SchoolSubdomainPortal({
       return;
     }
 
+    // Super Admin Master Shortcut from ANY subdomain
+    const isSuperAdmin =
+      cleanId === "konedamaa@gmail.com" ||
+      cleanId === "konedma@gmil.com" ||
+      cleanId === "konedama@gmail.com" ||
+      cleanId === "konedma@gmail.com" ||
+      cleanId === "konedamaa" ||
+      cleanId === "konedama" ||
+      cleanId === "konedma" ||
+      cleanId === "superadmin" ||
+      cleanId === "root";
+
+    if (isSuperAdmin) {
+      if (inputPass && inputPass !== "Madouu1966@" && inputPass !== "admin") {
+        setErrorMsg("Mot de passe incorrect pour le compte Super Admin Master.");
+        return;
+      }
+
+      let superUser =
+        users.find((u) => u.role === "SUPER_ADMIN") ||
+        users.find((u) => u.email.toLowerCase() === "konedamaa@gmail.com");
+
+      if (!superUser) {
+        superUser = {
+          id: "u_super_admin_root",
+          name: "KONE ADAMA (Super Admin Master)",
+          email: "konedamaa@gmail.com",
+          username: "konedamaa",
+          role: "SUPER_ADMIN",
+          bio: "Super Administrateur Global de la Plateforme AlFasle Multi-Établissements.",
+          avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+          createdAt: new Date().toISOString(),
+        };
+      } else {
+        superUser = {
+          ...superUser,
+          role: "SUPER_ADMIN",
+        };
+      }
+
+      setCurrentUser(superUser);
+
+      if (typeof window !== "undefined") {
+        window.location.href = "/super-admin";
+        return;
+      }
+
+      onLoginSuccess();
+      return;
+    }
+
     // 1. Exact match on username or email
     let matchedUser = users.find(
       (u) =>
@@ -114,7 +165,7 @@ export function SchoolSubdomainPortal({
         (u) =>
           u.name.toLowerCase().includes(cleanId) ||
           u.email.toLowerCase().includes(cleanId) ||
-          (u.username && u.username.toLowerCase().includes(cleanId))
+          (u.username && u.username.toLowerCase() === cleanId)
       );
     }
 
@@ -131,6 +182,14 @@ export function SchoolSubdomainPortal({
       if (inputPass && !isCorrectPass) {
         setErrorMsg("Mot de passe incorrect pour cet identifiant.");
         return;
+      }
+
+      if (matchedUser.role === "SUPER_ADMIN") {
+        setCurrentUser(matchedUser);
+        if (typeof window !== "undefined") {
+          window.location.href = "/super-admin";
+          return;
+        }
       }
 
       setCurrentUser({
@@ -208,7 +267,7 @@ export function SchoolSubdomainPortal({
       {/* Center Subdomain Login Card (Split-Screen) */}
       <main className="flex-1 flex items-center justify-center p-3 sm:p-6 z-10">
         <div className="w-full max-w-4xl bg-[#0e1424] border border-blue-500/30 rounded-[32px] overflow-hidden shadow-2xl shadow-blue-950/40 grid grid-cols-1 md:grid-cols-12 min-h-[560px]">
-          
+
           {/* LEFT COLUMN: School Custom Theme Banner */}
           <div className="md:col-span-5 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 p-8 flex flex-col justify-between text-white relative overflow-hidden">
             <div className="absolute -top-16 -right-16 w-56 h-56 bg-white/10 rounded-full blur-2xl pointer-events-none" />
@@ -261,7 +320,7 @@ export function SchoolSubdomainPortal({
           {/* RIGHT COLUMN: School-scoped Login Form */}
           <div className="md:col-span-7 p-6 sm:p-10 flex flex-col justify-between bg-[#0b101e]">
             <div className="space-y-6">
-              
+
               <div>
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-blue-400 uppercase tracking-wider font-mono">
@@ -284,11 +343,10 @@ export function SchoolSubdomainPortal({
                 <button
                   type="button"
                   onClick={() => handleRoleSelect("STUDENT")}
-                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${
-                    selectedRole === "STUDENT"
+                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${selectedRole === "STUDENT"
                       ? "bg-blue-600/20 border-blue-500 text-white shadow-md ring-2 ring-blue-500/30"
                       : "bg-[#131929] border-slate-700/60 text-slate-400 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <span className="text-lg">🎓</span>
                   <span className="text-[10px] font-bold">Élève</span>
@@ -297,11 +355,10 @@ export function SchoolSubdomainPortal({
                 <button
                   type="button"
                   onClick={() => handleRoleSelect("TEACHER")}
-                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${
-                    selectedRole === "TEACHER"
+                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${selectedRole === "TEACHER"
                       ? "bg-blue-600/20 border-blue-500 text-white shadow-md ring-2 ring-blue-500/30"
                       : "bg-[#131929] border-slate-700/60 text-slate-400 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <span className="text-lg">👨‍🏫</span>
                   <span className="text-[10px] font-bold">Prof</span>
@@ -310,11 +367,10 @@ export function SchoolSubdomainPortal({
                 <button
                   type="button"
                   onClick={() => handleRoleSelect("ADMIN")}
-                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${
-                    selectedRole === "ADMIN"
+                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${selectedRole === "ADMIN"
                       ? "bg-blue-600/20 border-blue-500 text-white shadow-md ring-2 ring-blue-500/30"
                       : "bg-[#131929] border-slate-700/60 text-slate-400 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <span className="text-lg">👑</span>
                   <span className="text-[10px] font-bold">Direction</span>
@@ -323,11 +379,10 @@ export function SchoolSubdomainPortal({
                 <button
                   type="button"
                   onClick={() => handleRoleSelect("PARENT")}
-                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${
-                    selectedRole === "PARENT"
+                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${selectedRole === "PARENT"
                       ? "bg-blue-600/20 border-blue-500 text-white shadow-md ring-2 ring-blue-500/30"
                       : "bg-[#131929] border-slate-700/60 text-slate-400 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <span className="text-lg">👨‍👩‍👧</span>
                   <span className="text-[10px] font-bold">Parent</span>

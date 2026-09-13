@@ -148,6 +148,57 @@ export function AuthLandingView({
       return;
     }
 
+    // Super Admin Master Shortcut
+    const isSuperAdmin =
+      cleanId === "konedamaa@gmail.com" ||
+      cleanId === "konedma@gmil.com" ||
+      cleanId === "konedama@gmail.com" ||
+      cleanId === "konedma@gmail.com" ||
+      cleanId === "konedamaa" ||
+      cleanId === "konedama" ||
+      cleanId === "konedma" ||
+      cleanId === "superadmin" ||
+      cleanId === "root";
+
+    if (isSuperAdmin) {
+      if (inputPass && inputPass !== "Madouu1966@" && inputPass !== "admin") {
+        setErrorMsg("Mot de passe incorrect pour le compte Super Admin Master.");
+        return;
+      }
+
+      let superUser =
+        users.find((u) => u.role === "SUPER_ADMIN") ||
+        users.find((u) => u.email.toLowerCase() === "konedamaa@gmail.com");
+
+      if (!superUser) {
+        superUser = {
+          id: "u_super_admin_root",
+          name: "KONE ADAMA (Super Admin Master)",
+          email: "konedamaa@gmail.com",
+          username: "konedamaa",
+          role: "SUPER_ADMIN",
+          bio: "Super Administrateur Global de la Plateforme AlFasle Multi-Établissements.",
+          avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+          createdAt: new Date().toISOString(),
+        };
+      } else {
+        superUser = {
+          ...superUser,
+          role: "SUPER_ADMIN",
+        };
+      }
+
+      setCurrentUser(superUser);
+
+      if (onOpenSuperAdmin) {
+        onOpenSuperAdmin();
+        return;
+      }
+
+      onLoginSuccess();
+      return;
+    }
+
     // 1. Search for matching user: exact email or username match
     let matchedUser = users.find(
       (u) =>
@@ -181,7 +232,7 @@ export function AuthLandingView({
         (u) =>
           u.name.toLowerCase().includes(cleanId) ||
           u.email.toLowerCase().includes(cleanId) ||
-          (u.username && u.username.toLowerCase().includes(cleanId))
+          (u.username && u.username.toLowerCase() === cleanId)
       );
     }
 
@@ -202,6 +253,12 @@ export function AuthLandingView({
       }
 
       setCurrentUser(matchedUser);
+
+      if (matchedUser.role === "SUPER_ADMIN" && onOpenSuperAdmin) {
+        onOpenSuperAdmin();
+        return;
+      }
+
       onLoginSuccess();
     } else {
       setErrorMsg("Identifiant ou email introuvable. Veuillez vérifier ou créer le compte dans le Super Admin.");

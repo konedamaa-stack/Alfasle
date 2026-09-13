@@ -27,7 +27,9 @@ interface MainAppLayoutProps {
 
 export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
   const { currentUser, submissions, assignments } = useStore();
-  const [activeTab, setActiveTab] = useState<NavTab>("dashboard");
+  const [activeTab, setActiveTab] = useState<NavTab>(() =>
+    currentUser.role === "SUPER_ADMIN" ? "superadmin" : "dashboard"
+  );
 
   // Modals state
   const [isCreateClassOpen, setIsCreateClassOpen] = useState(false);
