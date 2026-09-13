@@ -21,6 +21,8 @@ import {
   Award,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { PreRegistrationModal } from "@/components/inscriptions/PreRegistrationModal";
+import { InscriptionRole } from "@/types";
 
 interface SchoolSubdomainPortalProps {
   etablissement: Etablissement;
@@ -43,6 +45,8 @@ export function SchoolSubdomainPortal({
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
+  const [isPreRegModalOpen, setIsPreRegModalOpen] = useState(false);
+  const [preRegRole, setPreRegRole] = useState<InscriptionRole>("STUDENT");
 
   // Classes specific to this establishment
   const schoolClasses = classes.filter((c) => c.etablissementId === etablissement.id);
@@ -258,6 +262,18 @@ export function SchoolSubdomainPortal({
 
         <div className="flex items-center gap-2.5">
           <ThemeToggle />
+
+          <button
+            type="button"
+            onClick={() => {
+              setPreRegRole("STUDENT");
+              setIsPreRegModalOpen(true);
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold shadow-md transition-all transform hover:-translate-y-0.5"
+          >
+            <span>📝</span>
+            <span>Pré-inscription</span>
+          </button>
 
           <button
             onClick={onOpenJoinClassModal}
@@ -512,15 +528,41 @@ export function SchoolSubdomainPortal({
               )}
             </div>
 
-            <div className="pt-4 border-t border-slate-800/80 text-center text-xs text-slate-400">
-              Pas encore inscrit dans une classe ?{" "}
-              <button
-                type="button"
-                onClick={onOpenJoinClassModal}
-                className="text-blue-400 font-bold hover:underline"
-              >
-                Rejoindre avec un Code &rarr;
-              </button>
+            <div className="pt-4 border-t border-slate-800/80 space-y-2 text-center text-xs text-slate-400">
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPreRegRole("STUDENT");
+                    setIsPreRegModalOpen(true);
+                  }}
+                  className="text-emerald-400 font-bold hover:underline flex items-center gap-1"
+                >
+                  <span>🎓 Pré-inscription Élève</span>
+                </button>
+                <span className="text-slate-600">•</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPreRegRole("TEACHER");
+                    setIsPreRegModalOpen(true);
+                  }}
+                  className="text-indigo-400 font-bold hover:underline flex items-center gap-1"
+                >
+                  <span>👨‍🏫 Candidature Professeur</span>
+                </button>
+              </div>
+
+              <div>
+                Pas encore inscrit dans une classe ?{" "}
+                <button
+                  type="button"
+                  onClick={onOpenJoinClassModal}
+                  className="text-blue-400 font-bold hover:underline"
+                >
+                  Rejoindre avec un Code &rarr;
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -530,6 +572,14 @@ export function SchoolSubdomainPortal({
       <footer className="w-full text-center py-3 text-xs text-slate-500 border-t border-slate-900 z-10">
         © 2026-2027 {etablissement.name} • Hébergé sur la plateforme AlFasle Multi-Tenant
       </footer>
+
+      {/* Campus Pre-Registration Modal */}
+      <PreRegistrationModal
+        isOpen={isPreRegModalOpen}
+        onClose={() => setIsPreRegModalOpen(false)}
+        defaultEstablishmentId={etablissement.id}
+        defaultRole={preRegRole}
+      />
     </div>
   );
 }

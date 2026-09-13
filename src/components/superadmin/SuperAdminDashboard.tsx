@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useStore } from "@/lib/store";
 import { Etablissement, Classe, User, UserRole } from "@/types";
+import { ValidationQueue } from "@/components/inscriptions/ValidationQueue";
 import {
   School,
   PlusCircle,
@@ -58,10 +59,11 @@ export function SuperAdminDashboard({
     updateUser,
     deleteUser,
     currentUser,
+    inscriptions,
   } = useStore();
 
   // Active top-level Tab
-  const [activeTab, setActiveTab] = useState<"ETABLISSEMENTS" | "USERS" | "SYSTEM">("USERS");
+  const [activeTab, setActiveTab] = useState<"ETABLISSEMENTS" | "USERS" | "INSCRIPTIONS" | "SYSTEM">("USERS");
 
   // --- SCHOOLS MANAGEMENT STATE ---
   const [schoolSearchQuery, setSchoolSearchQuery] = useState("");
@@ -397,6 +399,23 @@ export function SuperAdminDashboard({
         >
           <Building2 className="w-4 h-4" />
           <span>🏫 Établissements & Campus ({etablissements.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("INSCRIPTIONS")}
+          className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2.5 transition-all ${
+            activeTab === "INSCRIPTIONS"
+              ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
+              : "bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800"
+          }`}
+        >
+          <UserCheck className="w-4 h-4" />
+          <span>📝 Préinscriptions & Validations</span>
+          {inscriptions.filter((i) => i.status === "PENDING").length > 0 && (
+            <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-mono text-[10px] font-black animate-pulse">
+              {inscriptions.filter((i) => i.status === "PENDING").length}
+            </span>
+          )}
         </button>
 
         <button
@@ -1001,6 +1020,15 @@ export function SuperAdminDashboard({
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 4: INSCRIPTIONS & VALIDATION QUEUE (SUPER ADMIN EXCLUSIVE) */}
+      {/* ========================================================================= */}
+      {activeTab === "INSCRIPTIONS" && (
+        <div className="glass-panel p-6 rounded-3xl border border-slate-800">
+          <ValidationQueue />
         </div>
       )}
 

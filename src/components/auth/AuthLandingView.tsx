@@ -20,6 +20,8 @@ import {
   Building2,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { PreRegistrationModal } from "@/components/inscriptions/PreRegistrationModal";
+import { InscriptionRole } from "@/types";
 
 interface AuthLandingViewProps {
   onLoginSuccess: () => void;
@@ -43,6 +45,8 @@ export function AuthLandingView({
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [brandBadgeText, setBrandBadgeText] = useState("ESSAYER2");
+  const [isPreRegModalOpen, setIsPreRegModalOpen] = useState(false);
+  const [preRegRole, setPreRegRole] = useState<InscriptionRole>("STUDENT");
 
   // Role metadata corresponding to the screenshot & design system
   const roleConfig: Record<
@@ -301,6 +305,18 @@ export function AuthLandingView({
         {/* Quick buttons */}
         <div className="flex items-center gap-2.5">
           <ThemeToggle />
+
+          <button
+            type="button"
+            onClick={() => {
+              setPreRegRole("STUDENT");
+              setIsPreRegModalOpen(true);
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold shadow-md transition-all transform hover:-translate-y-0.5"
+          >
+            <span>📝</span>
+            <span>Pré-inscription</span>
+          </button>
 
           <button
             onClick={onOpenJoinClassModal}
@@ -606,16 +622,42 @@ export function AuthLandingView({
               </div>
             </div>
 
-            {/* Bottom footer link */}
-            <div className="pt-4 mt-4 border-t border-slate-800/80 text-center text-xs text-slate-400">
-              Vous êtes élève ?{" "}
-              <button
-                type="button"
-                onClick={onOpenJoinClassModal}
-                className="text-blue-400 font-bold hover:underline"
-              >
-                Rejoindre une classe avec votre code &rarr;
-              </button>
+            {/* Bottom footer links */}
+            <div className="pt-4 mt-4 border-t border-slate-800/80 space-y-2 text-center text-xs text-slate-400">
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPreRegRole("STUDENT");
+                    setIsPreRegModalOpen(true);
+                  }}
+                  className="text-emerald-400 font-bold hover:underline flex items-center gap-1"
+                >
+                  <span>🎓 Pré-inscription Élève</span>
+                </button>
+                <span className="text-slate-600">•</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPreRegRole("TEACHER");
+                    setIsPreRegModalOpen(true);
+                  }}
+                  className="text-indigo-400 font-bold hover:underline flex items-center gap-1"
+                >
+                  <span>👨‍🏫 Candidature Professeur</span>
+                </button>
+              </div>
+
+              <div>
+                Vous avez déjà un code ?{" "}
+                <button
+                  type="button"
+                  onClick={onOpenJoinClassModal}
+                  className="text-blue-400 font-bold hover:underline"
+                >
+                  Rejoindre une classe &rarr;
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -690,6 +732,13 @@ export function AuthLandingView({
       <footer className="w-full text-center py-4 text-xs text-slate-500 border-t border-slate-900/80 z-10">
         © 2026-2027 ALFASLE LMS • Plateforme Éducative Multi-Établissements
       </footer>
+
+      {/* Public Pre-Registration Modal */}
+      <PreRegistrationModal
+        isOpen={isPreRegModalOpen}
+        onClose={() => setIsPreRegModalOpen(false)}
+        defaultRole={preRegRole}
+      />
     </div>
   );
 }

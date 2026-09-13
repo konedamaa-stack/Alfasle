@@ -7,6 +7,7 @@ import {
   Etablissement,
   Classe,
   Inscription,
+  InscriptionRole,
   Cours,
   Devoir,
   Soumission,
@@ -45,10 +46,21 @@ interface StoreContextType {
   updateClass: (id: string, data: Partial<Classe>) => void;
   archiveClass: (id: string) => void;
 
-  // Inscriptions
+  // Inscriptions & Pré-inscriptions
   inscriptions: Inscription[];
   applyToClass: (classeId: string, motivation?: string) => void;
   joinClassByCode: (classCode: string, motivation?: string) => { success: boolean; message: string; classe?: Classe };
+  submitPreRegistration: (data: {
+    userName: string;
+    userEmail: string;
+    userPhone?: string;
+    role: "STUDENT" | "TEACHER";
+    etablissementId: string;
+    classeId: string;
+    subject?: string;
+    diplomaOrBio?: string;
+    motivation?: string;
+  }) => { success: boolean; message: string; inscription: Inscription };
   approveInscription: (inscriptionId: string) => void;
   rejectInscription: (inscriptionId: string) => void;
 
@@ -369,6 +381,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       userName: currentUser.name,
       userEmail: currentUser.email,
       userAvatar: currentUser.avatarUrl,
+      role: (currentUser.role === "TEACHER" ? "TEACHER" : "STUDENT") as InscriptionRole,
+      etablissementId: targetClass.etablissementId,
+      etablissementName: targetClass.etablissementName,
       classeId,
       classeTitle: targetClass.title,
       status: isAutoApprove ? "APPROVED" : "PENDING",
@@ -451,6 +466,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       userName: currentUser.name,
       userEmail: currentUser.email,
       userAvatar: currentUser.avatarUrl,
+      role: (currentUser.role === "TEACHER" ? "TEACHER" : "STUDENT") as InscriptionRole,
+      etablissementId: targetClass.etablissementId,
+      etablissementName: targetClass.etablissementName,
       classeId: targetClass.id,
       classeTitle: targetClass.title,
       status: isAutoApprove ? "APPROVED" : "PENDING",
@@ -509,42 +527,148 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     };
   };
 
+  // Soumission d'une Pré-inscription publique (Élève ou Enseignant)
+  const submitPreRegistration = (data: {
+    userName: string;
+    userEmail: string;
+    userPhone?: string;
+    role: "STUDENT" | "TEACHER";
+    etablissementId: string;
+    classeId: string;
+    subject?: string;
+    diplomaOrBio?: string;
+    motivation?: string;
+  }) => {
+    const targetEtab = etablissements.find((e) => e.id === data.etablissementId);
+    const targetClass = classes.find((c) => c.id === data.classeId);
+
+    const newInscription: Inscription = {
+      id: `ins_${Date.now()}`,
+      userName: data.userName.trim(),
+      userEmail: data.userEmail.trim().toLowerCase(),
+      userPhone: data.userPhone?.trim(),
+      userAvatar:
+        data.role === "TEACHER"
+          ? "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80"
+          : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      role: data.role,
+      etablissementId: data.etablissementId,
+      etablissementName: targetEtab?.name || "Établissement AlFasle",
+      classeId: data.classeId,
+      classeTitle: targetClass?.title || "Classe AlFasle",
+      subject: data.subject?.trim(),
+      diplomaOrBio: data.diplomaOrBio?.trim(),
+      status: "PENDING",
+      motivation: data.motivation?.trim() || "Candidature en ligne en attente de validation Super Admin",
+      appliedAt: new Date().toISOString(),
+    };
+
+    setInscriptions((prev) => [newInscription, ...prev]);
+
+    // Update pending counter on class
+    setClasses((cls) =>
+      cls.map((c) =>
+        c.id === data.classeId ? { ...c, pendingCount: (c.pendingCount || 0) + 1 } : c
+      )
+    );
+
+    // Create system notification for Super Admin
+    setNotifications((prev) => [
+      {
+        id: `notif_${Date.now()}`,
+        userId: "u_super_admin_root",
+        title: `Nouvelle préinscription (${data.role === "TEACHER" ? "👨‍🏫 Enseignant" : "🎓 Élève"})`,
+        message: `${data.userName} a postulé pour ${targetClass?.title || "une classe"} (${targetEtab?.name || "Campus"}). En attente de votre validation.`,
+        type: "INSCRIPTION",
+        isRead: false,
+        createdAt: new Date().toISOString(),
+      },
+      ...prev,
+    ]);
+
+    return {
+      success: true,
+      message: `Votre demande de pré-inscription pour « ${targetClass?.title || "la classe"} » a été enregistrée avec succès. Elle sera examinée et validée par le Super Administrateur.`,
+      inscription: newInscription,
+    };
+  };
+
   const approveInscription = (inscriptionId: string) => {
+    const targetIns = inscriptions.find((i) => i.id === inscriptionId);
+    if (!targetIns) return;
+
+    // 1. If user account does not exist, create it automatically!
+    const existingUser = users.find(
+      (u) => u.email.toLowerCase() === targetIns.userEmail.toLowerCase()
+    );
+
+    let createdUserId = existingUser?.id;
+
+    if (!existingUser) {
+      const generatedUsername = targetIns.userEmail.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "") || `user${Date.now().toString().slice(-4)}`;
+      const newUser: User = {
+        id: `u_cand_${Date.now()}`,
+        name: targetIns.userName,
+        email: targetIns.userEmail.toLowerCase(),
+        username: generatedUsername,
+        password: "Madouu1966@",
+        role: targetIns.role || "STUDENT",
+        etablissementId: targetIns.etablissementId,
+        etablissementName: targetIns.etablissementName,
+        bio: targetIns.diplomaOrBio || targetIns.motivation || (targetIns.role === "TEACHER" ? `Enseignant de ${targetIns.subject || "matières scientifiques"}` : "Élève validé"),
+        avatarUrl: targetIns.userAvatar || (targetIns.role === "TEACHER" ? "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150" : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"),
+        createdAt: new Date().toISOString(),
+      };
+
+      setUsers((prev) => [newUser, ...prev]);
+      createdUserId = newUser.id;
+    }
+
+    // 2. Update inscription state
     setInscriptions((prev) =>
       prev.map((ins) => {
         if (ins.id === inscriptionId) {
-          // Notify student
-          setNotifications((n) => [
-            {
-              id: `notif_${Date.now()}`,
-              userId: ins.userId,
-              title: "Préinscription validée 🎉",
-              message: `Votre demande pour la classe « ${ins.classeTitle} » a été acceptée !`,
-              type: "INSCRIPTION",
-              isRead: false,
-              createdAt: new Date().toISOString(),
-            },
-            ...n,
-          ]);
-
-          // Update class counters
-          setClasses((cls) =>
-            cls.map((c) =>
-              c.id === ins.classeId
-                ? {
-                    ...c,
-                    enrolledCount: (c.enrolledCount || 0) + 1,
-                    pendingCount: Math.max(0, (c.pendingCount || 1) - 1),
-                  }
-                : c
-            )
-          );
-
-          return { ...ins, status: "APPROVED", reviewedAt: new Date().toISOString() };
+          return {
+            ...ins,
+            userId: createdUserId,
+            status: "APPROVED",
+            reviewedAt: new Date().toISOString(),
+            reviewedBy: currentUser.name || "Super Admin",
+          };
         }
         return ins;
       })
     );
+
+    // 3. Update class counters & teacher assignment
+    setClasses((cls) =>
+      cls.map((c) => {
+        if (c.id === targetIns.classeId) {
+          return {
+            ...c,
+            enrolledCount: targetIns.role === "STUDENT" ? (c.enrolledCount || 0) + 1 : c.enrolledCount,
+            pendingCount: Math.max(0, (c.pendingCount || 1) - 1),
+            teacherName: targetIns.role === "TEACHER" ? targetIns.userName : c.teacherName,
+            teacherId: targetIns.role === "TEACHER" && createdUserId ? createdUserId : c.teacherId,
+          };
+        }
+        return c;
+      })
+    );
+
+    // 4. Send Confirmation Notifications
+    setNotifications((n) => [
+      {
+        id: `notif_${Date.now()}`,
+        userId: createdUserId || "u_super_admin_root",
+        title: "Préinscription validée par le Super Admin 🎉",
+        message: `Félicitations ${targetIns.userName} ! Votre compte ${targetIns.role === "TEACHER" ? "Enseignant" : "Élève"} est maintenant actif sur ${targetIns.classeTitle}. Vos identifiants de connexion ont été activés (Mot de passe: Madouu1966@).`,
+        type: "INSCRIPTION",
+        isRead: false,
+        createdAt: new Date().toISOString(),
+      },
+      ...n,
+    ]);
   };
 
   const rejectInscription = (inscriptionId: string) => {
@@ -558,7 +682,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
                 : c
             )
           );
-          return { ...ins, status: "REJECTED", reviewedAt: new Date().toISOString() };
+          return {
+            ...ins,
+            status: "REJECTED",
+            reviewedAt: new Date().toISOString(),
+            reviewedBy: currentUser.name || "Super Admin",
+          };
         }
         return ins;
       })
@@ -747,6 +876,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         archiveClass,
         inscriptions,
         applyToClass,
+        submitPreRegistration,
         joinClassByCode,
         approveInscription,
         rejectInscription,

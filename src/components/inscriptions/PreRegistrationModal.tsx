@@ -1,0 +1,449 @@
+"use client";
+
+import React, { useState } from "react";
+import { useStore } from "@/lib/store";
+import { InscriptionRole } from "@/types";
+import {
+  X,
+  GraduationCap,
+  Briefcase,
+  School,
+  Mail,
+  User,
+  Phone,
+  BookOpen,
+  FileText,
+  Sparkles,
+  CheckCircle2,
+  AlertCircle,
+  Award,
+} from "lucide-react";
+
+interface PreRegistrationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  defaultEstablishmentId?: string;
+  defaultRole?: InscriptionRole;
+}
+
+const COMMON_SUBJECTS = [
+  "Mathématiques",
+  "Sciences Physiques & Chimie",
+  "Sciences de la Vie et de la Terre (SVT)",
+  "Français & Littérature",
+  "Informatique & Technologies",
+  "Histoire - Géographie",
+  "Philosophie",
+  "Anglais",
+  "Arabe & Éducation Islamique",
+  "Économie & Gestion",
+  "Autre spécialité",
+];
+
+export function PreRegistrationModal({
+  isOpen,
+  onClose,
+  defaultEstablishmentId,
+  defaultRole = "STUDENT",
+}: PreRegistrationModalProps) {
+  const { etablissements, classes, submitPreRegistration } = useStore();
+
+  const [role, setRole] = useState<InscriptionRole>(defaultRole);
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [userPhone, setUserPhone] = useState("");
+  const [establishmentId, setEstablishmentId] = useState(
+    defaultEstablishmentId || (etablissements[0]?.id ?? "dar-al-arqam")
+  );
+  const [classeId, setClasseId] = useState("");
+  const [subject, setSubject] = useState("");
+  const [customSubject, setCustomSubject] = useState("");
+  const [diplomaOrBio, setDiplomaOrBio] = useState("");
+  const [motivation, setMotivation] = useState("");
+
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // Available classes for selected establishment
+  const availableClasses = classes.filter(
+    (c) => !establishmentId || c.etablissementId === establishmentId
+  );
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg("");
+
+    if (!userName.trim()) {
+      setErrorMsg("Veuillez renseigner votre nom complet.");
+      return;
+    }
+    if (!userEmail.trim() || !userEmail.includes("@")) {
+      setErrorMsg("Veuillez renseigner une adresse email valide.");
+      return;
+    }
+    if (!establishmentId) {
+      setErrorMsg("Veuillez sélectionner un établissement scolaire.");
+      return;
+    }
+    if (!classeId) {
+      setErrorMsg("Veuillez sélectionner la classe souhaitée.");
+      return;
+    }
+
+    const selectedEstablishment = etablissements.find((e) => e.id === establishmentId);
+    const selectedClass = classes.find((c) => c.id === classeId);
+
+    const finalSubject =
+      role === "TEACHER"
+        ? subject === "Autre spécialité"
+          ? customSubject.trim() || "Spécialité générale"
+          : subject || "Discipline générale"
+        : undefined;
+
+    const result = submitPreRegistration({
+      role,
+      userName: userName.trim(),
+      userEmail: userEmail.trim().toLowerCase(),
+      userPhone: userPhone.trim(),
+      etablissementId: establishmentId,
+      classeId,
+      subject: finalSubject,
+      diplomaOrBio: role === "TEACHER" ? diplomaOrBio.trim() : undefined,
+      motivation: motivation.trim(),
+    });
+
+    if (result.success) {
+      setIsSubmitted(true);
+    } else {
+      setErrorMsg(result.message);
+    }
+  };
+
+  const handleResetAndClose = () => {
+    setIsSubmitted(false);
+    setUserName("");
+    setUserEmail("");
+    setUserPhone("");
+    setClasseId("");
+    setSubject("");
+    setCustomSubject("");
+    setDiplomaOrBio("");
+    setMotivation("");
+    setErrorMsg("");
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+        {/* Modal Header */}
+        <div className="relative px-6 py-5 border-b border-slate-800 bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shadow-inner">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-2">
+                Portail de Pré-inscription
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
+                  Alfasle
+                </span>
+              </h2>
+              <p className="text-xs text-slate-400">
+                Rejoignez nos établissements partenaires • Candidature soumise à validation Super Admin
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleResetAndClose}
+            className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 flex items-center justify-center transition-all"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Modal Body */}
+        <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar">
+          {isSubmitted ? (
+            <div className="text-center py-8 px-4 space-y-4 animate-scaleUp">
+              <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-3xl flex items-center justify-center mx-auto shadow-xl shadow-emerald-500/10">
+                <CheckCircle2 className="w-9 h-9" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-black text-white">
+                  Candidature enregistrée avec succès !
+                </h3>
+                <p className="text-sm text-slate-300 max-w-lg mx-auto leading-relaxed">
+                  Merci <strong className="text-indigo-300">{userName}</strong>. Votre dossier de pré-inscription pour le rôle de{" "}
+                  <strong className="text-emerald-300">
+                    {role === "TEACHER" ? "👨‍🏫 Professeur / Enseignant" : "🎓 Élève"}
+                  </strong>{" "}
+                  a bien été transmis.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 text-left text-xs space-y-2 max-w-lg mx-auto">
+                <div className="flex items-center gap-2 text-indigo-200 font-bold">
+                  <AlertCircle className="w-4 h-4 text-indigo-400 shrink-0" />
+                  Procédure de validation par le Super Administrateur :
+                </div>
+                <p className="text-slate-300 leading-relaxed">
+                  Votre demande est actuellement au statut <strong className="text-amber-400">EN ATTENTE</strong>.
+                  Le Super Administrateur va examiner votre profil et activer vos accès. Une fois validé, vous pourrez vous connecter avec vos identifiants.
+                </p>
+              </div>
+
+              <div className="pt-4">
+                <button
+                  onClick={handleResetAndClose}
+                  className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 transition-all"
+                >
+                  Fermer & Continuer
+                </button>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Role Toggle Switch */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  Type de Candidature
+                </label>
+                <div className="grid grid-cols-2 gap-3 p-1.5 bg-slate-950/80 rounded-2xl border border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => setRole("STUDENT")}
+                    className={`flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl text-xs font-bold transition-all ${
+                      role === "STUDENT"
+                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 border border-indigo-400/40"
+                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+                    }`}
+                  >
+                    <GraduationCap className="w-4 h-4" />
+                    <span>🎓 Candidature Élève</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setRole("TEACHER")}
+                    className={`flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl text-xs font-bold transition-all ${
+                      role === "TEACHER"
+                        ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 border border-emerald-400/40"
+                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+                    }`}
+                  >
+                    <Briefcase className="w-4 h-4" />
+                    <span>👨‍🏫 Candidature Professeur</span>
+                  </button>
+                </div>
+              </div>
+
+              {errorMsg && (
+                <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  {errorMsg}
+                </div>
+              )}
+
+              {/* Personal Info */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-indigo-400" />
+                    Nom complet <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder={role === "TEACHER" ? "Ex: Dr. Mamadou Diallo" : "Ex: Aminata Diop"}
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-indigo-400" />
+                    Adresse Email (de validation) <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="votre.email@exemple.com"
+                    value={userEmail}
+                    onChange={(e) => setUserEmail(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-indigo-400" />
+                    Numéro de Téléphone
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="+223 70 00 00 00"
+                    value={userPhone}
+                    onChange={(e) => setUserPhone(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                    <School className="w-3.5 h-3.5 text-indigo-400" />
+                    Établissement visé <span className="text-rose-400">*</span>
+                  </label>
+                  <select
+                    value={establishmentId}
+                    onChange={(e) => {
+                      setEstablishmentId(e.target.value);
+                      setClasseId(""); // Reset class selection on school change
+                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer"
+                  >
+                    {etablissements.map((est) => (
+                      <option key={est.id} value={est.id}>
+                        {est.name} ({est.city || "Mali"})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Class & Subject Selectors */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+                    {role === "TEACHER" ? "Classe à enseigner" : "Classe souhaitée"}{" "}
+                    <span className="text-rose-400">*</span>
+                  </label>
+                  <select
+                    value={classeId}
+                    onChange={(e) => setClasseId(e.target.value)}
+                    required
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer"
+                  >
+                    <option value="">-- Sélectionnez une classe --</option>
+                    {availableClasses.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.title} • {c.level} ({c.enrolledCount || 0}/{c.capacity} élèves)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {role === "TEACHER" && (
+                  <div className="space-y-1.5 animate-fadeIn">
+                    <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                      <Award className="w-3.5 h-3.5 text-emerald-400" />
+                      Matière / Discipline enseignée <span className="text-rose-400">*</span>
+                    </label>
+                    <select
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      required
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs focus:outline-none focus:border-emerald-500 transition-all cursor-pointer"
+                    >
+                      <option value="">-- Sélectionnez la matière --</option>
+                      {COMMON_SUBJECTS.map((sub) => (
+                        <option key={sub} value={sub}>
+                          {sub}
+                        </option>
+                      ))}
+                    </select>
+
+                    {subject === "Autre spécialité" && (
+                      <input
+                        type="text"
+                        placeholder="Précisez votre matière / spécialité..."
+                        value={customSubject}
+                        onChange={(e) => setCustomSubject(e.target.value)}
+                        className="w-full mt-2 px-3.5 py-2 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-all"
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Teacher Diploma / Experience */}
+              {role === "TEACHER" && (
+                <div className="space-y-1.5 animate-fadeIn">
+                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                    <Award className="w-3.5 h-3.5 text-emerald-400" />
+                    Diplômes, Titres ou Expérience pédagogique
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ex: Master 2 Physique-Chimie, 6 ans au Lycée Askia Mohamed"
+                    value={diplomaOrBio}
+                    onChange={(e) => setDiplomaOrBio(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-all"
+                  />
+                </div>
+              )}
+
+              {/* Motivation */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-indigo-400" />
+                  Motivation / Présentation
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder={
+                    role === "TEACHER"
+                      ? "Présentez brièvement vos objectifs pédagogiques et votre disponibilité..."
+                      : "Expliquez brièvement pourquoi vous souhaitez intégrer cette classe..."
+                  }
+                  value={motivation}
+                  onChange={(e) => setMotivation(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all resize-none"
+                />
+              </div>
+
+              {/* Validation Notice */}
+              <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 text-[11px] text-slate-400 flex items-start gap-2.5">
+                <div className="p-1 rounded-md bg-amber-500/10 text-amber-400 shrink-0 mt-0.5">
+                  👑
+                </div>
+                <div>
+                  <span className="font-bold text-slate-200">Validation Exclusive Super Admin :</span> Toutes les demandes de pré-inscription sont examinées par le Super Administrateur avant attribution définitive des comptes.
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="pt-2 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={handleResetAndClose}
+                  className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 text-xs font-semibold transition-all"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className={`px-6 py-2.5 rounded-xl text-white font-bold text-xs shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center gap-2 ${
+                    role === "TEACHER"
+                      ? "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/30"
+                      : "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/30"
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Soumettre ma Pré-inscription
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

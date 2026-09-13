@@ -69,19 +69,27 @@ export interface Classe {
 }
 
 export type InscriptionStatus = "PENDING" | "APPROVED" | "REJECTED";
+export type InscriptionRole = "STUDENT" | "TEACHER";
 
 export interface Inscription {
   id: string;
-  userId: string;
+  userId?: string;
   userName: string;
   userEmail: string;
+  userPhone?: string;
   userAvatar?: string;
+  role: InscriptionRole;
+  etablissementId?: string;
+  etablissementName?: string;
   classeId: string;
   classeTitle: string;
+  subject?: string; // Matière enseignée pour les professeurs
+  diplomaOrBio?: string;
   status: InscriptionStatus;
   motivation?: string;
   appliedAt: string;
   reviewedAt?: string;
+  reviewedBy?: string;
 }
 
 export type CourseStatus = "DRAFT" | "PUBLISHED";
