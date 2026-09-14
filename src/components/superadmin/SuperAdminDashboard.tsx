@@ -60,6 +60,7 @@ export function SuperAdminDashboard({
     deleteUser,
     currentUser,
     inscriptions,
+    resetStoreToDefaults,
   } = useStore();
 
   // Active top-level Tab
@@ -427,6 +428,19 @@ export function SuperAdminDashboard({
           </div>
 
           <div className="flex items-center gap-3 shrink-0 flex-wrap">
+            <button
+              onClick={() => {
+                if (window.confirm("Voulez-vous réinitialiser toutes les données aux valeurs d'origine propres et vider le cache du navigateur ?")) {
+                  resetStoreToDefaults();
+                }
+              }}
+              title="Vider le cache du navigateur et réinitialiser les données"
+              className="px-4 py-3.5 rounded-2xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-mono font-bold text-xs shadow-lg flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5"
+            >
+              <Trash2 className="w-4 h-4 text-rose-400" />
+              <span>🧹 Vider Cache & Réinitialiser</span>
+            </button>
+
             <button
               onClick={() => {
                 resetSchoolForm();

@@ -36,10 +36,10 @@ export function AuthLandingView({
   onOpenSuperAdmin,
   onSelectSubdomainSchool,
 }: AuthLandingViewProps) {
-  const { users, currentUser, setCurrentUser, etablissements, classes } = useStore();
+  const { users, currentUser, setCurrentUser, etablissements, classes, resetStoreToDefaults } = useStore();
 
   const [selectedRole, setSelectedRole] = useState<UserRole>("ADMIN");
-  const [identifier, setIdentifier] = useState("konedamaa@gmail.com");
+  const [identifier, setIdentifier] = useState("diawara@gmail.com");
   const [password, setPassword] = useState("Madouu1966@");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
@@ -729,8 +729,18 @@ export function AuthLandingView({
       </main>
 
       {/* Page Footer */}
-      <footer className="w-full text-center py-4 text-xs text-slate-500 border-t border-slate-900/80 z-10">
-        © 2026-2027 ALFASLE LMS • Plateforme Éducative Multi-Établissements
+      <footer className="w-full text-center py-4 px-4 text-xs text-slate-500 border-t border-slate-900/80 z-10 flex flex-col sm:flex-row items-center justify-between gap-3 max-w-7xl mx-auto">
+        <span>© 2026-2027 ALFASLE LMS • Plateforme Éducative Multi-Établissements</span>
+        <button
+          onClick={() => {
+            if (window.confirm("Voulez-vous vider le cache et réinitialiser les données de démo par défaut ?")) {
+              resetStoreToDefaults();
+            }
+          }}
+          className="text-[11px] text-slate-400 hover:text-rose-400 underline transition-colors flex items-center gap-1"
+        >
+          <span>🧹 Vider le cache & Réinitialiser</span>
+        </button>
       </footer>
 
       {/* Public Pre-Registration Modal */}

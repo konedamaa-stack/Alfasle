@@ -88,11 +88,41 @@ interface StoreContextType {
   notifications: AppNotification[];
   markNotificationAsRead: (id: string) => void;
   clearAllNotifications: () => void;
+  // Storage versioning
+  resetStoreToDefaults: () => void;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
-function loadInitialData<T extends { id: string }>(key: string, initialData: T[]): T[] {
+const STORAGE_PREFIX = "alfasle_v6_";
+
+function cleanLegacyStorage() {
+  if (typeof window !== "undefined") {
+    try {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (
+          key &&
+          key.startsWith("alfasle") &&
+          !key.startsWith(STORAGE_PREFIX) &&
+          key !== "alfasle_theme"
+        ) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach((k) => localStorage.removeItem(k));
+    } catch (e) {
+      console.error("Erreur nettoyage legacy localStorage:", e);
+    }
+  }
+}
+
+// Run legacy storage clean immediately
+cleanLegacyStorage();
+
+function loadInitialData<T extends { id: string }>(suffix: string, initialData: T[]): T[] {
+  const key = `${STORAGE_PREFIX}${suffix}`;
   if (typeof window !== "undefined") {
     try {
       const saved = localStorage.getItem(key);
@@ -152,7 +182,7 @@ function loadInitialData<T extends { id: string }>(key: string, initialData: T[]
           let merged = [...filteredSaved, ...missingFromInitial];
 
           // Auto-sync Dr. Mahamadou DIAWARA
-          if (key === "alfasle_users") {
+          if (suffix === "users") {
             merged = (merged as unknown as User[]).map((u) => {
               if (u.id === "u_admin_diawara" || u.id === "u_admin_excellence" || u.username === "diawara" || u.email === "diawara@gmail.com") {
                 return {
@@ -172,7 +202,7 @@ function loadInitialData<T extends { id: string }>(key: string, initialData: T[]
             }) as unknown as T[];
           }
 
-          if (key === "alfasle_etablissements") {
+          if (suffix === "etablissements") {
             merged = (merged as unknown as Etablissement[]).map((e) => {
               if (e.id === "etab_lycee_excellence") {
                 return {
@@ -235,43 +265,72 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, [theme]);
 
-  const [users, setUsers] = useState<User[]>(() => loadInitialData("alfasle_users", initialUsers));
-  const [currentUser, setCurrentUser] = useState<User>(initialUsers[0]); // Default: Teacher Sarah
+  const [users, setUsers] = useState<User[]>(() => loadInitialData("users", initialUsers));
+  const [currentUser, setCurrentUser] = useState<User>(initialUsers[1]); // Default: Dr. Mahamadou DIAWARA (Directeur)
   const [etablissements, setEtablissements] = useState<Etablissement[]>(() =>
-    loadInitialData("alfasle_etablissements", initialEtablissements)
+    loadInitialData("etablissements", initialEtablissements)
   );
   const [classes, setClasses] = useState<Classe[]>(() =>
-    loadInitialData("alfasle_classes", initialClasses)
+    loadInitialData("classes", initialClasses)
   );
   const [inscriptions, setInscriptions] = useState<Inscription[]>(() =>
-    loadInitialData("alfasle_inscriptions", initialInscriptions)
+    loadInitialData("inscriptions", initialInscriptions)
   );
   const [courses, setCourses] = useState<Cours[]>(() =>
-    loadInitialData("alfasle_courses", initialCourses)
+    loadInitialData("courses", initialCourses)
   );
   const [assignments, setAssignments] = useState<Devoir[]>(() =>
-    loadInitialData("alfasle_assignments", initialAssignments)
+    loadInitialData("assignments", initialAssignments)
   );
   const [submissions, setSubmissions] = useState<Soumission[]>(() =>
-    loadInitialData("alfasle_submissions", initialSubmissions)
+    loadInitialData("submissions", initialSubmissions)
   );
   const [notifications, setNotifications] = useState<AppNotification[]>(() =>
-    loadInitialData("alfasle_notifications", initialNotifications)
+    loadInitialData("notifications", initialNotifications)
   );
 
   // Sync to localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("alfasle_users", JSON.stringify(users));
-      localStorage.setItem("alfasle_etablissements", JSON.stringify(etablissements));
-      localStorage.setItem("alfasle_classes", JSON.stringify(classes));
-      localStorage.setItem("alfasle_inscriptions", JSON.stringify(inscriptions));
-      localStorage.setItem("alfasle_courses", JSON.stringify(courses));
-      localStorage.setItem("alfasle_assignments", JSON.stringify(assignments));
-      localStorage.setItem("alfasle_submissions", JSON.stringify(submissions));
-      localStorage.setItem("alfasle_notifications", JSON.stringify(notifications));
+      localStorage.setItem(`${STORAGE_PREFIX}users`, JSON.stringify(users));
+      localStorage.setItem(`${STORAGE_PREFIX}etablissements`, JSON.stringify(etablissements));
+      localStorage.setItem(`${STORAGE_PREFIX}classes`, JSON.stringify(classes));
+      localStorage.setItem(`${STORAGE_PREFIX}inscriptions`, JSON.stringify(inscriptions));
+      localStorage.setItem(`${STORAGE_PREFIX}courses`, JSON.stringify(courses));
+      localStorage.setItem(`${STORAGE_PREFIX}assignments`, JSON.stringify(assignments));
+      localStorage.setItem(`${STORAGE_PREFIX}submissions`, JSON.stringify(submissions));
+      localStorage.setItem(`${STORAGE_PREFIX}notifications`, JSON.stringify(notifications));
     }
   }, [users, etablissements, classes, inscriptions, courses, assignments, submissions, notifications]);
+
+  const resetStoreToDefaults = () => {
+    if (typeof window !== "undefined") {
+      try {
+        const keysToRemove: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith("alfasle")) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach((k) => localStorage.removeItem(k));
+      } catch (e) {
+        console.error("Erreur reset localStorage:", e);
+      }
+    }
+    setUsers(initialUsers);
+    setEtablissements(initialEtablissements);
+    setClasses(initialClasses);
+    setInscriptions(initialInscriptions);
+    setCourses(initialCourses);
+    setAssignments(initialAssignments);
+    setSubmissions(initialSubmissions);
+    setNotifications(initialNotifications);
+    setCurrentUser(initialUsers[1]); // Dr. Mahamadou DIAWARA
+    if (typeof window !== "undefined") {
+      window.location.reload();
+    }
+  };
 
   const switchRole = (role: UserRole) => {
     const found = users.find((u) => u.role === role);
@@ -1000,6 +1059,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         clearAllNotifications,
         theme,
         toggleTheme,
+        resetStoreToDefaults,
       }}
     >
       {children}
