@@ -28,10 +28,10 @@ export default function middleware(req: NextRequest) {
   if (hostWithoutPort.endsWith(".localhost")) {
     subdomain = hostWithoutPort.replace(".localhost", "");
   }
-  // 2. Vercel deployment support: e.g. "raya1.alfasle.vercel.app"
+  // 2. Vercel deployment support: e.g. "polytech-kone.alfasle.vercel.app"
   else if (hostWithoutPort.endsWith(".vercel.app")) {
     const vParts = hostWithoutPort.split(".");
-    // Only extract subdomain if 4+ parts (e.g. raya1.alfasle.vercel.app)
+    // Only extract subdomain if 4+ parts (e.g. polytech-kone.alfasle.vercel.app)
     if (vParts.length >= 4) {
       subdomain = vParts[0];
     } else {

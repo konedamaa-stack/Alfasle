@@ -1616,7 +1616,7 @@ export function SuperAdminDashboard({
                       required
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
-                      placeholder="Ex: Institut Supérieur Polytechnique KONE, Groupe Scolaire Raya 1..."
+                      placeholder="Ex: Institut Supérieur Polytechnique KONE, Lycée d'Excellence..."
                       className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
                     />
                   </div>
@@ -1630,7 +1630,7 @@ export function SuperAdminDashboard({
                         type="text"
                         value={newCode}
                         onChange={(e) => setNewCode(e.target.value)}
-                        placeholder="Ex: ALF-RAY-01 (Auto si vide)"
+                        placeholder="Ex: ALF-EXC-01 (Auto si vide)"
                         className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-amber-400 font-mono uppercase focus:outline-none focus:border-amber-500"
                       />
                     </div>
@@ -1643,7 +1643,7 @@ export function SuperAdminDashboard({
                           type="text"
                           value={newSubdomain}
                           onChange={(e) => setNewSubdomain(e.target.value)}
-                          placeholder="ex: raya1"
+                          placeholder="ex: polytech-kone"
                           className="w-full px-4 py-2.5 rounded-l-xl bg-slate-950 border border-slate-700 text-amber-300 font-mono lowercase focus:outline-none focus:border-amber-500 text-xs"
                         />
                         <span className="px-2.5 py-2.5 bg-slate-800 border border-l-0 border-slate-700 text-slate-400 text-xs rounded-r-xl font-mono">
