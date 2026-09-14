@@ -336,6 +336,29 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const updateEtablissement = (id: string, data: Partial<Etablissement>) => {
     setEtablissements((prev) => prev.map((e) => (e.id === id ? { ...e, ...data } : e)));
+
+    if (data.name) {
+      setClasses((prev) =>
+        prev.map((c) => (c.etablissementId === id ? { ...c, etablissementName: data.name! } : c))
+      );
+    }
+
+    if (data.directorEmail || data.directorName || data.directorPassword) {
+      setUsers((prev) =>
+        prev.map((u) => {
+          if (u.etablissementId === id && u.role === "ADMIN") {
+            return {
+              ...u,
+              name: data.directorName || u.name,
+              email: data.directorEmail || u.email,
+              password: data.directorPassword || u.password,
+              etablissementName: data.name || u.etablissementName,
+            };
+          }
+          return u;
+        })
+      );
+    }
   };
 
   const deleteEtablissement = (id: string) => {

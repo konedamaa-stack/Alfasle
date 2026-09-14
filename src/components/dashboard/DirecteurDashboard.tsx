@@ -68,6 +68,8 @@ export function DirecteurDashboard({
     updateUser,
     deleteUser,
     createClass,
+    updateClass,
+    updateEtablissement,
     approveInscription,
     rejectInscription,
   } = useStore();
@@ -94,10 +96,54 @@ export function DirecteurDashboard({
   const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Modals state
+  // Modals state (Creation)
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
   const [isAddTeacherOpen, setIsAddTeacherOpen] = useState(false);
   const [isAddClassOpen, setIsAddClassOpen] = useState(false);
+
+  // Modals state (Edition)
+  const [isEditCampusOpen, setIsEditCampusOpen] = useState(false);
+  const [editCampusName, setEditCampusName] = useState("");
+  const [editCampusPhone, setEditCampusPhone] = useState("");
+  const [editCampusAddress, setEditCampusAddress] = useState("");
+  const [editCampusDesc, setEditCampusDesc] = useState("");
+  const [editCampusDirectorName, setEditCampusDirectorName] = useState("");
+  const [editCampusDirectorPassword, setEditCampusDirectorPassword] = useState("");
+  const [showCampusDirectorPassword, setShowCampusDirectorPassword] = useState(false);
+
+  // Edit Student State
+  const [editingStudent, setEditingStudent] = useState<User | null>(null);
+  const [isEditStudentOpen, setIsEditStudentOpen] = useState(false);
+  const [editStudentName, setEditStudentName] = useState("");
+  const [editStudentEmail, setEditStudentEmail] = useState("");
+  const [editStudentUsername, setEditStudentUsername] = useState("");
+  const [editStudentPassword, setEditStudentPassword] = useState("");
+  const [showEditStudentPassword, setShowEditStudentPassword] = useState(false);
+  const [editStudentClasseId, setEditStudentClasseId] = useState("");
+  const [editStudentBio, setEditStudentBio] = useState("");
+
+  // Edit Teacher State
+  const [editingTeacher, setEditingTeacher] = useState<User | null>(null);
+  const [isEditTeacherOpen, setIsEditTeacherOpen] = useState(false);
+  const [editTeacherName, setEditTeacherName] = useState("");
+  const [editTeacherEmail, setEditTeacherEmail] = useState("");
+  const [editTeacherUsername, setEditTeacherUsername] = useState("");
+  const [editTeacherPassword, setEditTeacherPassword] = useState("");
+  const [showEditTeacherPassword, setShowEditTeacherPassword] = useState(false);
+  const [editTeacherSubject, setEditTeacherSubject] = useState(COMMON_SUBJECTS[0]);
+  const [editTeacherClasseId, setEditTeacherClasseId] = useState("");
+  const [editTeacherBio, setEditTeacherBio] = useState("");
+
+  // Edit Class State
+  const [editingClass, setEditingClass] = useState<Classe | null>(null);
+  const [isEditClassOpen, setIsEditClassOpen] = useState(false);
+  const [editClassTitle, setEditClassTitle] = useState("");
+  const [editClassCode, setEditClassCode] = useState("");
+  const [editClassLevel, setEditClassLevel] = useState("Terminale");
+  const [editClassCategory, setEditClassCategory] = useState("Sciences & Informatique");
+  const [editClassCapacity, setEditClassCapacity] = useState(35);
+  const [editClassTeacherId, setEditClassTeacherId] = useState("");
+  const [editClassDesc, setEditClassDesc] = useState("");
 
   // New Student Form State
   const [newStudentName, setNewStudentName] = useState("");
@@ -298,6 +344,115 @@ export function DirecteurDashboard({
     setNewClassTeacherId("");
   };
 
+  // --- EDIT HANDLERS ---
+  const handleOpenEditCampus = () => {
+    if (!currentEtab) return;
+    setEditCampusName(currentEtab.name);
+    setEditCampusPhone(currentEtab.phone || "");
+    setEditCampusAddress(currentEtab.address || "");
+    setEditCampusDesc(currentEtab.description || "");
+    setEditCampusDirectorName(currentEtab.directorName || currentUser.name);
+    setEditCampusDirectorPassword(currentUser.password || currentEtab.directorPassword || "Madouu1966@");
+    setShowCampusDirectorPassword(false);
+    setIsEditCampusOpen(true);
+  };
+
+  const handleSaveEditCampus = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentEtab) return;
+    updateEtablissement(currentEtab.id, {
+      name: editCampusName.trim(),
+      phone: editCampusPhone.trim(),
+      address: editCampusAddress.trim(),
+      description: editCampusDesc.trim(),
+      directorName: editCampusDirectorName.trim(),
+      directorPassword: editCampusDirectorPassword.trim(),
+    });
+    setIsEditCampusOpen(false);
+  };
+
+  const handleOpenEditStudent = (s: User) => {
+    const studentInscription = inscriptions.find((i) => i.userId === s.id);
+    setEditingStudent(s);
+    setEditStudentName(s.name);
+    setEditStudentEmail(s.email);
+    setEditStudentUsername(s.username || s.name.split(" ")[0].toLowerCase());
+    setEditStudentPassword(s.password || "Madouu1966@");
+    setShowEditStudentPassword(false);
+    setEditStudentClasseId(studentInscription?.classeId || "");
+    setEditStudentBio(s.bio || "");
+    setIsEditStudentOpen(true);
+  };
+
+  const handleSaveEditStudent = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingStudent) return;
+    updateUser(editingStudent.id, {
+      name: editStudentName.trim(),
+      email: editStudentEmail.trim().toLowerCase(),
+      username: editStudentUsername.trim().toLowerCase(),
+      password: editStudentPassword.trim(),
+      bio: editStudentBio.trim(),
+    });
+    setIsEditStudentOpen(false);
+  };
+
+  const handleOpenEditTeacher = (t: User) => {
+    setEditingTeacher(t);
+    setEditTeacherName(t.name);
+    setEditTeacherEmail(t.email);
+    setEditTeacherUsername(t.username || t.name.split(" ")[0].toLowerCase());
+    setEditTeacherPassword(t.password || "Madouu1966@");
+    setShowEditTeacherPassword(false);
+    setEditTeacherSubject(
+      COMMON_SUBJECTS.find((sub) => t.bio?.includes(sub)) || COMMON_SUBJECTS[0]
+    );
+    setEditTeacherBio(t.bio || "");
+    setIsEditTeacherOpen(true);
+  };
+
+  const handleSaveEditTeacher = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTeacher) return;
+    updateUser(editingTeacher.id, {
+      name: editTeacherName.trim(),
+      email: editTeacherEmail.trim().toLowerCase(),
+      username: editTeacherUsername.trim().toLowerCase(),
+      password: editTeacherPassword.trim(),
+      bio: editTeacherBio.trim() || `Professeur de ${editTeacherSubject}`,
+    });
+    setIsEditTeacherOpen(false);
+  };
+
+  const handleOpenEditClass = (c: Classe) => {
+    setEditingClass(c);
+    setEditClassTitle(c.title);
+    setEditClassCode(c.classCode);
+    setEditClassLevel(c.level);
+    setEditClassCategory(c.category);
+    setEditClassCapacity(c.capacity || 35);
+    setEditClassTeacherId(c.teacherId || "");
+    setEditClassDesc(c.description || "");
+    setIsEditClassOpen(true);
+  };
+
+  const handleSaveEditClass = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingClass) return;
+    const assignedTeacher = users.find((u) => u.id === editClassTeacherId);
+    updateClass(editingClass.id, {
+      title: editClassTitle.trim(),
+      classCode: editClassCode.trim().toUpperCase(),
+      level: editClassLevel,
+      category: editClassCategory,
+      capacity: editClassCapacity,
+      description: editClassDesc.trim(),
+      teacherId: assignedTeacher?.id || editingClass.teacherId,
+      teacherName: assignedTeacher?.name || editingClass.teacherName,
+    });
+    setIsEditClassOpen(false);
+  };
+
   return (
     <div className="space-y-6 animate-fadeIn pb-12">
       {/* Hero Director Banner */}
@@ -341,6 +496,15 @@ export function DirecteurDashboard({
             >
               <FolderKanban className="w-4 h-4" />
               <span>+ Créer Classe</span>
+            </button>
+
+            <button
+              onClick={handleOpenEditCampus}
+              className="px-3.5 py-3 rounded-2xl bg-slate-900/90 hover:bg-slate-800 text-amber-300 border border-amber-500/40 font-bold text-xs flex items-center gap-1.5 transition-all shadow-md"
+              title="Modifier les informations et mot de passe du campus"
+            >
+              <Edit className="w-4 h-4 text-amber-400" />
+              <span>Modifier Campus</span>
             </button>
           </div>
         </div>
@@ -576,6 +740,13 @@ export function DirecteurDashboard({
 
                           <td className="py-3 px-4 text-right">
                             <button
+                              onClick={() => handleOpenEditStudent(s)}
+                              className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/30 transition-all mr-1.5"
+                              title="Modifier l'élève"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </button>
+                            <button
                               onClick={() => {
                                 if (window.confirm(`Supprimer le compte élève de ${s.name} ?`)) {
                                   deleteUser(s.id);
@@ -631,9 +802,9 @@ export function DirecteurDashboard({
                   <tr className="border-b border-slate-800 bg-slate-900/60 text-slate-400 font-mono text-[11px] uppercase tracking-wider">
                     <th className="py-3.5 px-4">Professeur</th>
                     <th className="py-3.5 px-4">Matière / Spécialité</th>
-                    <th className="py-3.5 px-4">Login / Email</th>
+                    <th className="py-3.5 px-4">Identifiant & Email</th>
                     <th className="py-3.5 px-4">Mot de Passe</th>
-                    <th className="py-3.5 px-4">Classes Assignées</th>
+                    <th className="py-3.5 px-4">Classes Affectées</th>
                     <th className="py-3.5 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -641,7 +812,7 @@ export function DirecteurDashboard({
                   {filteredTeachers.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="text-center py-10 text-slate-400">
-                        Aucun enseignant rattaché pour l&apos;instant. Cliquez sur « + Inscrire un Professeur ».
+                        Aucun professeur enregistré sur ce campus. Cliquez sur « + Inscrire un Professeur ».
                       </td>
                     </tr>
                   ) : (
@@ -650,7 +821,7 @@ export function DirecteurDashboard({
                       const pwd = t.password || "Madouu1966@";
                       const tLogin = t.username || t.name.split(" ")[0].toLowerCase();
                       const teacherClasses = schoolClasses.filter(
-                        (c) => c.teacherId === t.id || c.teacherName === t.name
+                        (c) => c.teacherId === t.id
                       );
 
                       return (
@@ -709,6 +880,13 @@ export function DirecteurDashboard({
                           </td>
 
                           <td className="py-3 px-4 text-right">
+                            <button
+                              onClick={() => handleOpenEditTeacher(t)}
+                              className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 transition-all mr-1.5"
+                              title="Modifier le professeur"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </button>
                             <button
                               onClick={() => {
                                 if (window.confirm(`Supprimer le profil enseignant de ${t.name} ?`)) {
@@ -791,15 +969,25 @@ export function DirecteurDashboard({
                     </div>
                   </div>
 
-                  {onSelectClassForCourses && (
+                  <div className="flex items-center gap-2 pt-2 border-t border-slate-800/80">
                     <button
-                      onClick={() => onSelectClassForCourses(cls.id)}
-                      className="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5"
+                      onClick={() => handleOpenEditClass(cls)}
+                      className="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 font-bold text-xs transition-all flex items-center justify-center gap-1.5"
                     >
-                      <BookOpen className="w-3.5 h-3.5" />
-                      <span>Consulter les Cours & Devoirs</span>
+                      <Edit className="w-3.5 h-3.5" />
+                      <span>Modifier</span>
                     </button>
-                  )}
+
+                    {onSelectClassForCourses && (
+                      <button
+                        onClick={() => onSelectClassForCourses(cls.id)}
+                        className="flex-1 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 font-bold text-xs transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <BookOpen className="w-3.5 h-3.5" />
+                        <span>Cours</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))
             )}
@@ -1232,6 +1420,444 @@ export function DirecteurDashboard({
           </div>
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 4: EDIT CAMPUS / ETABLISSEMENT */}
+      {/* ========================================================================= */}
+      {isEditCampusOpen && currentEtab && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-lg bg-[#0a0f1e] border border-blue-500/40 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="px-6 py-5 border-b border-slate-800 bg-[#070b16] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
+                  <Building2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white">Modifier les Infos de l&apos;Établissement</h3>
+                  <p className="text-xs text-blue-400 font-mono">{currentEtab.code} • {currentEtab.subdomain}.alfasle.com</p>
+                </div>
+              </div>
+              <button onClick={() => setIsEditCampusOpen(false)} className="p-2 rounded-xl text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditCampus} className="p-6 overflow-y-auto flex-1 space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Nom de l&apos;Établissement *</label>
+                <input
+                  type="text"
+                  required
+                  value={editCampusName}
+                  onChange={(e) => setEditCampusName(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white font-bold focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Téléphone de Contact</label>
+                  <input
+                    type="text"
+                    value={editCampusPhone}
+                    onChange={(e) => setEditCampusPhone(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-blue-500 font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Adresse & Ville</label>
+                  <input
+                    type="text"
+                    value={editCampusAddress}
+                    onChange={(e) => setEditCampusAddress(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-blue-950/20 border border-blue-500/30 space-y-3">
+                <p className="text-[11px] font-bold text-blue-300 uppercase tracking-wider">Identifiants du Directeur</p>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Nom du Directeur *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editCampusDirectorName}
+                    onChange={(e) => setEditCampusDirectorName(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-bold focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Mot de Passe du Directeur *</label>
+                  <div className="relative">
+                    <input
+                      type={showCampusDirectorPassword ? "text" : "password"}
+                      required
+                      value={editCampusDirectorPassword}
+                      onChange={(e) => setEditCampusDirectorPassword(e.target.value)}
+                      className="w-full pl-4 pr-10 py-2 rounded-xl bg-slate-900 border border-slate-700 text-amber-300 font-mono font-bold focus:outline-none focus:border-blue-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCampusDirectorPassword(!showCampusDirectorPassword)}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-white"
+                    >
+                      {showCampusDirectorPassword ? <EyeOff className="w-4 h-4 text-blue-400" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Description du Campus</label>
+                <textarea
+                  rows={3}
+                  value={editCampusDesc}
+                  onChange={(e) => setEditCampusDesc(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-slate-800 flex justify-between items-center">
+                <button type="button" onClick={() => setIsEditCampusOpen(false)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300">
+                  Annuler
+                </button>
+                <button type="submit" className="px-6 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Mettre à jour l&apos;Établissement</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 5: EDIT STUDENT */}
+      {/* ========================================================================= */}
+      {isEditStudentOpen && editingStudent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-lg bg-[#0a0f1e] border border-sky-500/40 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="px-6 py-5 border-b border-slate-800 bg-[#070b16] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-sky-500/20 border border-sky-500/40 flex items-center justify-center text-sky-400">
+                  <GraduationCap className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white">Modifier l&apos;Élève</h3>
+                  <p className="text-xs text-sky-400 font-mono">{editingStudent.name}</p>
+                </div>
+              </div>
+              <button onClick={() => setIsEditStudentOpen(false)} className="p-2 rounded-xl text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditStudent} className="p-6 overflow-y-auto flex-1 space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Nom Complet *</label>
+                <input
+                  type="text"
+                  required
+                  value={editStudentName}
+                  onChange={(e) => setEditStudentName(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white font-bold focus:outline-none focus:border-sky-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Email *</label>
+                  <input
+                    type="email"
+                    required
+                    value={editStudentEmail}
+                    onChange={(e) => setEditStudentEmail(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono focus:outline-none focus:border-sky-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Identifiant / Login</label>
+                  <input
+                    type="text"
+                    value={editStudentUsername}
+                    onChange={(e) => setEditStudentUsername(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sky-300 font-mono font-bold focus:outline-none focus:border-sky-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Mot de Passe *</label>
+                <div className="relative">
+                  <input
+                    type={showEditStudentPassword ? "text" : "password"}
+                    required
+                    value={editStudentPassword}
+                    onChange={(e) => setEditStudentPassword(e.target.value)}
+                    className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-amber-300 font-mono font-bold focus:outline-none focus:border-sky-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowEditStudentPassword(!showEditStudentPassword)}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-white"
+                  >
+                    {showEditStudentPassword ? <EyeOff className="w-4 h-4 text-sky-400" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Bio / Notes</label>
+                <textarea
+                  rows={2}
+                  value={editStudentBio}
+                  onChange={(e) => setEditStudentBio(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-sky-500"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-slate-800 flex justify-between items-center">
+                <button type="button" onClick={() => setIsEditStudentOpen(false)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300">
+                  Annuler
+                </button>
+                <button type="submit" className="px-6 py-2.5 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-bold flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Enregistrer les Modifications</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 6: EDIT TEACHER */}
+      {/* ========================================================================= */}
+      {isEditTeacherOpen && editingTeacher && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-lg bg-[#0a0f1e] border border-emerald-500/40 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="px-6 py-5 border-b border-slate-800 bg-[#070b16] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                  <GraduationCap className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white">Modifier le Professeur</h3>
+                  <p className="text-xs text-emerald-400 font-mono">{editingTeacher.name}</p>
+                </div>
+              </div>
+              <button onClick={() => setIsEditTeacherOpen(false)} className="p-2 rounded-xl text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditTeacher} className="p-6 overflow-y-auto flex-1 space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Nom Complet *</label>
+                <input
+                  type="text"
+                  required
+                  value={editTeacherName}
+                  onChange={(e) => setEditTeacherName(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white font-bold focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Email *</label>
+                  <input
+                    type="email"
+                    required
+                    value={editTeacherEmail}
+                    onChange={(e) => setEditTeacherEmail(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Identifiant / Login</label>
+                  <input
+                    type="text"
+                    value={editTeacherUsername}
+                    onChange={(e) => setEditTeacherUsername(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-emerald-300 font-mono font-bold focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Matière / Spécialité</label>
+                  <select
+                    value={editTeacherSubject}
+                    onChange={(e) => setEditTeacherSubject(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-emerald-500"
+                  >
+                    {COMMON_SUBJECTS.map((sub) => (
+                      <option key={sub} value={sub}>
+                        {sub}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Mot de Passe *</label>
+                  <div className="relative">
+                    <input
+                      type={showEditTeacherPassword ? "text" : "password"}
+                      required
+                      value={editTeacherPassword}
+                      onChange={(e) => setEditTeacherPassword(e.target.value)}
+                      className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-amber-300 font-mono font-bold focus:outline-none focus:border-emerald-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowEditTeacherPassword(!showEditTeacherPassword)}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-white"
+                    >
+                      {showEditTeacherPassword ? <EyeOff className="w-4 h-4 text-emerald-400" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Bio & Expérience</label>
+                <textarea
+                  rows={2}
+                  value={editTeacherBio}
+                  onChange={(e) => setEditTeacherBio(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-slate-800 flex justify-between items-center">
+                <button type="button" onClick={() => setIsEditTeacherOpen(false)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300">
+                  Annuler
+                </button>
+                <button type="submit" className="px-6 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Enregistrer les Modifications</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 7: EDIT CLASS */}
+      {/* ========================================================================= */}
+      {isEditClassOpen && editingClass && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-lg bg-[#0a0f1e] border border-amber-500/40 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="px-6 py-5 border-b border-slate-800 bg-[#070b16] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                  <FolderKanban className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white">Modifier la Classe</h3>
+                  <p className="text-xs text-amber-400 font-mono">{editingClass.classCode} • {editingClass.title}</p>
+                </div>
+              </div>
+              <button onClick={() => setIsEditClassOpen(false)} className="p-2 rounded-xl text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditClass} className="p-6 overflow-y-auto flex-1 space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Nom / Titre de la Classe *</label>
+                <input
+                  type="text"
+                  required
+                  value={editClassTitle}
+                  onChange={(e) => setEditClassTitle(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white font-bold focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Code Classe *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editClassCode}
+                    onChange={(e) => setEditClassCode(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-amber-300 font-mono font-bold focus:outline-none focus:border-amber-500 uppercase"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Niveau d&apos;Étude *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editClassLevel}
+                    onChange={(e) => setEditClassLevel(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Professeur Responsable</label>
+                  <select
+                    value={editClassTeacherId}
+                    onChange={(e) => setEditClassTeacherId(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="">-- Non assigné --</option>
+                    {schoolTeachers.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Capacité Max (Élèves)</label>
+                  <input
+                    type="number"
+                    min={5}
+                    max={200}
+                    value={editClassCapacity}
+                    onChange={(e) => setEditClassCapacity(parseInt(e.target.value) || 35)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Description & Programme</label>
+                <textarea
+                  rows={2}
+                  value={editClassDesc}
+                  onChange={(e) => setEditClassDesc(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-slate-800 flex justify-between items-center">
+                <button type="button" onClick={() => setIsEditClassOpen(false)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300">
+                  Annuler
+                </button>
+                <button type="submit" className="px-6 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 fill-black" />
+                  <span>Enregistrer la Classe</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

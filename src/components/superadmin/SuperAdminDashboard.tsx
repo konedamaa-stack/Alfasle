@@ -111,6 +111,26 @@ export function SuperAdminDashboard({
   const [editBio, setEditBio] = useState("");
   const [saveSuccessMsg, setSaveSuccessMsg] = useState("");
 
+  // Edit School Modal State
+  const [editingEtab, setEditingEtab] = useState<Etablissement | null>(null);
+  const [isEditEtabModalOpen, setIsEditEtabModalOpen] = useState(false);
+  const [editEtabName, setEditEtabName] = useState("");
+  const [editEtabCode, setEditEtabCode] = useState("");
+  const [editEtabSubdomain, setEditEtabSubdomain] = useState("");
+  const [editEtabType, setEditEtabType] = useState<"LYCEE" | "COLLEGE" | "UNIVERSITE" | "INSTITUT" | "ECOLE_PRIMAIRE">("LYCEE");
+  const [editEtabCity, setEditEtabCity] = useState("");
+  const [editEtabCountry, setEditEtabCountry] = useState("");
+  const [editEtabAddress, setEditEtabAddress] = useState("");
+  const [editEtabPhone, setEditEtabPhone] = useState("");
+  const [editEtabDirectorName, setEditEtabDirectorName] = useState("");
+  const [editEtabDirectorEmail, setEditEtabDirectorEmail] = useState("");
+  const [editEtabDirectorPassword, setEditEtabDirectorPassword] = useState("");
+  const [showEditDirectorPassword, setShowEditDirectorPassword] = useState(false);
+  const [editEtabPlan, setEditEtabPlan] = useState<"STANDARD" | "PREMIUM" | "ENTERPRISE">("ENTERPRISE");
+  const [editEtabMaxStudents, setEditEtabMaxStudents] = useState(500);
+  const [editEtabMaxClasses, setEditEtabMaxClasses] = useState(25);
+  const [editEtabDesc, setEditEtabDesc] = useState("");
+
   // Create User Modal State
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
   const [createUserName, setCreateUserName] = useState("");
@@ -185,6 +205,57 @@ export function SuperAdminDashboard({
   const handleToggleStatus = (etab: Etablissement) => {
     const nextStatus = etab.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
     updateEtablissement(etab.id, { status: nextStatus });
+  };
+
+  const handleOpenEditEtab = (etab: Etablissement) => {
+    const dirUser = users.find(
+      (u) =>
+        (etab.directorEmail && u.email.toLowerCase() === etab.directorEmail.toLowerCase()) ||
+        (u.etablissementId === etab.id && u.role === "ADMIN")
+    );
+    setEditingEtab(etab);
+    setEditEtabName(etab.name);
+    setEditEtabCode(etab.code);
+    setEditEtabSubdomain(etab.subdomain);
+    setEditEtabType(etab.type);
+    setEditEtabCity(etab.city);
+    setEditEtabCountry(etab.country);
+    setEditEtabAddress(etab.address || "");
+    setEditEtabPhone(etab.phone || "");
+    setEditEtabDirectorName(etab.directorName || dirUser?.name || "");
+    setEditEtabDirectorEmail(etab.directorEmail || dirUser?.email || "");
+    setEditEtabDirectorPassword(dirUser?.password || etab.directorPassword || "Madouu1966@");
+    setShowEditDirectorPassword(false);
+    setEditEtabPlan(etab.subscriptionPlan || "ENTERPRISE");
+    setEditEtabMaxStudents(etab.maxStudentsQuota || 500);
+    setEditEtabMaxClasses(etab.maxClassesQuota || 25);
+    setEditEtabDesc(etab.description || "");
+    setIsEditEtabModalOpen(true);
+  };
+
+  const handleSaveEditEtab = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingEtab) return;
+
+    updateEtablissement(editingEtab.id, {
+      name: editEtabName.trim(),
+      code: editEtabCode.trim().toUpperCase(),
+      subdomain: editEtabSubdomain.trim().toLowerCase().replace(/[^a-z0-9]/g, "-"),
+      type: editEtabType,
+      city: editEtabCity.trim(),
+      country: editEtabCountry.trim(),
+      address: editEtabAddress.trim(),
+      phone: editEtabPhone.trim(),
+      directorName: editEtabDirectorName.trim(),
+      directorEmail: editEtabDirectorEmail.trim(),
+      directorPassword: editEtabDirectorPassword.trim(),
+      subscriptionPlan: editEtabPlan,
+      maxStudentsQuota: editEtabMaxStudents,
+      maxClassesQuota: editEtabMaxClasses,
+      description: editEtabDesc.trim(),
+    });
+
+    setIsEditEtabModalOpen(false);
   };
 
   const handleDeleteSchool = (etabId: string, etabName: string) => {
@@ -927,6 +998,16 @@ export function SuperAdminDashboard({
 
                     {/* Action Buttons on Establishment */}
                     <div className="flex items-center gap-2 flex-wrap self-end md:self-center">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEditEtab(etab)}
+                        className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+                        title="Modifier les informations de l'établissement"
+                      >
+                        <Edit className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Modifier</span>
+                      </button>
+
                       {onOpenCreateClassForSchool && (
                         <button
                           type="button"
@@ -1836,6 +1917,275 @@ export function SuperAdminDashboard({
                   </div>
                 </div>
               )}
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: EDIT ESTABLISHMENT MODAL */}
+      {/* ========================================================================= */}
+      {isEditEtabModalOpen && editingEtab && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-2xl bg-[#0a0f1e] border border-amber-500/40 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="px-6 py-5 border-b border-slate-800 bg-[#070b16] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-black shadow-lg shadow-amber-500/20">
+                  <Edit className="w-5 h-5 font-bold" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-white">
+                    Modifier les Informations de l&apos;Établissement
+                  </h3>
+                  <p className="text-xs text-amber-400/90 font-mono">
+                    ÉDITION DU CAMPUS : {editingEtab.code}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsEditEtabModalOpen(false)}
+                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Edit Form */}
+            <form onSubmit={handleSaveEditEtab} className="p-6 overflow-y-auto flex-1 space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Nom officiel de l&apos;établissement *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editEtabName}
+                  onChange={(e) => setEditEtabName(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">
+                    Code Unique
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editEtabCode}
+                    onChange={(e) => setEditEtabCode(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-amber-400 font-mono uppercase focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">
+                    Sous-domaine Dédié (DNS)
+                  </label>
+                  <div className="flex items-center">
+                    <input
+                      type="text"
+                      required
+                      value={editEtabSubdomain}
+                      onChange={(e) => setEditEtabSubdomain(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-l-xl bg-slate-950 border border-slate-700 text-amber-300 font-mono lowercase focus:outline-none focus:border-amber-500 text-xs"
+                    />
+                    <span className="px-2.5 py-2.5 bg-slate-800 border border-l-0 border-slate-700 text-slate-400 text-xs rounded-r-xl font-mono">
+                      .alfasle.xyz
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Type *</label>
+                  <select
+                    value={editEtabType}
+                    onChange={(e) => setEditEtabType(e.target.value as any)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="LYCEE">Lycée</option>
+                    <option value="COLLEGE">Collège</option>
+                    <option value="INSTITUT">Institut Supérieur</option>
+                    <option value="UNIVERSITE">Université</option>
+                    <option value="ECOLE_PRIMAIRE">École Primaire</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Ville *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editEtabCity}
+                    onChange={(e) => setEditEtabCity(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Pays *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editEtabCountry}
+                    onChange={(e) => setEditEtabCountry(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">
+                    Adresse géographique
+                  </label>
+                  <input
+                    type="text"
+                    value={editEtabAddress}
+                    onChange={(e) => setEditEtabAddress(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">
+                    Téléphone de contact
+                  </label>
+                  <input
+                    type="text"
+                    value={editEtabPhone}
+                    onChange={(e) => setEditEtabPhone(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              {/* Direction Information */}
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-3">
+                <p className="font-bold text-amber-300 flex items-center gap-1.5">
+                  <Shield className="w-4 h-4" />
+                  <span>Direction & Accès Administrateur du Campus</span>
+                </p>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">
+                      Nom du Directeur / Recteur *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editEtabDirectorName}
+                      onChange={(e) => setEditEtabDirectorName(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">
+                      Email du Directeur (Login) *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={editEtabDirectorEmail}
+                      onChange={(e) => setEditEtabDirectorEmail(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">
+                    Mot de Passe du Directeur *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showEditDirectorPassword ? "text" : "password"}
+                      required
+                      value={editEtabDirectorPassword}
+                      onChange={(e) => setEditEtabDirectorPassword(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-amber-500/40 text-amber-300 font-mono focus:outline-none focus:border-amber-500 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowEditDirectorPassword(!showEditDirectorPassword)}
+                      className="absolute right-3 top-3 text-slate-400 hover:text-white"
+                    >
+                      {showEditDirectorPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    Modifiez le mot de passe pour mettre à jour les accès de connexion du directeur.
+                  </p>
+                </div>
+              </div>
+
+              {/* Quotas & Plan */}
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Formule Plan</label>
+                  <select
+                    value={editEtabPlan}
+                    onChange={(e) => setEditEtabPlan(e.target.value as any)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="STANDARD">Standard</option>
+                    <option value="PREMIUM">Premium</option>
+                    <option value="ENTERPRISE">Enterprise (Illimité)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Quota Élèves</label>
+                  <input
+                    type="number"
+                    min={10}
+                    max={5000}
+                    value={editEtabMaxStudents}
+                    onChange={(e) => setEditEtabMaxStudents(parseInt(e.target.value) || 10)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Quota Classes</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={editEtabMaxClasses}
+                    onChange={(e) => setEditEtabMaxClasses(parseInt(e.target.value) || 1)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Description de l&apos;Établissement
+                </label>
+                <textarea
+                  rows={2}
+                  value={editEtabDesc}
+                  onChange={(e) => setEditEtabDesc(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="pt-4 border-t border-slate-800 flex justify-between items-center">
+                <button
+                  type="button"
+                  onClick={() => setIsEditEtabModalOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-black font-black shadow-lg shadow-amber-500/25 flex items-center gap-2 uppercase tracking-wider"
+                >
+                  <CheckCircle2 className="w-4 h-4 fill-black" />
+                  <span>Enregistrer les Modifications</span>
+                </button>
+              </div>
             </form>
           </div>
         </div>
