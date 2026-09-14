@@ -106,21 +106,43 @@ function loadInitialData<T extends { id: string }>(key: string, initialData: T[]
             const email = (item.email || item.userEmail || "").toLowerCase();
             const subdomain = (item.subdomain || "").toLowerCase();
             const etabId = (item.etablissementId || "").toLowerCase();
+            const desc = (item.description || item.bio || item.motivation || "").toLowerCase();
 
             const isDeleted =
               id.includes("raya") ||
               id.includes("arqam") ||
+              id.includes("tawhid") ||
+              id.includes("quran") ||
+              id.includes("coran") ||
               name.includes("raya") ||
               name.includes("arqam") ||
               name.includes("tawhid") ||
               name.includes("djibril") ||
+              name.includes("quran") ||
+              name.includes("coran") ||
+              name.includes("قرآن") ||
+              name.includes("القرآن") ||
+              name.includes("تعليم القرآن") ||
+              name.includes("توحيد") ||
+              desc.includes("قرآن") ||
+              desc.includes("القرآن") ||
+              desc.includes("تعليم القرآن") ||
               email.includes("raya") ||
               email.includes("arqam") ||
               email.includes("djibril") ||
+              email.includes("quran") ||
+              email.includes("coran") ||
+              email.includes("tawhid") ||
               subdomain.includes("raya") ||
               subdomain.includes("arqam") ||
+              subdomain.includes("tawhid") ||
+              subdomain.includes("quran") ||
+              subdomain.includes("coran") ||
               etabId.includes("raya") ||
-              etabId.includes("arqam");
+              etabId.includes("arqam") ||
+              etabId.includes("tawhid") ||
+              etabId.includes("quran") ||
+              etabId.includes("coran");
 
             return !isDeleted;
           });
@@ -369,6 +391,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const deleteEtablissement = (id: string) => {
     setEtablissements((prev) => prev.filter((e) => e.id !== id));
+    setClasses((prev) => prev.filter((c) => c.etablissementId !== id));
+    setInscriptions((prev) => prev.filter((i) => i.etablissementId !== id));
+    setUsers((prev) => prev.filter((u) => u.etablissementId !== id || u.role === "SUPER_ADMIN"));
   };
 
   // Class Management
