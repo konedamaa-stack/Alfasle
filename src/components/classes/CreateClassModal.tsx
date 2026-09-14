@@ -32,9 +32,23 @@ export function CreateClassModal({
     "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80"
   );
 
+  React.useEffect(() => {
+    if (defaultEtablissementId) {
+      setSelectedEtabId(defaultEtablissementId);
+    } else if (etablissements.length > 0 && !selectedEtabId) {
+      setSelectedEtabId(etablissements[0].id);
+    }
+  }, [defaultEtablissementId, isOpen, etablissements]);
+
   if (!isOpen) return null;
 
-  const selectedEtab = etablissements.find((e) => e.id === selectedEtabId) || etablissements[0];
+  const selectedEtab =
+    etablissements.find(
+      (e) =>
+        e.id === selectedEtabId ||
+        e.subdomain === selectedEtabId ||
+        (selectedEtabId && e.id.toLowerCase().includes(selectedEtabId.toLowerCase()))
+    ) || etablissements[0];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,8 +60,8 @@ export function CreateClassModal({
 
     createClass({
       classCode: generatedCode,
-      etablissementId: selectedEtab?.id || "etab_lycee_excellence",
-      etablissementName: selectedEtab?.name || "Lycée d'Excellence AlFasle",
+      etablissementId: selectedEtab?.id || selectedEtabId || "etab_raya1",
+      etablissementName: selectedEtab?.name || "Groupe Scolaire & Institut Raya 1",
       title,
       description,
       level,

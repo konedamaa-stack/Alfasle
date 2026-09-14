@@ -20,25 +20,35 @@ interface JoinClassModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccessNavigateToCourses?: (classId: string) => void;
+  defaultEtablissementId?: string;
 }
 
 export function JoinClassModal({
   isOpen,
   onClose,
   onSuccessNavigateToCourses,
+  defaultEtablissementId,
 }: JoinClassModalProps) {
   const { currentUser, etablissements, classes, inscriptions, joinClassByCode, applyToClass } =
     useStore();
 
   const [activeTab, setActiveTab] = useState<"code" | "browse">("code");
   const [classCode, setClassCode] = useState("");
-  const [selectedEtabId, setSelectedEtabId] = useState<string>("ALL");
+  const [selectedEtabId, setSelectedEtabId] = useState<string>(
+    defaultEtablissementId || "ALL"
+  );
   const [motivation, setMotivation] = useState("");
   const [statusFeedback, setStatusFeedback] = useState<{
     type: "success" | "error" | "info" | null;
     message: string;
     joinedClass?: Classe;
   }>({ type: null, message: "" });
+
+  React.useEffect(() => {
+    if (defaultEtablissementId) {
+      setSelectedEtabId(defaultEtablissementId);
+    }
+  }, [defaultEtablissementId, isOpen]);
 
   if (!isOpen) return null;
 
@@ -91,9 +101,26 @@ export function JoinClassModal({
     });
   };
 
+  const currentSelectedEtab = etablissements.find(
+    (e) => e.id === selectedEtabId || e.subdomain === selectedEtabId
+  );
+
   const filteredClasses = classes.filter((c) => {
     if (selectedEtabId === "ALL") return true;
-    return c.etablissementId === selectedEtabId;
+    if (c.etablissementId === selectedEtabId) return true;
+    if (currentSelectedEtab) {
+      if (c.etablissementId === currentSelectedEtab.id) return true;
+      if (c.etablissementId === currentSelectedEtab.subdomain) return true;
+      if (
+        c.etablissementName &&
+        currentSelectedEtab.name &&
+        (c.etablissementName.toLowerCase().includes(currentSelectedEtab.name.toLowerCase()) ||
+          currentSelectedEtab.name.toLowerCase().includes(c.etablissementName.toLowerCase()))
+      ) {
+        return true;
+      }
+    }
+    return c.etablissementId?.toLowerCase() === selectedEtabId?.toLowerCase();
   });
 
   return (

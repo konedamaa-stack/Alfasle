@@ -64,10 +64,38 @@ export function PreRegistrationModal({
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Available classes for selected establishment
-  const availableClasses = classes.filter(
-    (c) => !establishmentId || c.etablissementId === establishmentId
+  // Synchronize props when opening modal or when defaultEstablishmentId changes
+  React.useEffect(() => {
+    if (defaultEstablishmentId) {
+      setEstablishmentId(defaultEstablishmentId);
+    }
+    if (defaultRole) {
+      setRole(defaultRole);
+    }
+  }, [defaultEstablishmentId, defaultRole, isOpen]);
+
+  // Robustly filter available classes for selected establishment (supporting ID, subdomain, and name matching)
+  const currentSelectedEst = etablissements.find(
+    (e) => e.id === establishmentId || e.subdomain === establishmentId
   );
+
+  const availableClasses = classes.filter((c) => {
+    if (!establishmentId || establishmentId === "ALL") return true;
+    if (c.etablissementId === establishmentId) return true;
+    if (currentSelectedEst) {
+      if (c.etablissementId === currentSelectedEst.id) return true;
+      if (c.etablissementId === currentSelectedEst.subdomain) return true;
+      if (
+        c.etablissementName &&
+        currentSelectedEst.name &&
+        (c.etablissementName.toLowerCase().includes(currentSelectedEst.name.toLowerCase()) ||
+          currentSelectedEst.name.toLowerCase().includes(c.etablissementName.toLowerCase()))
+      ) {
+        return true;
+      }
+    }
+    return c.etablissementId?.toLowerCase() === establishmentId?.toLowerCase();
+  });
 
   if (!isOpen) return null;
 
@@ -308,11 +336,21 @@ export function PreRegistrationModal({
                     }}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer"
                   >
-                    {etablissements.map((est) => (
-                      <option key={est.id} value={est.id}>
-                        {est.name} ({est.city || "Mali"})
-                      </option>
-                    ))}
+                    <option value="ALL">-- Tous les établissements (Toutes les classes) --</option>
+                    {etablissements.map((est) => {
+                      const countForEst = classes.filter(
+                        (c) =>
+                          c.etablissementId === est.id ||
+                          c.etablissementId === est.subdomain ||
+                          (c.etablissementName &&
+                            c.etablissementName.toLowerCase().includes(est.name.toLowerCase()))
+                      ).length;
+                      return (
+                        <option key={est.id} value={est.id}>
+                          🏫 {est.name} ({countForEst} classe{countForEst > 1 ? "s" : ""})
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
               </div>
@@ -331,10 +369,14 @@ export function PreRegistrationModal({
                     required
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer"
                   >
-                    <option value="">-- Sélectionnez une classe --</option>
+                    <option value="">
+                      {availableClasses.length === 0
+                        ? "-- Aucune classe pour cet établissement (Choisissez 'Tous les établissements') --"
+                        : `-- Sélectionnez une classe (${availableClasses.length} disponible${availableClasses.length > 1 ? "s" : ""}) --`}
+                    </option>
                     {availableClasses.map((c) => (
                       <option key={c.id} value={c.id}>
-                        {c.title} • {c.level} ({c.enrolledCount || 0}/{c.capacity} élèves)
+                        [{c.etablissementName || "Campus"}] {c.title} • {c.level} ({c.enrolledCount || 0}/{c.capacity} élèves)
                       </option>
                     ))}
                   </select>
