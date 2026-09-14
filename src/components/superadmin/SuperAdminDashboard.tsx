@@ -351,26 +351,24 @@ export function SuperAdminDashboard({
           </div>
 
           <div className="flex items-center gap-3 shrink-0 flex-wrap">
-            {activeTab === "USERS" ? (
-              <button
-                onClick={() => setIsCreateUserModalOpen(true)}
-                className="px-5 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-500 text-black font-black text-xs shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 uppercase tracking-wider"
-              >
-                <PlusCircle className="w-5 h-5 fill-black" />
-                <span>+ Nouvel Utilisateur</span>
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  resetSchoolForm();
-                  setIsCreateModalOpen(true);
-                }}
-                className="px-5 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-black font-black text-xs shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 uppercase tracking-wider"
-              >
-                <PlusCircle className="w-5 h-5 fill-black" />
-                <span>+ Créer Établissement</span>
-              </button>
-            )}
+            <button
+              onClick={() => {
+                resetSchoolForm();
+                setIsCreateModalOpen(true);
+              }}
+              className="px-5 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-black font-black text-xs shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 uppercase tracking-wider"
+            >
+              <Building2 className="w-5 h-5 text-black" />
+              <span>+ Créer Établissement</span>
+            </button>
+
+            <button
+              onClick={() => setIsCreateUserModalOpen(true)}
+              className="px-5 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-500 text-black font-black text-xs shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 uppercase tracking-wider"
+            >
+              <Users className="w-5 h-5 text-black" />
+              <span>+ Nouvel Utilisateur</span>
+            </button>
           </div>
         </div>
       </div>
@@ -725,6 +723,30 @@ export function SuperAdminDashboard({
       {/* ========================================================================= */}
       {activeTab === "ETABLISSEMENTS" && (
         <div className="space-y-6 animate-fadeIn">
+          {/* Dedicated Establishment Creation Callout */}
+          <div className="p-6 rounded-3xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-slate-900 border border-amber-500/30 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-black text-white flex items-center gap-2.5">
+                <Building2 className="w-5 h-5 text-amber-400" />
+                <span>Campus & Établissements Scolaires ({etablissements.length})</span>
+              </h2>
+              <p className="text-xs text-slate-300 mt-1 max-w-xl leading-relaxed">
+                Déployez de nouveaux établissements scolaires, configurez leur sous-domaine isolé (*.alfasle.xyz), assignez le directeur et ajustez les quotas de classes et d&apos;élèves.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                resetSchoolForm();
+                setIsCreateModalOpen(true);
+              }}
+              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-black font-black text-xs shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 uppercase tracking-wider shrink-0"
+            >
+              <PlusCircle className="w-4 h-4 fill-black" />
+              <span>+ Créer un Établissement</span>
+            </button>
+          </div>
+
           {/* Filter & Search Bar */}
           <div className="glass-panel rounded-2xl p-4 border border-slate-800 flex flex-col md:flex-row gap-4 justify-between items-center">
             <div className="w-full md:w-80 relative">
