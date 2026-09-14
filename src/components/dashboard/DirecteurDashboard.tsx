@@ -323,8 +323,8 @@ export function DirecteurDashboard({
 
     createClass({
       classCode: generatedCode,
-      etablissementId: currentEtab?.id || "etab_raya1",
-      etablissementName: currentEtab?.name || "Groupe Scolaire & Institut Raya 1",
+      etablissementId: currentEtab?.id || etablissements[0]?.id || "etab_lycee_excellence",
+      etablissementName: currentEtab?.name || etablissements[0]?.name || "Lycée d'Excellence AlFasle",
       title: newClassTitle.trim(),
       description: newClassDesc.trim() || `Classe officielle dispensée au sein de ${currentEtab?.name}.`,
       level: newClassLevel,

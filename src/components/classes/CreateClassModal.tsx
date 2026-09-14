@@ -60,8 +60,8 @@ export function CreateClassModal({
 
     createClass({
       classCode: generatedCode,
-      etablissementId: selectedEtab?.id || selectedEtabId || "etab_raya1",
-      etablissementName: selectedEtab?.name || "Groupe Scolaire & Institut Raya 1",
+      etablissementId: selectedEtab?.id || selectedEtabId || etablissements[0]?.id || "etab_lycee_excellence",
+      etablissementName: selectedEtab?.name || etablissements[0]?.name || "Lycée d'Excellence AlFasle",
       title,
       description,
       level,

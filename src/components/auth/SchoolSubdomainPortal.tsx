@@ -41,24 +41,10 @@ export function SchoolSubdomainPortal({
 
   const [selectedRole, setSelectedRole] = useState<UserRole>("ADMIN");
   const [identifier, setIdentifier] = useState(() => {
-    if (
-      etablissement.subdomain === "alarqam" ||
-      etablissement.id === "etab_dar_alarqam" ||
-      etablissement.directorName?.toLowerCase().includes("djibril")
-    ) {
-      return "djibril";
-    }
-    return etablissement.directorEmail || etablissement.directorName || "diawara@gmail.com";
+    return etablissement.directorEmail || etablissement.directorName || `directeur@${etablissement.subdomain}.alfasle.edu`;
   });
   const [password, setPassword] = useState(() => {
-    if (
-      etablissement.subdomain === "alarqam" ||
-      etablissement.id === "etab_dar_alarqam" ||
-      etablissement.directorName?.toLowerCase().includes("djibril")
-    ) {
-      return "123";
-    }
-    return "Madouu1966@";
+    return etablissement.directorPassword || "Madouu1966@";
   });
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
@@ -74,17 +60,8 @@ export function SchoolSubdomainPortal({
     setSelectedRole(role);
     setErrorMsg("");
     if (role === "ADMIN") {
-      if (
-        etablissement.subdomain === "alarqam" ||
-        etablissement.id === "etab_dar_alarqam" ||
-        etablissement.directorName?.toLowerCase().includes("djibril")
-      ) {
-        setIdentifier("djibril");
-        setPassword("123");
-      } else {
-        setIdentifier(etablissement.directorEmail || etablissement.directorName || "diawara@gmail.com");
-        setPassword("Madouu1966@");
-      }
+      setIdentifier(etablissement.directorEmail || etablissement.directorName || `directeur@${etablissement.subdomain}.alfasle.edu`);
+      setPassword(etablissement.directorPassword || "Madouu1966@");
     } else if (role === "TEACHER") {
       setIdentifier("sarah.mansouri@alfasle.edu");
       setPassword("Madouu1966@");
@@ -244,8 +221,8 @@ export function SchoolSubdomainPortal({
         etablissement.directorEmail.toLowerCase().includes(cleanId)) ||
         (etablissement.directorName &&
           etablissement.directorName.toLowerCase().includes(cleanId)) ||
-        cleanId.includes("diawara") ||
         cleanId.includes("directeur") ||
+        cleanId.includes("direction") ||
         cleanId.includes("admin"))
     ) {
       matchedUser = {

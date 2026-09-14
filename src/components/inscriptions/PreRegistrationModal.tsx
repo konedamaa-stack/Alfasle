@@ -53,7 +53,7 @@ export function PreRegistrationModal({
   const [userEmail, setUserEmail] = useState("");
   const [userPhone, setUserPhone] = useState("");
   const [establishmentId, setEstablishmentId] = useState(
-    defaultEstablishmentId || (etablissements[0]?.id ?? "dar-al-arqam")
+    defaultEstablishmentId || (etablissements[0]?.id ?? "etab_lycee_excellence")
   );
   const [classeId, setClasseId] = useState("");
   const [subject, setSubject] = useState("");

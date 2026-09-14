@@ -99,29 +99,35 @@ function loadInitialData<T extends { id: string }>(key: string, initialData: T[]
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          const existingIds = new Set(parsed.map((item: T) => item.id));
+          // Filter out deleted establishments and related records
+          const filteredSaved = parsed.filter((item: any) => {
+            const id = (item.id || "").toLowerCase();
+            const name = (item.name || item.title || item.userName || "").toLowerCase();
+            const email = (item.email || item.userEmail || "").toLowerCase();
+            const subdomain = (item.subdomain || "").toLowerCase();
+            const etabId = (item.etablissementId || "").toLowerCase();
+
+            const isDeleted =
+              id.includes("raya") ||
+              id.includes("arqam") ||
+              name.includes("raya") ||
+              name.includes("arqam") ||
+              name.includes("tawhid") ||
+              name.includes("djibril") ||
+              email.includes("raya") ||
+              email.includes("arqam") ||
+              email.includes("djibril") ||
+              subdomain.includes("raya") ||
+              subdomain.includes("arqam") ||
+              etabId.includes("raya") ||
+              etabId.includes("arqam");
+
+            return !isDeleted;
+          });
+
+          const existingIds = new Set(filteredSaved.map((item: T) => item.id));
           const missingFromInitial = initialData.filter((item) => !existingIds.has(item.id));
-          let merged = [...parsed, ...missingFromInitial];
-
-          // Auto-sync u_admin_arqam with djibril / 123
-          if (key === "alfasle_users") {
-            merged = (merged as unknown as User[]).map((u) => {
-              if (u.id === "u_admin_arqam" || u.username === "admin.arqam") {
-                return {
-                  ...u,
-                  name: "Djibril (Directeur Dar Al-Arqam)",
-                  username: "djibril",
-                  email: u.email || "djibril@alarqam.alfasle.edu",
-                  password: "123",
-                  etablissementId: "etab_dar_alarqam",
-                  etablissementName: "Groupe Scolaire & Institut Dar Al-Arqam",
-                };
-              }
-              return u;
-            }) as unknown as T[];
-          }
-
-          return merged;
+          return [...filteredSaved, ...missingFromInitial];
         }
       }
     } catch (e) {
