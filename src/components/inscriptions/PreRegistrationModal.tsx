@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Award,
 } from "lucide-react";
+import { AccountActivationModal } from "./AccountActivationModal";
 
 interface PreRegistrationModalProps {
   isOpen: boolean;
@@ -63,6 +64,7 @@ export function PreRegistrationModal({
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [isActivationOpen, setIsActivationOpen] = useState(false);
 
   // Synchronize props when opening modal or when defaultEstablishmentId changes
   React.useEffect(() => {
@@ -214,21 +216,29 @@ export function PreRegistrationModal({
 
               <div className="p-4 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 text-left text-xs space-y-2 max-w-lg mx-auto">
                 <div className="flex items-center gap-2 text-indigo-200 font-bold">
-                  <AlertCircle className="w-4 h-4 text-indigo-400 shrink-0" />
-                  Procédure de validation par le Super Administrateur :
+                  <Mail className="w-4 h-4 text-indigo-400 shrink-0" />
+                  Email de confirmation & Définition du mot de passe :
                 </div>
                 <p className="text-slate-300 leading-relaxed">
-                  Votre demande est actuellement au statut <strong className="text-amber-400">EN ATTENTE</strong>.
-                  Le Super Administrateur va examiner votre profil et activer vos accès. Une fois validé, vous pourrez vous connecter avec vos identifiants.
+                  Un email avec lien d'activation a été envoyé à <strong className="text-white font-mono">{userEmail}</strong>. Vous pouvez confirmer votre inscription et définir votre propre mot de passe dès maintenant.
                 </p>
               </div>
 
-              <div className="pt-4">
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsActivationOpen(true)}
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-black text-xs shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all transform hover:scale-105"
+                >
+                  <Mail className="w-4 h-4 text-black" />
+                  <span>📨 Ouvrir l'Email & Définir mon Mot de passe &rarr;</span>
+                </button>
+
                 <button
                   onClick={handleResetAndClose}
-                  className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 transition-all"
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all"
                 >
-                  Fermer & Continuer
+                  Fermer
                 </button>
               </div>
             </div>
@@ -486,6 +496,20 @@ export function PreRegistrationModal({
           )}
         </div>
       </div>
+
+      {/* Account Activation / Password Setting Modal */}
+      <AccountActivationModal
+        isOpen={isActivationOpen}
+        onClose={() => {
+          setIsActivationOpen(false);
+          handleResetAndClose();
+        }}
+        emailOrToken={userEmail}
+        onSuccess={() => {
+          setIsActivationOpen(false);
+          handleResetAndClose();
+        }}
+      />
     </div>
   );
 }

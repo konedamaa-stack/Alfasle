@@ -13,9 +13,11 @@ import {
   BookOpen,
   Check,
   Search,
+  KeyRound,
 } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { ChangePasswordModal } from "@/components/common/ChangePasswordModal";
 
 interface NavbarProps {
   onLogoutToLanding?: () => void;
@@ -35,6 +37,7 @@ export function Navbar({ onLogoutToLanding, onOpenSuperAdmin }: NavbarProps) {
 
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
+  const [isChangePassOpen, setIsChangePassOpen] = useState(false);
 
   const unreadNotifs = notifications.filter((n) => !n.isRead && n.userId === currentUser.id);
 
@@ -259,11 +262,21 @@ export function Navbar({ onLogoutToLanding, onOpenSuperAdmin }: NavbarProps) {
             <p className="text-[10px] text-slate-400 leading-tight mt-0.5">{currentUser.email}</p>
           </div>
 
+          {/* Change Password Button */}
+          <button
+            onClick={() => setIsChangePassOpen(true)}
+            title="Modifier mon mot de passe"
+            className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors flex items-center gap-1 text-xs"
+          >
+            <KeyRound className="w-3.5 h-3.5 text-indigo-400" />
+            <span className="hidden xl:inline text-[11px]">Mot de passe</span>
+          </button>
+
           {onLogoutToLanding && (
             <button
               onClick={onLogoutToLanding}
               title="Page d'accueil / Changer de compte"
-              className="ml-2 p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition-colors flex items-center gap-1.5 text-xs font-medium"
+              className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition-colors flex items-center gap-1.5 text-xs font-medium"
             >
               <span>🚪</span>
               <span className="hidden sm:inline">Accueil / Connexion</span>
@@ -271,6 +284,12 @@ export function Navbar({ onLogoutToLanding, onOpenSuperAdmin }: NavbarProps) {
           )}
         </div>
       </div>
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={isChangePassOpen}
+        onClose={() => setIsChangePassOpen(false)}
+      />
     </header>
   );
 }

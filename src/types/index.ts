@@ -88,6 +88,8 @@ export interface Inscription {
   diplomaOrBio?: string;
   status: InscriptionStatus;
   motivation?: string;
+  activationToken?: string;
+  emailConfirmed?: boolean;
   appliedAt: string;
   reviewedAt?: string;
   reviewedBy?: string;

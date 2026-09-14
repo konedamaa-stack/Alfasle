@@ -21,6 +21,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
+import { AccountActivationModal } from "./AccountActivationModal";
 
 export function ValidationQueue() {
   const { inscriptions, classes, etablissements, approveInscription, rejectInscription } = useStore();
@@ -28,6 +29,7 @@ export function ValidationQueue() {
   const [filterStatus, setFilterStatus] = useState<"ALL" | InscriptionStatus>("PENDING");
   const [filterRole, setFilterRole] = useState<"ALL" | InscriptionRole>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedActivationIns, setSelectedActivationIns] = useState<any | null>(null);
 
   const filteredInscriptions = inscriptions.filter((ins) => {
     const matchesStatus = filterStatus === "ALL" || ins.status === filterStatus;
@@ -327,6 +329,15 @@ export function ValidationQueue() {
 
                   {/* Actions reserved for Super Admin */}
                   <div className="flex lg:flex-col items-center justify-end gap-2.5 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-800">
+                    <button
+                      onClick={() => setSelectedActivationIns(ins)}
+                      title="Simuler la réception de l'email et définir le mot de passe"
+                      className="w-full sm:w-auto px-4 py-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
+                    >
+                      <Mail className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>📨 Email & Mot de passe</span>
+                    </button>
+
                     {ins.status === "PENDING" && (
                       <>
                         <button
@@ -370,6 +381,16 @@ export function ValidationQueue() {
           })
         )}
       </div>
+
+      {/* Account Activation Modal for selected inscription */}
+      {selectedActivationIns && (
+        <AccountActivationModal
+          isOpen={true}
+          onClose={() => setSelectedActivationIns(null)}
+          inscription={selectedActivationIns}
+          onSuccess={() => setSelectedActivationIns(null)}
+        />
+      )}
     </div>
   );
 }

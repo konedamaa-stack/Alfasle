@@ -88,6 +88,18 @@ interface StoreContextType {
   notifications: AppNotification[];
   markNotificationAsRead: (id: string) => void;
   clearAllNotifications: () => void;
+
+  // Account Activation & Password
+  activateAccountWithPassword: (data: {
+    emailOrToken: string;
+    newPassword: string;
+  }) => { success: boolean; message: string; user?: User };
+  changeUserPassword: (data: {
+    userId: string;
+    currentPassword?: string;
+    newPassword: string;
+  }) => { success: boolean; message: string };
+
   // Storage versioning
   resetStoreToDefaults: () => void;
 }
@@ -715,6 +727,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const targetEtab = etablissements.find((e) => e.id === data.etablissementId);
     const targetClass = classes.find((c) => c.id === data.classeId);
 
+    const activationToken = `act_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 6)}`;
+
     const newInscription: Inscription = {
       id: `ins_${Date.now()}`,
       userName: data.userName.trim(),
@@ -732,6 +746,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       subject: data.subject?.trim(),
       diplomaOrBio: data.diplomaOrBio?.trim(),
       status: "PENDING",
+      emailConfirmed: false,
+      activationToken,
       motivation: data.motivation?.trim() || "Candidature en ligne en attente de validation Super Admin",
       appliedAt: new Date().toISOString(),
     };
@@ -751,7 +767,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         id: `notif_${Date.now()}`,
         userId: "u_super_admin_root",
         title: `Nouvelle préinscription (${data.role === "TEACHER" ? "👨‍🏫 Enseignant" : "🎓 Élève"})`,
-        message: `${data.userName} a postulé pour ${targetClass?.title || "une classe"} (${targetEtab?.name || "Campus"}). En attente de votre validation.`,
+        message: `${data.userName} a postulé pour ${targetClass?.title || "une classe"} (${targetEtab?.name || "Campus"}). Email de confirmation envoyé.`,
         type: "INSCRIPTION",
         isRead: false,
         createdAt: new Date().toISOString(),
@@ -761,9 +777,169 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     return {
       success: true,
-      message: `Votre demande de pré-inscription pour « ${targetClass?.title || "la classe"} » a été enregistrée avec succès. Elle sera examinée et validée par le Super Administrateur.`,
+      message: `Votre demande de pré-inscription pour « ${targetClass?.title || "la classe"} » a été enregistrée. Un email de confirmation a été envoyé à ${data.userEmail}.`,
       inscription: newInscription,
     };
+  };
+
+  // Activation de compte par confirmation Email et Définition du mot de passe
+  const activateAccountWithPassword = (data: {
+    emailOrToken: string;
+    newPassword: string;
+  }) => {
+    const cleanSearch = data.emailOrToken.trim().toLowerCase();
+    const targetIns = inscriptions.find(
+      (i) =>
+        i.userEmail.toLowerCase() === cleanSearch ||
+        (i.activationToken && i.activationToken.toLowerCase() === cleanSearch)
+    );
+
+    const targetEmail = targetIns ? targetIns.userEmail.toLowerCase() : cleanSearch;
+    let existingUser = users.find((u) => u.email.toLowerCase() === targetEmail);
+
+    let activeUser: User;
+
+    if (existingUser) {
+      activeUser = {
+        ...existingUser,
+        password: data.newPassword,
+        role: targetIns?.role || existingUser.role,
+        etablissementId: targetIns?.etablissementId || existingUser.etablissementId,
+        etablissementName: targetIns?.etablissementName || existingUser.etablissementName,
+      };
+      setUsers((prev) => prev.map((u) => (u.id === activeUser.id ? activeUser : u)));
+    } else {
+      const generatedUsername =
+        targetEmail.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "") ||
+        `user${Date.now().toString().slice(-4)}`;
+
+      activeUser = {
+        id: `u_act_${Date.now()}`,
+        name: targetIns?.userName || targetEmail.split("@")[0],
+        email: targetEmail,
+        username: generatedUsername,
+        password: data.newPassword,
+        role: targetIns?.role || "STUDENT",
+        etablissementId: targetIns?.etablissementId || "etab_gs_alfasle",
+        etablissementName: targetIns?.etablissementName || "Groupe Scolaire AlFasle",
+        bio:
+          targetIns?.diplomaOrBio ||
+          (targetIns?.role === "TEACHER"
+            ? `Professeur de ${targetIns.subject || "matières scientifiques"}`
+            : "Élève actif"),
+        avatarUrl:
+          targetIns?.role === "TEACHER"
+            ? "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150"
+            : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
+        createdAt: new Date().toISOString(),
+      };
+      setUsers((prev) => [activeUser, ...prev]);
+    }
+
+    // Update matching inscription to approved and confirmed
+    if (targetIns) {
+      setInscriptions((prev) =>
+        prev.map((ins) =>
+          ins.id === targetIns.id
+            ? {
+                ...ins,
+                userId: activeUser.id,
+                status: "APPROVED",
+                emailConfirmed: true,
+                reviewedAt: new Date().toISOString(),
+                reviewedBy: "Activation Email",
+              }
+            : ins
+        )
+      );
+
+      // Update class counter
+      setClasses((cls) =>
+        cls.map((c) => {
+          if (c.id === targetIns.classeId) {
+            return {
+              ...c,
+              enrolledCount:
+                targetIns.role === "STUDENT" ? (c.enrolledCount || 0) + 1 : c.enrolledCount,
+              pendingCount: Math.max(0, (c.pendingCount || 1) - 1),
+              teacherName: targetIns.role === "TEACHER" ? targetIns.userName : c.teacherName,
+              teacherId: targetIns.role === "TEACHER" ? activeUser.id : c.teacherId,
+            };
+          }
+          return c;
+        })
+      );
+    }
+
+    // Connect user directly
+    setCurrentUser(activeUser);
+
+    // Notification
+    setNotifications((n) => [
+      {
+        id: `notif_${Date.now()}`,
+        userId: activeUser.id,
+        title: "Compte activé avec succès 🎉",
+        message: `Bienvenue ${activeUser.name} ! Votre mot de passe personnalisé est configuré et votre espace est prêt.`,
+        type: "SYSTEM",
+        isRead: false,
+        createdAt: new Date().toISOString(),
+      },
+      ...n,
+    ]);
+
+    return {
+      success: true,
+      message: `Félicitations ${activeUser.name} ! Votre compte a été activé avec succès.`,
+      user: activeUser,
+    };
+  };
+
+  // Modification du mot de passe utilisateur
+  const changeUserPassword = (data: {
+    userId: string;
+    currentPassword?: string;
+    newPassword: string;
+  }) => {
+    const targetUser = users.find((u) => u.id === data.userId);
+    if (!targetUser) {
+      return { success: false, message: "Utilisateur introuvable." };
+    }
+
+    if (
+      data.currentPassword &&
+      targetUser.password &&
+      targetUser.password !== data.currentPassword &&
+      currentUser.role !== "SUPER_ADMIN"
+    ) {
+      return { success: false, message: "L'ancien mot de passe saisi est incorrect." };
+    }
+
+    const updatedUser: User = {
+      ...targetUser,
+      password: data.newPassword,
+    };
+
+    setUsers((prev) => prev.map((u) => (u.id === data.userId ? updatedUser : u)));
+    if (currentUser.id === data.userId) {
+      setCurrentUser(updatedUser);
+    }
+
+    // Notification
+    setNotifications((prev) => [
+      {
+        id: `notif_${Date.now()}`,
+        userId: targetUser.id,
+        title: "Mot de passe modifié 🔒",
+        message: "Votre mot de passe a été mis à jour avec succès.",
+        type: "SYSTEM",
+        isRead: false,
+        createdAt: new Date().toISOString(),
+      },
+      ...prev,
+    ]);
+
+    return { success: true, message: "Votre mot de passe a été modifié avec succès !" };
   };
 
   const approveInscription = (inscriptionId: string) => {
@@ -805,6 +981,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             ...ins,
             userId: createdUserId,
             status: "APPROVED",
+            emailConfirmed: true,
             reviewedAt: new Date().toISOString(),
             reviewedBy: currentUser.name || "Super Admin",
           };
@@ -1066,6 +1243,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         notifications,
         markNotificationAsRead,
         clearAllNotifications,
+        activateAccountWithPassword,
+        changeUserPassword,
         theme,
         toggleTheme,
         resetStoreToDefaults,
