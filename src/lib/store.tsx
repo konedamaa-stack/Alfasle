@@ -93,8 +93,7 @@ interface StoreContextType {
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
-
-const STORAGE_PREFIX = "alfasle_v6_";
+const STORAGE_PREFIX = "alfasle_v7_";
 
 function cleanLegacyStorage() {
   if (typeof window !== "undefined") {
@@ -144,12 +143,15 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
               id.includes("tawhid") ||
               id.includes("quran") ||
               id.includes("coran") ||
+              id.includes("lycee_excellence") ||
               name.includes("raya") ||
               name.includes("arqam") ||
               name.includes("tawhid") ||
               name.includes("djibril") ||
               name.includes("quran") ||
               name.includes("coran") ||
+              name.includes("lycée d'excellence") ||
+              name.includes("lycee d'excellence") ||
               name.includes("قرآن") ||
               name.includes("القرآن") ||
               name.includes("تعليم القرآن") ||
@@ -168,11 +170,13 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
               subdomain.includes("tawhid") ||
               subdomain.includes("quran") ||
               subdomain.includes("coran") ||
+              subdomain.includes("lycee-excellence") ||
               etabId.includes("raya") ||
               etabId.includes("arqam") ||
               etabId.includes("tawhid") ||
               etabId.includes("quran") ||
-              etabId.includes("coran");
+              etabId.includes("coran") ||
+              etabId.includes("lycee_excellence");
 
             return !isDeleted;
           });
@@ -193,9 +197,9 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
                   email: "diawara@gmail.com",
                   password: u.password || "Madouu1966@",
                   role: "ADMIN" as const,
-                  bio: "Directeur & Administrateur Principal du Lycée d'Excellence AlFasle.",
-                  etablissementId: "etab_lycee_excellence",
-                  etablissementName: "Lycée d'Excellence AlFasle",
+                  bio: "Directeur & Administrateur Principal du Groupe Scolaire AlFasle.",
+                  etablissementId: "etab_gs_alfasle",
+                  etablissementName: "Groupe Scolaire AlFasle",
                 };
               }
               return u;
@@ -204,9 +208,14 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
 
           if (suffix === "etablissements") {
             merged = (merged as unknown as Etablissement[]).map((e) => {
-              if (e.id === "etab_lycee_excellence") {
+              if (e.id === "etab_gs_alfasle" || e.id === "etab_lycee_excellence") {
                 return {
                   ...e,
+                  id: "etab_gs_alfasle",
+                  name: "Groupe Scolaire AlFasle",
+                  subdomain: "gs-alfasle",
+                  city: "Abidjan",
+                  country: "Côte d'Ivoire",
                   directorName: "Dr. Mahamadou DIAWARA",
                   directorEmail: "diawara@gmail.com",
                 };
