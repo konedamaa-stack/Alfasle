@@ -149,7 +149,43 @@ function loadInitialData<T extends { id: string }>(key: string, initialData: T[]
 
           const existingIds = new Set(filteredSaved.map((item: T) => item.id));
           const missingFromInitial = initialData.filter((item) => !existingIds.has(item.id));
-          return [...filteredSaved, ...missingFromInitial];
+          let merged = [...filteredSaved, ...missingFromInitial];
+
+          // Auto-sync Dr. Mahamadou DIAWARA
+          if (key === "alfasle_users") {
+            merged = (merged as unknown as User[]).map((u) => {
+              if (u.id === "u_admin_diawara" || u.id === "u_admin_excellence" || u.username === "diawara" || u.email === "diawara@gmail.com") {
+                return {
+                  ...u,
+                  id: "u_admin_diawara",
+                  name: "Dr. Mahamadou DIAWARA (Directeur)",
+                  username: "diawara",
+                  email: "diawara@gmail.com",
+                  password: u.password || "Madouu1966@",
+                  role: "ADMIN" as const,
+                  bio: "Directeur & Administrateur Principal du Lycée d'Excellence AlFasle.",
+                  etablissementId: "etab_lycee_excellence",
+                  etablissementName: "Lycée d'Excellence AlFasle",
+                };
+              }
+              return u;
+            }) as unknown as T[];
+          }
+
+          if (key === "alfasle_etablissements") {
+            merged = (merged as unknown as Etablissement[]).map((e) => {
+              if (e.id === "etab_lycee_excellence") {
+                return {
+                  ...e,
+                  directorName: "Dr. Mahamadou DIAWARA",
+                  directorEmail: "diawara@gmail.com",
+                };
+              }
+              return e;
+            }) as unknown as T[];
+          }
+
+          return merged;
         }
       }
     } catch (e) {

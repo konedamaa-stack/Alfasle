@@ -83,9 +83,9 @@ export function AuthLandingView({
       leftDesc:
         "Pilotez l'ensemble des activités, établissements, classes et paramètres de votre système éducatif.",
       roleSubtitle: "connexion en tant que directeur d'établissement",
-      espaceTitle: "Espace Directeur",
+      espaceTitle: "Espace Directeur (Dr. DIAWARA)",
       espaceDesc: "Accès Direction, Supervision de l'Établissement et Gestion",
-      defaultLogin: "karim.belkacem@alfasle.edu",
+      defaultLogin: "diawara@gmail.com",
       defaultPass: "Madouu1966@",
       cardBg: "from-blue-600 via-blue-700 to-indigo-800",
       gradient: "from-blue-600 to-indigo-600",
