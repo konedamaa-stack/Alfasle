@@ -39,9 +39,27 @@ export function SchoolSubdomainPortal({
 }: SchoolSubdomainPortalProps) {
   const { users, currentUser, setCurrentUser, classes, inscriptions } = useStore();
 
-  const [selectedRole, setSelectedRole] = useState<UserRole>("STUDENT");
-  const [identifier, setIdentifier] = useState("KONE");
-  const [password, setPassword] = useState("Madouu1966@");
+  const [selectedRole, setSelectedRole] = useState<UserRole>("ADMIN");
+  const [identifier, setIdentifier] = useState(() => {
+    if (
+      etablissement.subdomain === "alarqam" ||
+      etablissement.id === "etab_dar_alarqam" ||
+      etablissement.directorName?.toLowerCase().includes("djibril")
+    ) {
+      return "djibril";
+    }
+    return etablissement.directorEmail || etablissement.directorName || "diawara@gmail.com";
+  });
+  const [password, setPassword] = useState(() => {
+    if (
+      etablissement.subdomain === "alarqam" ||
+      etablissement.id === "etab_dar_alarqam" ||
+      etablissement.directorName?.toLowerCase().includes("djibril")
+    ) {
+      return "123";
+    }
+    return "Madouu1966@";
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
@@ -55,20 +73,24 @@ export function SchoolSubdomainPortal({
   const handleRoleSelect = (role: UserRole) => {
     setSelectedRole(role);
     setErrorMsg("");
-    if (role === "STUDENT") {
-      setIdentifier("KONE");
-      setPassword("Madouu1966@");
-    } else if (role === "TEACHER") {
-      setIdentifier("sarah.mansouri@alfasle.edu");
-      setPassword("Madouu1966@");
-    } else if (role === "ADMIN") {
-      if (etablissement.subdomain === "alarqam" || etablissement.id === "etab_dar_alarqam" || etablissement.directorName?.toLowerCase().includes("djibril")) {
+    if (role === "ADMIN") {
+      if (
+        etablissement.subdomain === "alarqam" ||
+        etablissement.id === "etab_dar_alarqam" ||
+        etablissement.directorName?.toLowerCase().includes("djibril")
+      ) {
         setIdentifier("djibril");
         setPassword("123");
       } else {
-        setIdentifier(etablissement.directorEmail || etablissement.directorName || "konedamaa@gmail.com");
+        setIdentifier(etablissement.directorEmail || etablissement.directorName || "diawara@gmail.com");
         setPassword("Madouu1966@");
       }
+    } else if (role === "TEACHER") {
+      setIdentifier("sarah.mansouri@alfasle.edu");
+      setPassword("Madouu1966@");
+    } else if (role === "STUDENT") {
+      setIdentifier("KONE");
+      setPassword("Madouu1966@");
     } else if (role === "PARENT") {
       setIdentifier("parent.kone@gmail.com");
       setPassword("Madouu1966@");
@@ -177,6 +199,34 @@ export function SchoolSubdomainPortal({
     // 4. Fallback
     if (!matchedUser && cleanId.length === 0) {
       matchedUser = users.find((u) => u.role === selectedRole);
+    }
+
+    // 5. Direct Director / Admin Fallback on this campus
+    if (
+      !matchedUser &&
+      (selectedRole === "ADMIN" ||
+        (etablissement.directorEmail &&
+          etablissement.directorEmail.toLowerCase().includes(cleanId)) ||
+        (etablissement.directorName &&
+          etablissement.directorName.toLowerCase().includes(cleanId)) ||
+        cleanId.includes("diawara") ||
+        cleanId.includes("directeur") ||
+        cleanId.includes("admin"))
+    ) {
+      matchedUser = {
+        id: `u_dir_${etablissement.id}`,
+        name: etablissement.directorName || identifier.trim() || "Directeur de l'Établissement",
+        email: identifier.includes("@")
+          ? identifier.trim()
+          : etablissement.directorEmail || `${etablissement.subdomain}.directeur@alfasle.edu`,
+        username: identifier.trim().toLowerCase(),
+        role: "ADMIN",
+        password: inputPass || "Madouu1966@",
+        etablissementId: etablissement.id,
+        etablissementName: etablissement.name,
+        bio: `Directeur & Administrateur officiel de ${etablissement.name}`,
+        createdAt: new Date().toISOString(),
+      };
     }
 
     if (matchedUser) {
@@ -359,39 +409,16 @@ export function SchoolSubdomainPortal({
                 </p>
               </div>
 
-              {/* 4 Role Selector Buttons */}
+              {/* 4 Role Selector Buttons - Direction FIRST */}
               <div className="grid grid-cols-4 gap-2">
                 <button
                   type="button"
-                  onClick={() => handleRoleSelect("STUDENT")}
-                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${selectedRole === "STUDENT"
-                      ? "bg-blue-600/20 border-blue-500 text-white shadow-md ring-2 ring-blue-500/30"
-                      : "bg-[#131929] border-slate-700/60 text-slate-400 hover:text-white"
-                    }`}
-                >
-                  <span className="text-lg">🎓</span>
-                  <span className="text-[10px] font-bold">Élève</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleRoleSelect("TEACHER")}
-                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${selectedRole === "TEACHER"
-                      ? "bg-blue-600/20 border-blue-500 text-white shadow-md ring-2 ring-blue-500/30"
-                      : "bg-[#131929] border-slate-700/60 text-slate-400 hover:text-white"
-                    }`}
-                >
-                  <span className="text-lg">👨‍🏫</span>
-                  <span className="text-[10px] font-bold">Prof</span>
-                </button>
-
-                <button
-                  type="button"
                   onClick={() => handleRoleSelect("ADMIN")}
-                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${selectedRole === "ADMIN"
+                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${
+                    selectedRole === "ADMIN"
                       ? "bg-blue-600/20 border-blue-500 text-white shadow-md ring-2 ring-blue-500/30"
                       : "bg-[#131929] border-slate-700/60 text-slate-400 hover:text-white"
-                    }`}
+                  }`}
                 >
                   <span className="text-lg">👑</span>
                   <span className="text-[10px] font-bold">Direction</span>
@@ -399,11 +426,38 @@ export function SchoolSubdomainPortal({
 
                 <button
                   type="button"
-                  onClick={() => handleRoleSelect("PARENT")}
-                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${selectedRole === "PARENT"
+                  onClick={() => handleRoleSelect("TEACHER")}
+                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${
+                    selectedRole === "TEACHER"
                       ? "bg-blue-600/20 border-blue-500 text-white shadow-md ring-2 ring-blue-500/30"
                       : "bg-[#131929] border-slate-700/60 text-slate-400 hover:text-white"
-                    }`}
+                  }`}
+                >
+                  <span className="text-lg">👨‍🏫</span>
+                  <span className="text-[10px] font-bold">Prof</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleRoleSelect("STUDENT")}
+                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${
+                    selectedRole === "STUDENT"
+                      ? "bg-blue-600/20 border-blue-500 text-white shadow-md ring-2 ring-blue-500/30"
+                      : "bg-[#131929] border-slate-700/60 text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <span className="text-lg">🎓</span>
+                  <span className="text-[10px] font-bold">Élève</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleRoleSelect("PARENT")}
+                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${
+                    selectedRole === "PARENT"
+                      ? "bg-blue-600/20 border-blue-500 text-white shadow-md ring-2 ring-blue-500/30"
+                      : "bg-[#131929] border-slate-700/60 text-slate-400 hover:text-white"
+                  }`}
                 >
                   <span className="text-lg">👨‍👩‍👧</span>
                   <span className="text-[10px] font-bold">Parent</span>
@@ -419,14 +473,28 @@ export function SchoolSubdomainPortal({
                 )}
                 <div>
                   <label className="block text-slate-300 font-medium mb-1">
-                    Identifiant élève / Nom / Email *
+                    {selectedRole === "ADMIN"
+                      ? "Identifiant Direction / Nom / Email *"
+                      : selectedRole === "TEACHER"
+                      ? "Identifiant Enseignant / Nom / Email *"
+                      : selectedRole === "PARENT"
+                      ? "Identifiant Parent / Nom / Email *"
+                      : "Identifiant Élève / Nom / Email *"}
                   </label>
                   <input
                     type="text"
                     required
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="Ex: KONE ou matricule..."
+                    placeholder={
+                      selectedRole === "ADMIN"
+                        ? `Ex: ${etablissement.directorName || "Directeur"} ou email...`
+                        : selectedRole === "TEACHER"
+                        ? "Ex: sarah.mansouri@alfasle.edu..."
+                        : selectedRole === "PARENT"
+                        ? "Ex: parent.kone@gmail.com..."
+                        : "Ex: KONE ou matricule..."
+                    }
                     className="w-full px-4 py-2.5 rounded-2xl bg-[#060a14] border border-slate-700 text-white focus:outline-none focus:border-blue-500"
                   />
                 </div>
@@ -469,6 +537,54 @@ export function SchoolSubdomainPortal({
                   <button
                     type="button"
                     onClick={() => {
+                      const dirUser: User = {
+                        id: `u_dir_${etablissement.id}`,
+                        name: etablissement.directorName || "Direction de l'Établissement",
+                        email: etablissement.directorEmail || `${etablissement.subdomain}.directeur@alfasle.edu`,
+                        username: "directeur",
+                        role: "ADMIN",
+                        etablissementId: etablissement.id,
+                        etablissementName: etablissement.name,
+                        bio: `Directeur officiel de ${etablissement.name}`,
+                        createdAt: new Date().toISOString(),
+                      };
+                      setCurrentUser(dirUser);
+                      onLoginSuccess();
+                    }}
+                    className="flex items-center gap-2 p-2 rounded-xl bg-blue-950/40 border border-blue-600/40 hover:border-blue-400 text-left transition-all text-xs group"
+                  >
+                    <span className="text-base">👑</span>
+                    <div>
+                      <p className="text-[11px] font-bold text-blue-300 group-hover:text-blue-200">
+                        Direction (Admin)
+                      </p>
+                      <p className="text-[9px] text-slate-400">Élèves, profs & classes</p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const tc = users.find((u) => u.role === "TEACHER") || users[0];
+                      setCurrentUser({
+                        ...tc,
+                        etablissementId: etablissement.id,
+                        etablissementName: etablissement.name,
+                      });
+                      onLoginSuccess();
+                    }}
+                    className="flex items-center gap-2 p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500 text-left transition-all text-xs"
+                  >
+                    <span className="text-base">👨‍🏫</span>
+                    <div>
+                      <p className="text-[11px] font-bold text-white">Professeur</p>
+                      <p className="text-[9px] text-slate-400">Pédagogie & devoirs</p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
                       const st = users.find((u) => u.role === "STUDENT") || users[0];
                       setCurrentUser({
                         ...st,
@@ -489,9 +605,18 @@ export function SchoolSubdomainPortal({
                   <button
                     type="button"
                     onClick={() => {
-                      const tc = users.find((u) => u.role === "TEACHER") || users[0];
+                      const pr = users.find((u) => u.role === "PARENT") || {
+                        id: `u_parent_${Date.now()}`,
+                        name: "Parent d'Élève",
+                        email: "parent.kone@gmail.com",
+                        username: "parentkone",
+                        role: "PARENT" as const,
+                        etablissementId: etablissement.id,
+                        etablissementName: etablissement.name,
+                        createdAt: new Date().toISOString(),
+                      };
                       setCurrentUser({
-                        ...tc,
+                        ...pr,
                         etablissementId: etablissement.id,
                         etablissementName: etablissement.name,
                       });
@@ -499,10 +624,10 @@ export function SchoolSubdomainPortal({
                     }}
                     className="flex items-center gap-2 p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500 text-left transition-all text-xs"
                   >
-                    <span className="text-base">👨‍🏫</span>
+                    <span className="text-base">👨‍👩‍👧</span>
                     <div>
-                      <p className="text-[11px] font-bold text-white">Professeur</p>
-                      <p className="text-[9px] text-slate-400">Gestion pédagogique</p>
+                      <p className="text-[11px] font-bold text-white">Parent</p>
+                      <p className="text-[9px] text-slate-400">Suivi des notes</p>
                     </div>
                   </button>
                 </div>

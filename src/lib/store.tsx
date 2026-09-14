@@ -42,7 +42,7 @@ interface StoreContextType {
 
   // Classes
   classes: Classe[];
-  createClass: (newClass: Omit<Classe, "id" | "createdAt" | "teacherId" | "teacherName" | "enrolledCount" | "pendingCount">) => Classe;
+  createClass: (newClass: Omit<Classe, "id" | "createdAt" | "teacherId" | "teacherName" | "enrolledCount" | "pendingCount"> & { teacherId?: string; teacherName?: string }) => Classe;
   updateClass: (id: string, data: Partial<Classe>) => void;
   archiveClass: (id: string) => void;
 
@@ -328,17 +328,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Class Management
-  const createClass = (newClassData: Omit<Classe, "id" | "createdAt" | "teacherId" | "teacherName" | "enrolledCount" | "pendingCount">) => {
+  const createClass = (newClassData: Omit<Classe, "id" | "createdAt" | "teacherId" | "teacherName" | "enrolledCount" | "pendingCount"> & { teacherId?: string; teacherName?: string }) => {
     const newClass: Classe = {
+      coursesCount: 0,
+      assignmentsCount: 0,
       ...newClassData,
       id: `cls_${Date.now()}`,
-      teacherId: currentUser.id,
-      teacherName: currentUser.name,
+      teacherId: newClassData.teacherId || currentUser.id,
+      teacherName: newClassData.teacherName || currentUser.name,
       createdAt: new Date().toISOString(),
       enrolledCount: 0,
       pendingCount: 0,
-      coursesCount: 0,
-      assignmentsCount: 0,
     };
     setClasses((prev) => [newClass, ...prev]);
 

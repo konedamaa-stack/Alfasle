@@ -11,6 +11,7 @@ import { CreateClassModal } from "@/components/classes/CreateClassModal";
 import { JoinClassModal } from "@/components/classes/JoinClassModal";
 import { SchoolManager } from "@/components/schools/SchoolManager";
 import { SuperAdminDashboard } from "@/components/superadmin/SuperAdminDashboard";
+import { DirecteurDashboard } from "@/components/dashboard/DirecteurDashboard";
 import { ValidationQueue } from "@/components/inscriptions/ValidationQueue";
 import { CourseViewer } from "@/components/courses/CourseViewer";
 import { CreateCourseModal } from "@/components/courses/CreateCourseModal";
@@ -97,7 +98,16 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
                   onOpenCreateClassForSchool={handleOpenCreateClassForSchool}
                   onSelectClassForCourses={handleSelectClassForCourses}
                 />
-              ) : currentUser.role === "TEACHER" || currentUser.role === "ADMIN" ? (
+              ) : currentUser.role === "ADMIN" ? (
+                <DirecteurDashboard
+                  onNavigate={(tab) => setActiveTab(tab as any)}
+                  onOpenCreateClass={() => {
+                    setCreateClassDefaultEtab(currentUser.etablissementId);
+                    setIsCreateClassOpen(true);
+                  }}
+                  onSelectClassForCourses={handleSelectClassForCourses}
+                />
+              ) : currentUser.role === "TEACHER" ? (
                 <TeacherDashboard
                   onNavigate={(tab) => setActiveTab(tab)}
                   onOpenCreateClass={() => {

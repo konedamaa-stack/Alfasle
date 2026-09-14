@@ -114,24 +114,24 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
       case "ADMIN":
         return [
           {
-            id: "superadmin",
-            label: "Console Super Admin",
-            icon: <Shield className="w-4 h-4 text-amber-400" />,
-            badge: "Root Master",
-            badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+            id: "dashboard",
+            label: "Direction & Inscriptions",
+            icon: <School className="w-4 h-4 text-emerald-400" />,
+            badge: currentUser.etablissementName ? currentUser.etablissementName.slice(0, 14) : "Campus",
+            badgeColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
           },
-          { id: "dashboard", label: "Supervision Établissement", icon: <LayoutDashboard className="w-4 h-4" /> },
+          { id: "classes", label: "Classes du Campus", icon: <FolderKanban className="w-4 h-4" /> },
           {
-            id: "etablissements",
-            label: "Campus & Établissements",
-            icon: <School className="w-4 h-4" />,
-            badge: `${etablissements.length} campus`,
-            badgeColor: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+            id: "inscriptions",
+            label: "Préinscriptions",
+            icon: <UserCheck className="w-4 h-4" />,
+            badge: pendingInscriptionsCount > 0 ? `${pendingInscriptionsCount} en attente` : null,
+            badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/30",
           },
-          { id: "classes", label: "Classes de l'Établissement", icon: <FolderKanban className="w-4 h-4" /> },
-          { id: "inscriptions", label: "Gestion des Inscriptions", icon: <Users className="w-4 h-4" /> },
-          { id: "analytics", label: "Métriques & Rapports", icon: <BarChart3 className="w-4 h-4" /> },
-          { id: "settings", label: "Paramètres", icon: <Settings className="w-4 h-4" /> },
+          { id: "courses", label: "Cours & Formations", icon: <BookOpen className="w-4 h-4" /> },
+          { id: "assignments", label: "Devoirs & Évaluations", icon: <FileCheck2 className="w-4 h-4" /> },
+          { id: "grades", label: "Notes & Relevés", icon: <Award className="w-4 h-4" /> },
+          { id: "analytics", label: "Statistiques Campus", icon: <BarChart3 className="w-4 h-4" /> },
         ];
     }
   };
