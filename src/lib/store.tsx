@@ -285,11 +285,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     // 2. If director has email, provision Director user in system
     if (data.directorEmail && data.directorName) {
+      const directorPass = data.directorPassword?.trim() || "Madouu1966@";
       const directorUser: User = {
         id: `u_dir_${Date.now()}`,
         name: data.directorName,
         email: data.directorEmail,
+        username: data.directorEmail.split("@")[0].toLowerCase(),
         role: "ADMIN",
+        password: directorPass,
         etablissementId: etabId,
         etablissementName: data.name,
         avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
@@ -297,8 +300,20 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         createdAt: new Date().toISOString(),
       };
       setUsers((prev) => {
-        if (prev.some((u) => u.email.toLowerCase() === data.directorEmail?.toLowerCase())) {
-          return prev;
+        const existingIndex = prev.findIndex(
+          (u) => u.email.toLowerCase() === data.directorEmail?.toLowerCase()
+        );
+        if (existingIndex >= 0) {
+          const updated = [...prev];
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            name: data.directorName || updated[existingIndex].name,
+            password: directorPass,
+            role: "ADMIN",
+            etablissementId: etabId,
+            etablissementName: data.name,
+          };
+          return updated;
         }
         return [...prev, directorUser];
       });

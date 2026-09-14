@@ -108,15 +108,51 @@ export function SchoolSubdomainPortal({
       return;
     }
 
-    // Super Admin Master Shortcut from ANY subdomain
+    // 1. Direct login to Campus Director Dashboard for Direction role
+    if (selectedRole === "ADMIN") {
+      let dirUser = users.find(
+        (u) =>
+          (u.email.toLowerCase() === cleanId ||
+            (u.username && u.username.toLowerCase() === cleanId) ||
+            u.name.toLowerCase().includes(cleanId)) &&
+          u.role === "ADMIN"
+      );
+
+      if (!dirUser) {
+        dirUser = {
+          id: `u_dir_${etablissement.id}`,
+          name: etablissement.directorName || identifier.trim() || "Direction de l'Établissement",
+          email: identifier.includes("@")
+            ? identifier.trim()
+            : etablissement.directorEmail || `${etablissement.subdomain}.directeur@alfasle.edu`,
+          username: identifier.trim().toLowerCase(),
+          role: "ADMIN",
+          password: inputPass || "Madouu1966@",
+          etablissementId: etablissement.id,
+          etablissementName: etablissement.name,
+          bio: `Directeur officiel de ${etablissement.name}`,
+          createdAt: new Date().toISOString(),
+        };
+      } else {
+        dirUser = {
+          ...dirUser,
+          role: "ADMIN",
+          etablissementId: etablissement.id,
+          etablissementName: etablissement.name,
+        };
+      }
+
+      setCurrentUser(dirUser);
+      onLoginSuccess();
+      return;
+    }
+
+    // Super Admin Master Shortcut
     const isSuperAdmin =
       cleanId === "konedamaa@gmail.com" ||
       cleanId === "konedma@gmil.com" ||
       cleanId === "konedama@gmail.com" ||
       cleanId === "konedma@gmail.com" ||
-      cleanId === "konedamaa" ||
-      cleanId === "konedama" ||
-      cleanId === "konedma" ||
       cleanId === "superadmin" ||
       cleanId === "root";
 
@@ -184,7 +220,7 @@ export function SchoolSubdomainPortal({
       matchedUser = users.find(
         (u) =>
           u.name.toLowerCase().includes(cleanId) &&
-          (u.role === selectedRole || selectedRole === "ADMIN")
+          u.role === selectedRole
       );
     }
     if (!matchedUser) {
@@ -204,9 +240,8 @@ export function SchoolSubdomainPortal({
     // 5. Direct Director / Admin Fallback on this campus
     if (
       !matchedUser &&
-      (selectedRole === "ADMIN" ||
-        (etablissement.directorEmail &&
-          etablissement.directorEmail.toLowerCase().includes(cleanId)) ||
+      ((etablissement.directorEmail &&
+        etablissement.directorEmail.toLowerCase().includes(cleanId)) ||
         (etablissement.directorName &&
           etablissement.directorName.toLowerCase().includes(cleanId)) ||
         cleanId.includes("diawara") ||

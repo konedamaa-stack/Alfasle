@@ -82,6 +82,8 @@ export function SuperAdminDashboard({
   const [newAddress, setNewAddress] = useState("");
   const [newDirectorName, setNewDirectorName] = useState("");
   const [newDirectorEmail, setNewDirectorEmail] = useState("");
+  const [newDirectorPassword, setNewDirectorPassword] = useState("Madouu1966@");
+  const [showDirectorPassword, setShowDirectorPassword] = useState(false);
   const [newPhone, setNewPhone] = useState("");
   const [newPlan, setNewPlan] = useState<"STANDARD" | "PREMIUM" | "ENTERPRISE">("ENTERPRISE");
   const [newMaxStudents, setNewMaxStudents] = useState(500);
@@ -131,6 +133,8 @@ export function SuperAdminDashboard({
     setNewAddress("");
     setNewDirectorName("");
     setNewDirectorEmail("");
+    setNewDirectorPassword("Madouu1966@");
+    setShowDirectorPassword(false);
     setNewPhone("");
     setNewPlan("ENTERPRISE");
     setNewMaxStudents(500);
@@ -160,6 +164,7 @@ export function SuperAdminDashboard({
       address: newAddress || `${newCity}, ${newCountry}`,
       directorName: newDirectorName || "Direction de l'Établissement",
       directorEmail: newDirectorEmail || `direction@${autoSubdomain}.edu`,
+      directorPassword: newDirectorPassword || "Madouu1966@",
       phone: newPhone || "+225 01 02 03 04",
       status: "ACTIVE",
       subscriptionPlan: newPlan,
@@ -861,11 +866,57 @@ export function SuperAdminDashboard({
                             </span>
                           )}
                           {etab.directorEmail && (
-                            <span className="flex items-center gap-1">
-                              <Mail className="w-3.5 h-3.5 text-slate-400" />
+                            <span className="flex items-center gap-1 text-slate-300 font-mono text-[10px] bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                              <Mail className="w-3 h-3 text-amber-400" />
                               {etab.directorEmail}
                             </span>
                           )}
+                          {/* Director Password Display */}
+                          {(() => {
+                            const dirUser = users.find(
+                              (u) =>
+                                (etab.directorEmail && u.email.toLowerCase() === etab.directorEmail.toLowerCase()) ||
+                                (u.etablissementId === etab.id && u.role === "ADMIN")
+                            );
+                            const dirPass = dirUser?.password || etab.directorPassword || "Madouu1966@";
+                            const isVisible = visiblePasswords[`dir_${etab.id}`] || false;
+                            return (
+                              <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded text-[10px] font-mono text-amber-300">
+                                <span>Pass Dir:</span>
+                                <span className="font-bold">
+                                  {isVisible ? dirPass : "••••••••"}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setVisiblePasswords((prev) => ({
+                                      ...prev,
+                                      [`dir_${etab.id}`]: !prev[`dir_${etab.id}`],
+                                    }))
+                                  }
+                                  className="text-amber-400/80 hover:text-amber-200 ml-1"
+                                >
+                                  {isVisible ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    navigator.clipboard?.writeText(dirPass);
+                                    setCopiedId(`dir_${etab.id}`);
+                                    setTimeout(() => setCopiedId(null), 2000);
+                                  }}
+                                  className="text-amber-400/80 hover:text-amber-200 ml-0.5"
+                                  title="Copier mot de passe"
+                                >
+                                  {copiedId === `dir_${etab.id}` ? (
+                                    <Check className="w-3 h-3 text-emerald-400" />
+                                  ) : (
+                                    <Copy className="w-3 h-3" />
+                                  )}
+                                </button>
+                              </div>
+                            );
+                          })()}
                           <span className="flex items-center gap-1 font-mono text-blue-400">
                             <Globe2 className="w-3.5 h-3.5" />
                             .{etab.subdomain}.alfasle.xyz
@@ -1624,17 +1675,45 @@ export function SuperAdminDashboard({
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-slate-300 font-semibold mb-1">
-                      Téléphone de contact
-                    </label>
-                    <input
-                      type="text"
-                      value={newPhone}
-                      onChange={(e) => setNewPhone(e.target.value)}
-                      placeholder="+225 07 00 11 22"
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
-                    />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-slate-300 font-semibold mb-1">
+                        Mot de Passe de Connexion du Directeur *
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showDirectorPassword ? "text" : "password"}
+                          required
+                          value={newDirectorPassword}
+                          onChange={(e) => setNewDirectorPassword(e.target.value)}
+                          placeholder="Madouu1966@"
+                          className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-amber-500/40 text-amber-300 font-mono focus:outline-none focus:border-amber-500 pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowDirectorPassword(!showDirectorPassword)}
+                          className="absolute right-3 top-3 text-slate-400 hover:text-white"
+                        >
+                          {showDirectorPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-1">
+                        🔑 Le directeur utilisera ce mot de passe pour gérer ses élèves, profs et classes.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-slate-300 font-semibold mb-1">
+                        Téléphone de contact
+                      </label>
+                      <input
+                        type="text"
+                        value={newPhone}
+                        onChange={(e) => setNewPhone(e.target.value)}
+                        placeholder="+225 07 00 11 22"
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
                   </div>
 
                   <div>

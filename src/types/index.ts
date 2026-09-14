@@ -31,6 +31,7 @@ export interface Etablissement {
   coverImage?: string;
   directorName?: string;
   directorEmail?: string;
+  directorPassword?: string;
   status?: "ACTIVE" | "SUSPENDED" | "PENDING";
   subscriptionPlan?: "STANDARD" | "PREMIUM" | "ENTERPRISE";
   maxStudentsQuota?: number;
