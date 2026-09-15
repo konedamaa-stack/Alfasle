@@ -11,8 +11,12 @@ export default function SuperAdminPage() {
 
   const handleLoginSuccess = () => {
     // Navigate to dashboard with super admin root profile
-    const adminUser = users.find((u) => u.role === "ADMIN") || users[0];
-    setCurrentUser(adminUser);
+    const superAdminUser = users.find((u) => u.role === "SUPER_ADMIN") || users.find((u) => u.role === "ADMIN") || users[0];
+    if (typeof window !== "undefined") {
+      localStorage.setItem("alfasle_session_active", "true");
+      localStorage.setItem("alfasle_active_tab", "superadmin");
+    }
+    setCurrentUser(superAdminUser);
     router.push("/");
   };
 

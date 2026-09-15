@@ -28,9 +28,20 @@ interface MainAppLayoutProps {
 
 export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
   const { currentUser, submissions, assignments } = useStore();
-  const [activeTab, setActiveTab] = useState<NavTab>(() =>
-    currentUser.role === "SUPER_ADMIN" ? "superadmin" : "dashboard"
-  );
+  const [activeTab, setActiveTabState] = useState<NavTab>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("alfasle_active_tab") as NavTab;
+      if (saved) return saved;
+    }
+    return currentUser.role === "SUPER_ADMIN" ? "superadmin" : "dashboard";
+  });
+
+  const setActiveTab = (tab: NavTab) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("alfasle_active_tab", tab);
+    }
+    setActiveTabState(tab);
+  };
 
   // Modals state
   const [isCreateClassOpen, setIsCreateClassOpen] = useState(false);

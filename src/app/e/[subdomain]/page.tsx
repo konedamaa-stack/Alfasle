@@ -13,8 +13,28 @@ export default function SubdomainSchoolPage() {
   const params = useParams();
   const router = useRouter();
   const { etablissements } = useStore();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("alfasle_session_active") === "true";
+    }
+    return false;
+  });
   const [isJoinClassOpen, setIsJoinClassOpen] = useState(false);
+
+  const handleLoginSuccess = () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("alfasle_session_active", "true");
+    }
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("alfasle_session_active");
+      localStorage.removeItem("alfasle_active_tab");
+    }
+    setIsAuthenticated(false);
+  };
 
   const subdomain = (params?.subdomain as string) || "";
 
@@ -55,14 +75,14 @@ export default function SubdomainSchoolPage() {
     };
 
   if (isAuthenticated) {
-    return <MainAppLayout onLogout={() => setIsAuthenticated(false)} />;
+    return <MainAppLayout onLogout={handleLogout} />;
   }
 
   return (
     <>
       <SchoolSubdomainPortal
         etablissement={effectiveEtab}
-        onLoginSuccess={() => setIsAuthenticated(true)}
+        onLoginSuccess={handleLoginSuccess}
         onOpenJoinClassModal={() => setIsJoinClassOpen(true)}
         onBackToGlobal={() => router.push("/")}
       />
@@ -70,7 +90,7 @@ export default function SubdomainSchoolPage() {
       <JoinClassModal
         isOpen={isJoinClassOpen}
         onClose={() => setIsJoinClassOpen(false)}
-        onSuccessNavigateToCourses={() => setIsAuthenticated(true)}
+        onSuccessNavigateToCourses={handleLoginSuccess}
       />
     </>
   );
