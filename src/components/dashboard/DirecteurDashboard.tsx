@@ -533,6 +533,14 @@ export function DirecteurDashboard({
             </button>
 
             <button
+              onClick={() => onNavigate && onNavigate("courses")}
+              className="px-4 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs shadow-xl shadow-purple-600/25 flex items-center gap-1.5 transition-all transform hover:-translate-y-0.5"
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>+ Publier Cours Vidéo</span>
+            </button>
+
+            <button
               onClick={handleOpenEditCampus}
               className="px-3.5 py-3 rounded-2xl bg-slate-900/90 hover:bg-slate-800 text-amber-300 border border-amber-500/40 font-bold text-xs flex items-center gap-1.5 transition-all shadow-md"
               title="Modifier les informations et mot de passe du campus"

@@ -116,30 +116,33 @@ export function CourseViewer({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <select
-            value={activeClassId}
-            onChange={(e) => {
-              setActiveClassId(e.target.value);
-              const nextCourses = courses.filter((c) => c.classeId === e.target.value);
-              if (nextCourses.length > 0) setSelectedCourseId(nextCourses[0].id);
-            }}
-            className="px-3.5 py-2 text-xs bg-slate-800 border border-slate-700 rounded-xl text-white font-medium focus:outline-none focus:border-indigo-500 shadow-sm"
-          >
-            {classes.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.title}
-              </option>
-            ))}
-          </select>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400 font-semibold hidden md:inline">Classe :</span>
+            <select
+              value={activeClassId}
+              onChange={(e) => {
+                setActiveClassId(e.target.value);
+                const nextCourses = courses.filter((c) => c.classeId === e.target.value);
+                if (nextCourses.length > 0) setSelectedCourseId(nextCourses[0].id);
+              }}
+              className="px-3.5 py-2.5 text-xs bg-slate-900 border border-slate-700 rounded-xl text-white font-bold focus:outline-none focus:border-purple-500 shadow-sm cursor-pointer"
+            >
+              {classes.map((c) => (
+                <option key={c.id} value={c.id}>
+                  🏫 {c.title}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {canEditCourse && (
             <button
               onClick={onOpenCreateCourse}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg shadow-purple-600/25 transition-all"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black shadow-xl shadow-purple-600/30 transition-all transform hover:-translate-y-0.5 border border-purple-400/40"
             >
-              <PlusCircle className="w-4 h-4" />
-              Nouveau Cours
+              <PlusCircle className="w-4 h-4 text-white fill-purple-400 text-slate-950" />
+              <span>➕ Ajouter un Nouveau Cours</span>
             </button>
           )}
         </div>
@@ -336,6 +339,16 @@ export function CourseViewer({
                 );
               })}
             </div>
+
+            {canEditCourse && (
+              <button
+                onClick={onOpenCreateCourse}
+                className="w-full mt-3 py-3 px-4 rounded-2xl border-2 border-dashed border-purple-500/40 hover:border-purple-400 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 hover:text-white text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm"
+              >
+                <PlusCircle className="w-4 h-4 text-purple-400" />
+                <span>+ Ajouter une Leçon à cette Classe</span>
+              </button>
+            )}
           </div>
         </div>
       )}
