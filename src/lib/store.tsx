@@ -44,6 +44,7 @@ interface StoreContextType {
   classes: Classe[];
   createClass: (newClass: Omit<Classe, "id" | "createdAt" | "teacherId" | "teacherName" | "enrolledCount" | "pendingCount"> & { teacherId?: string; teacherName?: string }) => Classe;
   updateClass: (id: string, data: Partial<Classe>) => void;
+  deleteClass: (id: string) => void;
   archiveClass: (id: string) => void;
 
   // Inscriptions & Pré-inscriptions
@@ -543,6 +544,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const updateClass = (id: string, data: Partial<Classe>) => {
     setClasses((prev) => prev.map((c) => (c.id === id ? { ...c, ...data } : c)));
+  };
+
+  const deleteClass = (id: string) => {
+    setClasses((prev) => prev.filter((c) => c.id !== id));
+    setInscriptions((prev) => prev.filter((i) => i.classeId !== id));
+    setCourses((prev) => prev.filter((crs) => crs.classeId !== id));
+    setAssignments((prev) => {
+      const remaining = prev.filter((a) => a.classeId !== id);
+      const removedIds = new Set(prev.filter((a) => a.classeId === id).map((a) => a.id));
+      setSubmissions((subs) => subs.filter((s) => !removedIds.has(s.devoirId)));
+      return remaining;
+    });
   };
 
   const archiveClass = (id: string) => {
@@ -1223,6 +1236,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         classes,
         createClass,
         updateClass,
+        deleteClass,
         archiveClass,
         inscriptions,
         applyToClass,

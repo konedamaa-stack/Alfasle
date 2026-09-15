@@ -69,6 +69,7 @@ export function DirecteurDashboard({
     deleteUser,
     createClass,
     updateClass,
+    deleteClass,
     updateEtablissement,
     approveInscription,
     rejectInscription,
@@ -451,6 +452,39 @@ export function DirecteurDashboard({
       teacherName: assignedTeacher?.name || editingClass.teacherName,
     });
     setIsEditClassOpen(false);
+  };
+
+  const handleDeleteClass = (c: Classe) => {
+    if (
+      window.confirm(
+        `Êtes-vous sûr de vouloir supprimer définitivement la classe « ${c.title} » (${c.classCode}) ?\nTous les cours et inscriptions associés à cette classe seront également supprimés.`
+      )
+    ) {
+      deleteClass(c.id);
+      setIsEditClassOpen(false);
+    }
+  };
+
+  const handleDeleteStudent = (u: User) => {
+    if (
+      window.confirm(
+        `Êtes-vous sûr de vouloir supprimer le compte élève de « ${u.name} » (${u.email}) ?`
+      )
+    ) {
+      deleteUser(u.id);
+      setIsEditStudentOpen(false);
+    }
+  };
+
+  const handleDeleteTeacher = (u: User) => {
+    if (
+      window.confirm(
+        `Êtes-vous sûr de vouloir supprimer le compte professeur de « ${u.name} » (${u.email}) ?`
+      )
+    ) {
+      deleteUser(u.id);
+      setIsEditTeacherOpen(false);
+    }
   };
 
   return (
@@ -987,6 +1021,14 @@ export function DirecteurDashboard({
                         <span>Cours</span>
                       </button>
                     )}
+
+                    <button
+                      onClick={() => handleDeleteClass(cls)}
+                      title="Supprimer définitivement cette classe"
+                      className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-all flex items-center justify-center shrink-0"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
               ))
@@ -1618,14 +1660,24 @@ export function DirecteurDashboard({
                 />
               </div>
 
-              <div className="pt-3 border-t border-slate-800 flex justify-between items-center">
-                <button type="button" onClick={() => setIsEditStudentOpen(false)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300">
-                  Annuler
+              <div className="pt-3 border-t border-slate-800 flex justify-between items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleDeleteStudent(editingStudent)}
+                  className="px-4 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold flex items-center gap-1.5 transition-all"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                  <span>Supprimer l&apos;Élève</span>
                 </button>
-                <button type="submit" className="px-6 py-2.5 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-bold flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Enregistrer les Modifications</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => setIsEditStudentOpen(false)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300">
+                    Annuler
+                  </button>
+                  <button type="submit" className="px-5 py-2.5 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-bold flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Enregistrer</span>
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -1734,14 +1786,24 @@ export function DirecteurDashboard({
                 />
               </div>
 
-              <div className="pt-3 border-t border-slate-800 flex justify-between items-center">
-                <button type="button" onClick={() => setIsEditTeacherOpen(false)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300">
-                  Annuler
+              <div className="pt-3 border-t border-slate-800 flex justify-between items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleDeleteTeacher(editingTeacher)}
+                  className="px-4 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold flex items-center gap-1.5 transition-all"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                  <span>Supprimer le Professeur</span>
                 </button>
-                <button type="submit" className="px-6 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Enregistrer les Modifications</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => setIsEditTeacherOpen(false)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300">
+                    Annuler
+                  </button>
+                  <button type="submit" className="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Enregistrer</span>
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -1844,14 +1906,24 @@ export function DirecteurDashboard({
                 />
               </div>
 
-              <div className="pt-3 border-t border-slate-800 flex justify-between items-center">
-                <button type="button" onClick={() => setIsEditClassOpen(false)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300">
-                  Annuler
+              <div className="pt-3 border-t border-slate-800 flex justify-between items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleDeleteClass(editingClass)}
+                  className="px-4 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold flex items-center gap-1.5 transition-all"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                  <span>Supprimer la Classe</span>
                 </button>
-                <button type="submit" className="px-6 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 fill-black" />
-                  <span>Enregistrer la Classe</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => setIsEditClassOpen(false)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300">
+                    Annuler
+                  </button>
+                  <button type="submit" className="px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 fill-black" />
+                    <span>Enregistrer</span>
+                  </button>
+                </div>
               </div>
             </form>
           </div>
