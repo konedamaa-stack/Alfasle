@@ -15,6 +15,10 @@ import {
   CheckCircle2,
   Clock,
   Send,
+  Edit,
+  Trash2,
+  X,
+  AlertCircle,
 } from "lucide-react";
 import { ApplyModal } from "./ApplyModal";
 
@@ -29,7 +33,7 @@ export function ClassList({
   onSelectClassForCourses,
   onOpenJoinClassModal,
 }: ClassListProps) {
-  const { currentUser, classes, inscriptions, etablissements } = useStore();
+  const { currentUser, classes, inscriptions, etablissements, updateClass, deleteClass, users } = useStore();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedEtablissement, setSelectedEtablissement] = useState("ALL");
@@ -38,6 +42,57 @@ export function ClassList({
 
   // Apply modal state
   const [applyingClass, setApplyingClass] = useState<Classe | null>(null);
+
+  // Edit modal state
+  const [editingClass, setEditingClass] = useState<Classe | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editCode, setEditCode] = useState("");
+  const [editLevel, setEditLevel] = useState("");
+  const [editCategory, setEditCategory] = useState("");
+  const [editCapacity, setEditCapacity] = useState(35);
+  const [editTeacherId, setEditTeacherId] = useState("");
+  const [editDesc, setEditDesc] = useState("");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const handleOpenEdit = (c: Classe) => {
+    setEditingClass(c);
+    setEditTitle(c.title);
+    setEditCode(c.classCode);
+    setEditLevel(c.level);
+    setEditCategory(c.category);
+    setEditCapacity(c.capacity || 35);
+    setEditTeacherId(c.teacherId || "");
+    setEditDesc(c.description || "");
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingClass) return;
+    const assignedTeacher = users.find((u) => u.id === editTeacherId);
+    updateClass(editingClass.id, {
+      title: editTitle.trim(),
+      classCode: editCode.trim().toUpperCase(),
+      level: editLevel,
+      category: editCategory,
+      capacity: editCapacity,
+      description: editDesc.trim(),
+      teacherId: assignedTeacher?.id || editingClass.teacherId,
+      teacherName: assignedTeacher?.name || editingClass.teacherName,
+    });
+    setIsEditModalOpen(false);
+  };
+
+  const handleDeleteClass = (c: Classe) => {
+    if (
+      window.confirm(
+        `Êtes-vous sûr de vouloir supprimer définitivement la classe « ${c.title} » (${c.classCode}) ?\nTous les cours et inscriptions associés seront supprimés.`
+      )
+    ) {
+      deleteClass(c.id);
+      setIsEditModalOpen(false);
+    }
+  };
 
   const categories = ["ALL", "Informatique", "Mathématiques", "Design", "Sciences", "Langues"];
   const levels = ["ALL", "Débutant", "Intermédiaire", "Avancé"];
@@ -243,14 +298,34 @@ export function ClassList({
 
                   {/* Actions according to Role */}
                   <div className="pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
-                    {currentUser.role === "TEACHER" || currentUser.role === "ADMIN" ? (
-                      <button
-                        onClick={() => onSelectClassForCourses && onSelectClassForCourses(cls.id)}
-                        className="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
-                      >
-                        <BookOpen className="w-3.5 h-3.5" />
-                        Gérer les Cours ({cls.coursesCount || 0})
-                      </button>
+                    {currentUser.role === "TEACHER" || currentUser.role === "ADMIN" || currentUser.role === "SUPER_ADMIN" ? (
+                      <div className="w-full flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleOpenEdit(cls)}
+                          className="flex-1 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/40 text-xs font-bold flex items-center justify-center gap-1 transition-all shadow-sm"
+                          title="Modifier les informations de la classe"
+                        >
+                          <Edit className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Modifier</span>
+                        </button>
+
+                        <button
+                          onClick={() => onSelectClassForCourses && onSelectClassForCourses(cls.id)}
+                          className="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-1 transition-colors shadow-sm"
+                          title="Gérer les cours de cette classe"
+                        >
+                          <BookOpen className="w-3.5 h-3.5" />
+                          <span>Cours</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleDeleteClass(cls)}
+                          className="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs font-bold flex items-center justify-center transition-all"
+                          title="Supprimer cette classe"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     ) : (
                       // Student view
                       <>
@@ -301,6 +376,136 @@ export function ClassList({
         isOpen={!!applyingClass}
         onClose={() => setApplyingClass(null)}
       />
+
+      {/* Edit Class Modal */}
+      {isEditModalOpen && editingClass && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-lg bg-[#0a0f1e] border border-amber-500/40 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="px-6 py-5 border-b border-slate-800 bg-[#070b16] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                  <FolderKanban className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white">Modifier les Informations de la Classe</h3>
+                  <p className="text-xs text-amber-400 font-mono">{editingClass.classCode} • {editingClass.title}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="p-2 rounded-xl text-slate-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="p-6 overflow-y-auto flex-1 space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Nom / Titre de la Classe *</label>
+                <input
+                  type="text"
+                  required
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white font-bold focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Code Classe *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editCode}
+                    onChange={(e) => setEditCode(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-amber-300 font-mono font-bold focus:outline-none focus:border-amber-500 uppercase"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Niveau d&apos;Étude *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editLevel}
+                    onChange={(e) => setEditLevel(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Professeur Responsable</label>
+                  <select
+                    value={editTeacherId}
+                    onChange={(e) => setEditTeacherId(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="">-- Non assigné --</option>
+                    {users
+                      .filter((u) => u.role === "TEACHER")
+                      .map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Capacité Max (Élèves)</label>
+                  <input
+                    type="number"
+                    min={5}
+                    max={200}
+                    value={editCapacity}
+                    onChange={(e) => setEditCapacity(parseInt(e.target.value) || 35)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Description & Programme</label>
+                <textarea
+                  rows={3}
+                  value={editDesc}
+                  onChange={(e) => setEditDesc(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-slate-800 flex justify-between items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleDeleteClass(editingClass)}
+                  className="px-4 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold flex items-center gap-1.5 transition-all"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                  <span>Supprimer la Classe</span>
+                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditModalOpen(false)}
+                    className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-semibold"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black flex items-center gap-2 shadow-lg shadow-amber-500/25"
+                  >
+                    <CheckCircle2 className="w-4 h-4 fill-black" />
+                    <span>Enregistrer</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
