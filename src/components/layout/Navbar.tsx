@@ -14,6 +14,7 @@ import {
   Check,
   Search,
   KeyRound,
+  LogOut,
 } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
@@ -274,12 +275,16 @@ export function Navbar({ onLogoutToLanding, onOpenSuperAdmin }: NavbarProps) {
 
           {onLogoutToLanding && (
             <button
-              onClick={onLogoutToLanding}
-              title="Page d'accueil / Changer de compte"
-              className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition-colors flex items-center gap-1.5 text-xs font-medium"
+              onClick={() => {
+                if (window.confirm("Voulez-vous vraiment vous déconnecter de votre compte ?")) {
+                  onLogoutToLanding();
+                }
+              }}
+              title="Se déconnecter de la session"
+              className="px-3.5 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 hover:text-rose-200 border border-rose-500/30 transition-all flex items-center gap-1.5 text-xs font-bold shadow-md shadow-rose-500/10 transform hover:-translate-y-0.5"
             >
-              <span>🚪</span>
-              <span className="hidden sm:inline">Accueil / Connexion</span>
+              <LogOut className="w-3.5 h-3.5 text-rose-400" />
+              <span className="hidden sm:inline">Déconnexion</span>
             </button>
           )}
         </div>

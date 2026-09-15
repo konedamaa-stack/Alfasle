@@ -19,6 +19,7 @@ import {
   HeartHandshake,
   Shield,
   Sparkles,
+  LogOut,
 } from "lucide-react";
 
 export type NavTab =
@@ -38,9 +39,10 @@ interface SidebarProps {
   activeTab: NavTab;
   setActiveTab: (tab: NavTab) => void;
   onOpenSuperAdminModal?: () => void;
+  onLogout?: () => void;
 }
 
-export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
+export function Sidebar({ activeTab, setActiveTab, onLogout }: SidebarProps) {
   const { currentUser, inscriptions, submissions, assignments, etablissements } = useStore();
 
   const pendingInscriptionsCount = inscriptions.filter((i) => i.status === "PENDING").length;
@@ -210,8 +212,21 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
         </div>
       </div>
 
-      {/* Footer support */}
-      <div className="pt-4 border-t border-slate-800/80">
+      {/* Footer support & Logout */}
+      <div className="pt-3 border-t border-slate-800/80 space-y-2.5">
+        {onLogout && (
+          <button
+            onClick={() => {
+              if (window.confirm("Voulez-vous vraiment vous déconnecter de votre session ?")) {
+                onLogout();
+              }
+            }}
+            className="w-full py-2.5 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm group"
+          >
+            <LogOut className="w-4 h-4 text-rose-400 group-hover:-translate-x-0.5 transition-transform" />
+            <span>Se Déconnecter</span>
+          </button>
+        )}
         <p className="text-[10px] text-slate-500 text-center">
           AlFasle v1.0.0 • Tous droits réservés
         </p>

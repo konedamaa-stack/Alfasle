@@ -78,7 +78,7 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
       {/* Main App Layout */}
       <div className="flex-1 flex max-w-[1600px] w-full mx-auto">
         {/* Left Sidebar */}
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={onLogout} />
 
         {/* Content Area */}
         <main className="flex-1 p-4 sm:p-8 overflow-y-auto max-h-[calc(100vh-65px)]">
