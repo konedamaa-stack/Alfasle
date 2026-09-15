@@ -146,32 +146,44 @@ export function CreateCourseModal({
           </div>
 
           {/* Video integration section */}
-          <div className="p-4 rounded-xl bg-slate-900/70 border border-purple-500/20 space-y-3">
-            <h4 className="text-xs font-bold text-purple-300 flex items-center gap-1.5">
-              <Video className="w-3.5 h-3.5" /> Support Vidéo Streaming (Mux / Bunny / MP4 / Embed)
-            </h4>
+          <div className="p-4 rounded-xl bg-slate-900/70 border border-purple-500/30 space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold text-purple-300 flex items-center gap-1.5">
+                <Video className="w-3.5 h-3.5 text-purple-400" /> Support Vidéo : Liens YouTube / Vimeo / MP4
+              </h4>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                0 Mo sur la base de données
+              </span>
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] text-slate-400 mb-1">URL du flux vidéo</label>
+                <label className="block text-[11px] text-slate-300 font-semibold mb-1">
+                  Lien Vidéo YouTube ou Stream
+                </label>
                 <input
                   type="url"
-                  placeholder="https://..."
+                  placeholder="https://www.youtube.com/watch?v=... ou https://youtu.be/..."
                   value={streamUrl}
                   onChange={(e) => setStreamUrl(e.target.value)}
-                  className="w-full px-3 py-1.5 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
+                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white font-mono placeholder-slate-500 focus:outline-none focus:border-purple-500"
                 />
               </div>
               <div>
-                <label className="block text-[11px] text-slate-400 mb-1">Durée estimée (minutes)</label>
+                <label className="block text-[11px] text-slate-300 font-semibold mb-1">Durée estimée (minutes)</label>
                 <input
                   type="number"
-                  value={durationMinutes}
+                  min={1}
+                  placeholder="Ex: 15"
+                  value={durationMinutes || ""}
                   onChange={(e) => setDurationMinutes(parseInt(e.target.value) || 0)}
-                  className="w-full px-3 py-1.5 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
+                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
                 />
               </div>
             </div>
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              💡 <strong>Astuce Optimale :</strong> Hébergez vos cours vidéo sur YouTube (en mode <em>« Non répertorié »</em> ou public) et collez simplement le lien ici. Les élèves liront la vidéo directement sans consommer l'espace de stockage de votre serveur.
+            </p>
           </div>
 
           {/* Text/Markdown content editor */}

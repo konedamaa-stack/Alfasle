@@ -19,6 +19,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { getVideoEmbedInfo } from "@/lib/utils";
 
 interface CourseViewerProps {
   onOpenCreateCourse: () => void;
@@ -168,14 +169,30 @@ export function CourseViewer({
           <div className="lg:col-span-8 space-y-6">
             {activeCourse && (
               <div className="glass-panel rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
-                {/* Video Player Section */}
-                {activeCourse.video && (
-                  <div className="relative bg-slate-950 aspect-video w-full border-b border-slate-800 flex items-center justify-center group">
-                    <video
-                      controls
-                      src={activeCourse.video.streamUrl}
-                      className="w-full h-full object-contain"
-                    />
+                {/* Video Player Section with YouTube / Vimeo / MP4 support */}
+                {activeCourse.video && activeCourse.video.streamUrl && (
+                  <div className="relative bg-slate-950 aspect-video w-full border-b border-slate-800 flex items-center justify-center overflow-hidden">
+                    {(() => {
+                      const videoInfo = getVideoEmbedInfo(activeCourse.video.streamUrl);
+                      if (videoInfo.isIframe) {
+                        return (
+                          <iframe
+                            src={videoInfo.embedUrl}
+                            title={activeCourse.title}
+                            className="w-full h-full border-0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                          />
+                        );
+                      }
+                      return (
+                        <video
+                          controls
+                          src={activeCourse.video.streamUrl}
+                          className="w-full h-full object-contain"
+                        />
+                      );
+                    })()}
                   </div>
                 )}
 
@@ -380,14 +397,19 @@ export function CourseViewer({
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">URL Flux Vidéo (MP4 ou WebM)</label>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Lien Vidéo (Lien YouTube, Vimeo, MP4 ou WebM)
+                </label>
                 <input
                   type="url"
-                  placeholder="https://commondatastorage.googleapis.com/..."
+                  placeholder="https://www.youtube.com/watch?v=... ou https://youtu.be/..."
                   value={editVideoUrl}
                   onChange={(e) => setEditVideoUrl(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-purple-300 font-mono focus:outline-none focus:border-purple-500"
                 />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  💡 Collez simplement le lien de votre vidéo YouTube. Votre base de données reste ultra-légère.
+                </p>
               </div>
 
               <div>
