@@ -161,12 +161,26 @@ export function CreateAssignmentModal({
               Consignes & Critères d'évaluation
             </label>
             <textarea
-              rows={4}
+              rows={3}
               placeholder="Détaillez les attendus, formats de fichiers acceptés et barème..."
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
               className="w-full px-3.5 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"
             />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">
+              Fichier Sujet / Énoncé PDF (optionnel)
+            </label>
+            <div className="flex items-center gap-2 p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs">
+              <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold text-[10px]">PDF</span>
+              <input
+                type="text"
+                placeholder="Ex: Sujet_Devoir_Maths.pdf"
+                className="w-full bg-transparent text-white text-xs focus:outline-none placeholder-slate-500"
+              />
+            </div>
           </div>
 
           {/* Actions */}
