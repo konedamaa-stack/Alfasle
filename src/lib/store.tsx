@@ -247,6 +247,23 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
   return initialData;
 }
 
+function loadInitialUser(defaultUser: User): User {
+  if (typeof window !== "undefined") {
+    try {
+      const saved = localStorage.getItem(`${STORAGE_PREFIX}currentUser`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.id && parsed.role) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.error("Erreur chargement currentUser:", e);
+    }
+  }
+  return defaultUser;
+}
+
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<"dark" | "light">(() => {
     if (typeof window !== "undefined") {
@@ -288,7 +305,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, [theme]);
 
   const [users, setUsers] = useState<User[]>(() => loadInitialData("users", initialUsers));
-  const [currentUser, setCurrentUser] = useState<User>(initialUsers[1]); // Default: Dr. Mahamadou DIAWARA (Directeur)
+  const [currentUser, setCurrentUser] = useState<User>(() => loadInitialUser(initialUsers[1])); // Default: Dr. Mahamadou DIAWARA (Directeur)
   const [etablissements, setEtablissements] = useState<Etablissement[]>(() =>
     loadInitialData("etablissements", initialEtablissements)
   );
@@ -314,6 +331,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   // Sync to localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
+      localStorage.setItem(`${STORAGE_PREFIX}currentUser`, JSON.stringify(currentUser));
       localStorage.setItem(`${STORAGE_PREFIX}users`, JSON.stringify(users));
       localStorage.setItem(`${STORAGE_PREFIX}etablissements`, JSON.stringify(etablissements));
       localStorage.setItem(`${STORAGE_PREFIX}classes`, JSON.stringify(classes));
@@ -323,7 +341,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(`${STORAGE_PREFIX}submissions`, JSON.stringify(submissions));
       localStorage.setItem(`${STORAGE_PREFIX}notifications`, JSON.stringify(notifications));
     }
-  }, [users, etablissements, classes, inscriptions, courses, assignments, submissions, notifications]);
+  }, [currentUser, users, etablissements, classes, inscriptions, courses, assignments, submissions, notifications]);
 
   const resetStoreToDefaults = () => {
     if (typeof window !== "undefined") {

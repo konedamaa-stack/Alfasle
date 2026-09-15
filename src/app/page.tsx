@@ -10,10 +10,32 @@ import { JoinClassModal } from "@/components/classes/JoinClassModal";
 import { Soumission, Devoir, Etablissement } from "@/types";
 
 export default function Home() {
-  const [showLandingView, setShowLandingView] = useState<boolean>(true);
+  const [showLandingView, setShowLandingView] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      const isSessionActive = localStorage.getItem("alfasle_session_active");
+      if (isSessionActive === "true") {
+        return false;
+      }
+    }
+    return true;
+  });
   const [showSuperAdminView, setShowSuperAdminView] = useState<boolean>(false);
   const [selectedSubdomainSchool, setSelectedSubdomainSchool] = useState<Etablissement | null>(null);
   const [isJoinClassOpen, setIsJoinClassOpen] = useState(false);
+
+  const handleLoginSuccess = () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("alfasle_session_active", "true");
+    }
+    setShowLandingView(false);
+  };
+
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("alfasle_session_active");
+    }
+    setShowLandingView(true);
+  };
 
   // If a school's dedicated subdomain portal is selected
   if (selectedSubdomainSchool) {
@@ -23,7 +45,7 @@ export default function Home() {
           etablissement={selectedSubdomainSchool}
           onLoginSuccess={() => {
             setSelectedSubdomainSchool(null);
-            setShowLandingView(false);
+            handleLoginSuccess();
           }}
           onOpenJoinClassModal={() => setIsJoinClassOpen(true)}
           onBackToGlobal={() => setSelectedSubdomainSchool(null)}
@@ -33,7 +55,7 @@ export default function Home() {
           onClose={() => setIsJoinClassOpen(false)}
           onSuccessNavigateToCourses={() => {
             setSelectedSubdomainSchool(null);
-            setShowLandingView(false);
+            handleLoginSuccess();
           }}
         />
       </>
@@ -46,7 +68,7 @@ export default function Home() {
       <SuperAdminLoginView
         onLoginSuccess={() => {
           setShowSuperAdminView(false);
-          setShowLandingView(false);
+          handleLoginSuccess();
         }}
         onBackToStandard={() => {
           setShowSuperAdminView(false);
@@ -61,7 +83,7 @@ export default function Home() {
     return (
       <>
         <AuthLandingView
-          onLoginSuccess={() => setShowLandingView(false)}
+          onLoginSuccess={handleLoginSuccess}
           onOpenJoinClassModal={() => setIsJoinClassOpen(true)}
           onOpenSuperAdmin={() => setShowSuperAdminView(true)}
           onSelectSubdomainSchool={(etab) => setSelectedSubdomainSchool(etab)}
@@ -70,13 +92,11 @@ export default function Home() {
         <JoinClassModal
           isOpen={isJoinClassOpen}
           onClose={() => setIsJoinClassOpen(false)}
-          onSuccessNavigateToCourses={() => {
-            setShowLandingView(false);
-          }}
+          onSuccessNavigateToCourses={handleLoginSuccess}
         />
       </>
     );
   }
 
-  return <MainAppLayout onLogout={() => setShowLandingView(true)} />;
+  return <MainAppLayout onLogout={handleLogout} />;
 }
