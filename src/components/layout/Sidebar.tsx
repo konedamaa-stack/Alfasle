@@ -21,6 +21,7 @@ import {
   Sparkles,
   LogOut,
 } from "lucide-react";
+import { ConfirmModal } from "@/components/common/ConfirmModal";
 
 export type NavTab =
   | "dashboard"
@@ -44,6 +45,7 @@ interface SidebarProps {
 
 export function Sidebar({ activeTab, setActiveTab, onLogout }: SidebarProps) {
   const { currentUser, inscriptions, submissions, assignments, etablissements } = useStore();
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = React.useState(false);
 
   const pendingInscriptionsCount = inscriptions.filter((i) => i.status === "PENDING").length;
   const pendingGradingCount = submissions.filter((s) => s.status === "SUBMITTED").length;
@@ -216,11 +218,7 @@ export function Sidebar({ activeTab, setActiveTab, onLogout }: SidebarProps) {
       <div className="pt-3 border-t border-slate-800/80 space-y-2.5">
         {onLogout && (
           <button
-            onClick={() => {
-              if (window.confirm("Voulez-vous vraiment vous déconnecter de votre session ?")) {
-                onLogout();
-              }
-            }}
+            onClick={() => setIsLogoutConfirmOpen(true)}
             className="w-full py-2.5 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm group"
           >
             <LogOut className="w-4 h-4 text-rose-400 group-hover:-translate-x-0.5 transition-transform" />
@@ -231,6 +229,20 @@ export function Sidebar({ activeTab, setActiveTab, onLogout }: SidebarProps) {
           AlFasle v1.0.0 • Tous droits réservés
         </p>
       </div>
+
+      {/* Sleek Logout Confirmation Dialog */}
+      <ConfirmModal
+        isOpen={isLogoutConfirmOpen}
+        onClose={() => setIsLogoutConfirmOpen(false)}
+        onConfirm={() => {
+          if (onLogout) onLogout();
+        }}
+        title="Déconnexion de session"
+        message="Voulez-vous vraiment vous déconnecter de votre compte AlFasle ?"
+        confirmLabel="Se Déconnecter"
+        cancelLabel="Rester Connecté"
+        variant="logout"
+      />
     </aside>
   );
 }

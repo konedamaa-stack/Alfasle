@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useStore } from "@/lib/store";
 import { Etablissement, Classe, User, UserRole } from "@/types";
 import { ValidationQueue } from "@/components/inscriptions/ValidationQueue";
+import { ConfirmModal, ConfirmVariant } from "@/components/common/ConfirmModal";
 import {
   School,
   PlusCircle,
@@ -259,14 +260,32 @@ export function SuperAdminDashboard({
     setIsEditEtabModalOpen(false);
   };
 
+  // Confirmation modal state
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmLabel?: string;
+    variant?: ConfirmVariant;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
+
   const handleDeleteSchool = (etabId: string, etabName: string) => {
-    if (
-      window.confirm(
-        `Êtes-vous sûr de vouloir supprimer l'établissement « ${etabName} » ? Cette action est irréversible.`
-      )
-    ) {
-      deleteEtablissement(etabId);
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: `Supprimer l'établissement « ${etabName} » ?`,
+      message: `Êtes-vous sûr de vouloir supprimer définitivement l'établissement « ${etabName} » ? Tous les comptes, classes et données associés seront définitivement effacés.`,
+      confirmLabel: "Supprimer l'établissement",
+      variant: "danger",
+      onConfirm: () => {
+        deleteEtablissement(etabId);
+      },
+    });
   };
 
   // Handlers for Users
@@ -344,12 +363,26 @@ export function SuperAdminDashboard({
 
   const handleDeleteUser = (u: User) => {
     if (u.id === "u_super_admin_root" || u.email === "konedamaa@gmail.com") {
-      alert("Impossible de supprimer le compte Super Admin Master principal.");
+      setConfirmModal({
+        isOpen: true,
+        title: "Action impossible",
+        message: "Impossible de supprimer le compte Super Admin Master principal.",
+        confirmLabel: "Compris",
+        variant: "info",
+        onConfirm: () => {},
+      });
       return;
     }
-    if (window.confirm(`Voulez-vous vraiment supprimer le compte de « ${u.name} » (${u.email}) ?`)) {
-      deleteUser(u.id);
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: `Supprimer le compte de « ${u.name} » ?`,
+      message: `Êtes-vous sûr de vouloir supprimer définitivement le compte de « ${u.name} » (${u.email}) ? Cette action est irréversible.`,
+      confirmLabel: "Supprimer le compte",
+      variant: "danger",
+      onConfirm: () => {
+        deleteUser(u.id);
+      },
+    });
   };
 
   const togglePasswordVisibility = (userId: string) => {
@@ -430,9 +463,16 @@ export function SuperAdminDashboard({
           <div className="flex items-center gap-3 shrink-0 flex-wrap">
             <button
               onClick={() => {
-                if (window.confirm("Voulez-vous réinitialiser toutes les données aux valeurs d'origine propres et vider le cache du navigateur ?")) {
-                  resetStoreToDefaults();
-                }
+                setConfirmModal({
+                  isOpen: true,
+                  title: "Réinitialiser et Vider le Cache ?",
+                  message: "Voulez-vous réinitialiser toutes les données aux valeurs d'origine propres et vider le cache du navigateur ? Toutes les modifications locales non synchronisées seront réinitialisées.",
+                  confirmLabel: "Réinitialiser les données",
+                  variant: "warning",
+                  onConfirm: () => {
+                    resetStoreToDefaults();
+                  },
+                });
               }}
               title="Vider le cache du navigateur et réinitialiser les données"
               className="px-4 py-3.5 rounded-2xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-mono font-bold text-xs shadow-lg flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5"
@@ -2204,6 +2244,17 @@ export function SuperAdminDashboard({
           </div>
         </div>
       )}
+
+      {/* Uniform In-App Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmLabel={confirmModal.confirmLabel}
+        variant={confirmModal.variant}
+        onConfirm={confirmModal.onConfirm}
+        onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

@@ -19,6 +19,7 @@ import {
 import { formatDateTime } from "@/lib/utils";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { ChangePasswordModal } from "@/components/common/ChangePasswordModal";
+import { ConfirmModal } from "@/components/common/ConfirmModal";
 
 interface NavbarProps {
   onLogoutToLanding?: () => void;
@@ -39,6 +40,7 @@ export function Navbar({ onLogoutToLanding, onOpenSuperAdmin }: NavbarProps) {
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
   const [isChangePassOpen, setIsChangePassOpen] = useState(false);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
   const unreadNotifs = notifications.filter((n) => !n.isRead && n.userId === currentUser.id);
 
@@ -275,11 +277,7 @@ export function Navbar({ onLogoutToLanding, onOpenSuperAdmin }: NavbarProps) {
 
           {onLogoutToLanding && (
             <button
-              onClick={() => {
-                if (window.confirm("Voulez-vous vraiment vous déconnecter de votre compte ?")) {
-                  onLogoutToLanding();
-                }
-              }}
+              onClick={() => setIsLogoutConfirmOpen(true)}
               title="Se déconnecter de la session"
               className="px-3.5 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 hover:text-rose-200 border border-rose-500/30 transition-all flex items-center gap-1.5 text-xs font-bold shadow-md shadow-rose-500/10 transform hover:-translate-y-0.5"
             >
@@ -294,6 +292,20 @@ export function Navbar({ onLogoutToLanding, onOpenSuperAdmin }: NavbarProps) {
       <ChangePasswordModal
         isOpen={isChangePassOpen}
         onClose={() => setIsChangePassOpen(false)}
+      />
+
+      {/* Logout Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isLogoutConfirmOpen}
+        onClose={() => setIsLogoutConfirmOpen(false)}
+        onConfirm={() => {
+          if (onLogoutToLanding) onLogoutToLanding();
+        }}
+        title="Déconnexion de votre Session"
+        message="Voulez-vous vraiment vous déconnecter de votre compte AlFasle ?"
+        confirmLabel="Se Déconnecter"
+        cancelLabel="Rester Connecté"
+        variant="logout"
       />
     </header>
   );

@@ -20,6 +20,7 @@ import {
   X,
 } from "lucide-react";
 import { getVideoEmbedInfo } from "@/lib/utils";
+import { ConfirmModal, ConfirmVariant } from "@/components/common/ConfirmModal";
 
 interface CourseViewerProps {
   onOpenCreateCourse: () => void;
@@ -92,15 +93,37 @@ export function CourseViewer({
     setIsEditCourseOpen(false);
   };
 
+  // Confirmation modal state
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmLabel?: string;
+    variant?: ConfirmVariant;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
+
   const handleDeleteActiveCourse = () => {
     if (!activeCourse) return;
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer la leçon « ${activeCourse.title} » ?`)) {
-      deleteCourse(activeCourse.id);
-      const remaining = classCourses.filter((c) => c.id !== activeCourse.id);
-      if (remaining.length > 0) {
-        setSelectedCourseId(remaining[0].id);
-      }
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: `Supprimer la leçon « ${activeCourse.title} » ?`,
+      message: `Êtes-vous sûr de vouloir supprimer définitivement cette leçon ? Les supports associés seront retirés du cours.`,
+      confirmLabel: "Supprimer la leçon",
+      variant: "danger",
+      onConfirm: () => {
+        deleteCourse(activeCourse.id);
+        const remaining = classCourses.filter((c) => c.id !== activeCourse.id);
+        if (remaining.length > 0) {
+          setSelectedCourseId(remaining[0].id);
+        }
+      },
+    });
   };
 
   return (
@@ -460,6 +483,17 @@ export function CourseViewer({
           </div>
         </div>
       )}
+
+      {/* In-app uniform confirmation modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmLabel={confirmModal.confirmLabel}
+        variant={confirmModal.variant}
+        onConfirm={confirmModal.onConfirm}
+        onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

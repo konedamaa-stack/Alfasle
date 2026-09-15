@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { PreRegistrationModal } from "@/components/inscriptions/PreRegistrationModal";
+import { ConfirmModal } from "@/components/common/ConfirmModal";
 import { InscriptionRole } from "@/types";
 
 interface SchoolSubdomainPortalProps {
@@ -51,6 +52,7 @@ export function SchoolSubdomainPortal({
   const [errorMsg, setErrorMsg] = useState("");
   const [isPreRegModalOpen, setIsPreRegModalOpen] = useState(false);
   const [preRegRole, setPreRegRole] = useState<InscriptionRole>("STUDENT");
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   // Classes specific to this establishment
   const schoolClasses = classes.filter((c) => c.etablissementId === etablissement.id);
@@ -709,11 +711,7 @@ export function SchoolSubdomainPortal({
       <footer className="w-full text-center py-3 px-4 text-xs text-slate-500 border-t border-slate-900 z-10 flex flex-col sm:flex-row items-center justify-between gap-2 max-w-5xl mx-auto">
         <span>© 2026-2027 {etablissement.name} • Hébergé sur la plateforme AlFasle Multi-Tenant</span>
         <button
-          onClick={() => {
-            if (window.confirm("Voulez-vous vider le cache et réinitialiser les données de démo par défaut ?")) {
-              resetStoreToDefaults();
-            }
-          }}
+          onClick={() => setIsResetConfirmOpen(true)}
           className="text-[11px] text-slate-400 hover:text-rose-400 underline transition-colors flex items-center gap-1"
         >
           <span>🧹 Vider le cache & Réinitialiser</span>
@@ -726,6 +724,18 @@ export function SchoolSubdomainPortal({
         onClose={() => setIsPreRegModalOpen(false)}
         defaultEstablishmentId={etablissement.id}
         defaultRole={preRegRole}
+      />
+
+      {/* Reset Cache Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isResetConfirmOpen}
+        onClose={() => setIsResetConfirmOpen(false)}
+        onConfirm={resetStoreToDefaults}
+        title="Réinitialisation du Campus"
+        message="Voulez-vous vider le cache et réinitialiser les données de démonstration de cet établissement ?"
+        confirmLabel="Réinitialiser"
+        cancelLabel="Annuler"
+        variant="warning"
       />
     </div>
   );

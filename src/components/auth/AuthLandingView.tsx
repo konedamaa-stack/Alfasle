@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { PreRegistrationModal } from "@/components/inscriptions/PreRegistrationModal";
+import { ConfirmModal } from "@/components/common/ConfirmModal";
 import { InscriptionRole } from "@/types";
 
 interface AuthLandingViewProps {
@@ -47,6 +48,7 @@ export function AuthLandingView({
   const [brandBadgeText, setBrandBadgeText] = useState("ESSAYER2");
   const [isPreRegModalOpen, setIsPreRegModalOpen] = useState(false);
   const [preRegRole, setPreRegRole] = useState<InscriptionRole>("STUDENT");
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   // Role metadata corresponding to the screenshot & design system
   const roleConfig: Record<
@@ -732,11 +734,7 @@ export function AuthLandingView({
       <footer className="w-full text-center py-4 px-4 text-xs text-slate-500 border-t border-slate-900/80 z-10 flex flex-col sm:flex-row items-center justify-between gap-3 max-w-7xl mx-auto">
         <span>© 2026-2027 ALFASLE LMS • Plateforme Éducative Multi-Établissements</span>
         <button
-          onClick={() => {
-            if (window.confirm("Voulez-vous vider le cache et réinitialiser les données de démo par défaut ?")) {
-              resetStoreToDefaults();
-            }
-          }}
+          onClick={() => setIsResetConfirmOpen(true)}
           className="text-[11px] text-slate-400 hover:text-rose-400 underline transition-colors flex items-center gap-1"
         >
           <span>🧹 Vider le cache & Réinitialiser</span>
@@ -748,6 +746,18 @@ export function AuthLandingView({
         isOpen={isPreRegModalOpen}
         onClose={() => setIsPreRegModalOpen(false)}
         defaultRole={preRegRole}
+      />
+
+      {/* Reset Cache Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isResetConfirmOpen}
+        onClose={() => setIsResetConfirmOpen(false)}
+        onConfirm={resetStoreToDefaults}
+        title="Réinitialisation des Données"
+        message="Voulez-vous vider le cache et réinitialiser les données de démonstration de la plateforme ?"
+        confirmLabel="Réinitialiser"
+        cancelLabel="Annuler"
+        variant="warning"
       />
     </div>
   );

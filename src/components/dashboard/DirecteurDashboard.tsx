@@ -33,6 +33,8 @@ import {
   Lock,
 } from "lucide-react";
 
+import { ConfirmModal, ConfirmVariant } from "@/components/common/ConfirmModal";
+
 interface DirecteurDashboardProps {
   onNavigate?: (tab: string) => void;
   onOpenCreateClass?: () => void;
@@ -135,7 +137,7 @@ export function DirecteurDashboard({
   const [editTeacherClasseId, setEditTeacherClasseId] = useState("");
   const [editTeacherBio, setEditTeacherBio] = useState("");
 
-  // Edit Class State
+  // Class Edit State
   const [editingClass, setEditingClass] = useState<Classe | null>(null);
   const [isEditClassOpen, setIsEditClassOpen] = useState(false);
   const [editClassTitle, setEditClassTitle] = useState("");
@@ -145,6 +147,21 @@ export function DirecteurDashboard({
   const [editClassCapacity, setEditClassCapacity] = useState(35);
   const [editClassTeacherId, setEditClassTeacherId] = useState("");
   const [editClassDesc, setEditClassDesc] = useState("");
+
+  // Confirmation Modal State
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmLabel?: string;
+    variant?: ConfirmVariant;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
 
   // New Student Form State
   const [newStudentName, setNewStudentName] = useState("");
@@ -455,36 +472,45 @@ export function DirecteurDashboard({
   };
 
   const handleDeleteClass = (c: Classe) => {
-    if (
-      window.confirm(
-        `Êtes-vous sûr de vouloir supprimer définitivement la classe « ${c.title} » (${c.classCode}) ?\nTous les cours et inscriptions associés à cette classe seront également supprimés.`
-      )
-    ) {
-      deleteClass(c.id);
-      setIsEditClassOpen(false);
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: `Supprimer la classe « ${c.title} » ?`,
+      message: `Êtes-vous sûr de vouloir supprimer définitivement la classe « ${c.title} » (${c.classCode}) ? Tous les cours et inscriptions associés à cette classe seront également supprimés.`,
+      confirmLabel: "Supprimer la classe",
+      variant: "danger",
+      onConfirm: () => {
+        deleteClass(c.id);
+        setIsEditClassOpen(false);
+      },
+    });
   };
 
   const handleDeleteStudent = (u: User) => {
-    if (
-      window.confirm(
-        `Êtes-vous sûr de vouloir supprimer le compte élève de « ${u.name} » (${u.email}) ?`
-      )
-    ) {
-      deleteUser(u.id);
-      setIsEditStudentOpen(false);
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: `Supprimer l'élève « ${u.name} » ?`,
+      message: `Êtes-vous sûr de vouloir supprimer définitivement le compte élève de « ${u.name} » (${u.email}) ? Cette action est irréversible.`,
+      confirmLabel: "Supprimer l'élève",
+      variant: "danger",
+      onConfirm: () => {
+        deleteUser(u.id);
+        setIsEditStudentOpen(false);
+      },
+    });
   };
 
   const handleDeleteTeacher = (u: User) => {
-    if (
-      window.confirm(
-        `Êtes-vous sûr de vouloir supprimer le compte professeur de « ${u.name} » (${u.email}) ?`
-      )
-    ) {
-      deleteUser(u.id);
-      setIsEditTeacherOpen(false);
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: `Supprimer l'enseignant « ${u.name} » ?`,
+      message: `Êtes-vous sûr de vouloir supprimer définitivement le compte professeur de « ${u.name} » (${u.email}) ? Ses cours resteront archivés.`,
+      confirmLabel: "Supprimer le professeur",
+      variant: "danger",
+      onConfirm: () => {
+        deleteUser(u.id);
+        setIsEditTeacherOpen(false);
+      },
+    });
   };
 
   return (
@@ -789,12 +815,9 @@ export function DirecteurDashboard({
                               <Edit className="w-3.5 h-3.5" />
                             </button>
                             <button
-                              onClick={() => {
-                                if (window.confirm(`Supprimer le compte élève de ${s.name} ?`)) {
-                                  deleteUser(s.id);
-                                }
-                              }}
+                              onClick={() => handleDeleteStudent(s)}
                               className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-all"
+                              title="Supprimer l'élève"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -930,12 +953,9 @@ export function DirecteurDashboard({
                               <Edit className="w-3.5 h-3.5" />
                             </button>
                             <button
-                              onClick={() => {
-                                if (window.confirm(`Supprimer le profil enseignant de ${t.name} ?`)) {
-                                  deleteUser(t.id);
-                                }
-                              }}
+                              onClick={() => handleDeleteTeacher(t)}
                               className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-all"
+                              title="Supprimer le professeur"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -1937,6 +1957,17 @@ export function DirecteurDashboard({
           </div>
         </div>
       )}
+
+      {/* Uniform In-App Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmLabel={confirmModal.confirmLabel}
+        variant={confirmModal.variant}
+        onConfirm={confirmModal.onConfirm}
+        onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

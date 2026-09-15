@@ -21,6 +21,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { ApplyModal } from "./ApplyModal";
+import { ConfirmModal, ConfirmVariant } from "@/components/common/ConfirmModal";
 
 interface ClassListProps {
   onOpenCreateClass: () => void;
@@ -54,6 +55,21 @@ export function ClassList({
   const [editDesc, setEditDesc] = useState("");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+  // Confirmation modal state
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmLabel?: string;
+    variant?: ConfirmVariant;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
+
   const handleOpenEdit = (c: Classe) => {
     setEditingClass(c);
     setEditTitle(c.title);
@@ -84,14 +100,17 @@ export function ClassList({
   };
 
   const handleDeleteClass = (c: Classe) => {
-    if (
-      window.confirm(
-        `Êtes-vous sûr de vouloir supprimer définitivement la classe « ${c.title} » (${c.classCode}) ?\nTous les cours et inscriptions associés seront supprimés.`
-      )
-    ) {
-      deleteClass(c.id);
-      setIsEditModalOpen(false);
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: `Supprimer la classe « ${c.title} » ?`,
+      message: `Êtes-vous sûr de vouloir supprimer définitivement la classe « ${c.title} » (${c.classCode}) ? Tous les cours et inscriptions associés seront supprimés.`,
+      confirmLabel: "Supprimer la classe",
+      variant: "danger",
+      onConfirm: () => {
+        deleteClass(c.id);
+        setIsEditModalOpen(false);
+      },
+    });
   };
 
   const categories = ["ALL", "Informatique", "Mathématiques", "Design", "Sciences", "Langues"];
@@ -506,6 +525,17 @@ export function ClassList({
           </div>
         </div>
       )}
+
+      {/* In-app uniform confirmation modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmLabel={confirmModal.confirmLabel}
+        variant={confirmModal.variant}
+        onConfirm={confirmModal.onConfirm}
+        onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }
