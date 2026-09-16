@@ -504,41 +504,41 @@ export function SuperAdminDashboard({
       </div>
 
       {/* Main Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-3 flex-wrap">
+      <div className="flex items-center gap-2 border-b border-slate-800 pb-3 overflow-x-auto no-scrollbar whitespace-nowrap -mx-1 px-1">
         <button
           onClick={() => setActiveTab("USERS")}
-          className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2.5 transition-all ${
+          className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${
             activeTab === "USERS"
               ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
               : "bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800"
           }`}
         >
           <Users className="w-4 h-4" />
-          <span>👥 Utilisateurs & Identifiants ({users.length})</span>
+          <span>👥 Utilisateurs ({users.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab("ETABLISSEMENTS")}
-          className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2.5 transition-all ${
+          className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${
             activeTab === "ETABLISSEMENTS"
               ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
               : "bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800"
           }`}
         >
           <Building2 className="w-4 h-4" />
-          <span>🏫 Établissements & Campus ({etablissements.length})</span>
+          <span>🏫 Établissements ({etablissements.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab("INSCRIPTIONS")}
-          className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2.5 transition-all ${
+          className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${
             activeTab === "INSCRIPTIONS"
               ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
               : "bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800"
           }`}
         >
           <UserCheck className="w-4 h-4" />
-          <span>📝 Préinscriptions & Validations</span>
+          <span>📝 Préinscriptions</span>
           {inscriptions.filter((i) => i.status === "PENDING").length > 0 && (
             <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-mono text-[10px] font-black animate-pulse">
               {inscriptions.filter((i) => i.status === "PENDING").length}
@@ -548,14 +548,14 @@ export function SuperAdminDashboard({
 
         <button
           onClick={() => setActiveTab("SYSTEM")}
-          className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2.5 transition-all ${
+          className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${
             activeTab === "SYSTEM"
               ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
               : "bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800"
           }`}
         >
           <Server className="w-4 h-4" />
-          <span>📊 Monitoring & Quotas</span>
+          <span>📊 Monitoring</span>
         </button>
       </div>
 

@@ -136,9 +136,9 @@ export function ClassList({
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+          <h2 className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">
             {currentUser.role === "TEACHER"
               ? "Gestion des Classes Pédagogiques"
               : "Catalogue des Classes & Formations"}
@@ -150,11 +150,11 @@ export function ClassList({
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
           {onOpenJoinClassModal && (
             <button
               onClick={onOpenJoinClassModal}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-300 border border-blue-500/30 text-xs font-semibold shadow-md transition-all self-start sm:self-auto"
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-300 border border-blue-500/30 text-xs font-semibold shadow-md transition-all"
             >
               <span>🔑</span>
               <span>Rejoindre avec un Code</span>
@@ -164,17 +164,17 @@ export function ClassList({
           {(currentUser.role === "TEACHER" || currentUser.role === "ADMIN") && (
             <button
               onClick={onOpenCreateClass}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all self-start sm:self-auto"
+              className="flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all"
             >
               <PlusCircle className="w-4 h-4" />
-              <span>Créer une Nouvelle Classe</span>
+              <span>+ Nouvelle Classe</span>
             </button>
           )}
         </div>
       </div>
 
       {/* Filter Bar */}
-      <div className="glass-panel rounded-2xl p-4 border border-slate-800 flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="glass-panel rounded-2xl p-3 sm:p-4 border border-slate-800 flex flex-col md:flex-row gap-3 sm:gap-4 justify-between items-stretch md:items-center">
         {/* Search */}
         <div className="w-full md:w-72 relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -189,11 +189,11 @@ export function ClassList({
 
         {/* Établissement Filter */}
         <div className="flex items-center gap-2 w-full md:w-auto">
-          <label className="text-xs text-slate-400 whitespace-nowrap">Établissement :</label>
+          <label className="text-xs text-slate-400 whitespace-nowrap hidden sm:inline">Établissement :</label>
           <select
             value={selectedEtablissement}
             onChange={(e) => setSelectedEtablissement(e.target.value)}
-            className="px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+            className="w-full sm:w-auto px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-blue-500"
           >
             <option value="ALL">Tous les campus ({etablissements.length})</option>
             {etablissements.map((etab) => (
@@ -205,12 +205,12 @@ export function ClassList({
         </div>
 
         {/* Category & Level pills */}
-        <div className="flex flex-wrap items-center gap-1.5 w-full md:w-auto">
+        <div className="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto no-scrollbar whitespace-nowrap pb-1 md:pb-0">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors shrink-0 ${
                 selectedCategory === cat
                   ? "bg-blue-600 text-white font-semibold shadow-sm"
                   : "bg-slate-800/80 text-slate-400 hover:text-slate-200 border border-slate-700"

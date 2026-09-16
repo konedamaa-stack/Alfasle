@@ -279,18 +279,18 @@ export function SchoolSubdomainPortal({
       <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[130px] pointer-events-none" />
 
       {/* Subdomain Top Indicator Bar */}
-      <div className="w-full bg-[#080e1c] border-b border-blue-500/20 py-2 px-4 sm:px-8 text-xs flex items-center justify-between z-20">
-        <div className="flex items-center gap-2 font-mono">
-          <Globe className="w-3.5 h-3.5 text-blue-400" />
-          <span className="text-slate-400">Sous-Domaine Établissement :</span>
-          <span className="text-blue-400 font-bold bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/30">
+      <div className="w-full bg-[#080e1c] border-b border-blue-500/20 py-2 px-3 sm:px-8 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 z-20">
+        <div className="flex items-center gap-2 font-mono flex-wrap">
+          <Globe className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+          <span className="text-slate-400">Sous-Domaine :</span>
+          <span className="text-blue-400 font-bold bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/30 text-[11px] truncate max-w-[220px] sm:max-w-none">
             https://{etablissement.subdomain}.alfasle.edu
           </span>
         </div>
 
         <button
           onClick={onBackToGlobal}
-          className="text-slate-400 hover:text-white flex items-center gap-1 transition-colors text-[11px]"
+          className="text-slate-400 hover:text-white flex items-center gap-1 transition-colors text-[11px] self-end sm:self-auto"
         >
           <span>Changer d&apos;établissement (Portail Global)</span>
           <ExternalLink className="w-3 h-3" />
@@ -298,9 +298,9 @@ export function SchoolSubdomainPortal({
       </div>
 
       {/* Main Subdomain Header */}
-      <header className="w-full max-w-7xl mx-auto px-4 sm:px-8 py-4 flex items-center justify-between z-10">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 via-blue-500 to-indigo-600 p-0.5 shadow-lg shadow-blue-500/30">
+      <header className="w-full max-w-7xl mx-auto px-3 sm:px-8 py-3 sm:py-4 flex flex-col md:flex-row md:items-center justify-between gap-3.5 z-10">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-blue-600 via-blue-500 to-indigo-600 p-0.5 shadow-lg shadow-blue-500/30 shrink-0">
             <img
               src={
                 etablissement.logoUrl ||
@@ -310,21 +310,21 @@ export function SchoolSubdomainPortal({
               className="w-full h-full object-cover rounded-[14px]"
             />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-black text-xl tracking-tight text-white">{etablissement.name}</h1>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="font-black text-lg sm:text-xl tracking-tight text-white truncate">{etablissement.name}</h1>
               <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
                 {etablissement.code}
               </span>
             </div>
-            <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
-              <MapPin className="w-3 h-3 text-blue-400" />
-              {etablissement.city}, {etablissement.country} • {etablissement.type}
+            <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5 truncate">
+              <MapPin className="w-3 h-3 text-blue-400 shrink-0" />
+              <span>{etablissement.city}, {etablissement.country} • {etablissement.type}</span>
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
           <ThemeToggle />
 
           <button
@@ -333,28 +333,31 @@ export function SchoolSubdomainPortal({
               setPreRegRole("STUDENT");
               setIsPreRegModalOpen(true);
             }}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold shadow-md transition-all transform hover:-translate-y-0.5"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold shadow-md transition-all transform hover:-translate-y-0.5"
+            title="Pré-inscription"
           >
             <span>📝</span>
-            <span>Pré-inscription</span>
+            <span className="hidden sm:inline">Pré-inscription</span>
           </button>
 
           <button
             onClick={onOpenJoinClassModal}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 text-xs font-semibold shadow-md transition-all"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 text-xs font-semibold shadow-md transition-all"
+            title="Rejoindre une classe"
           >
             <KeyRound className="w-3.5 h-3.5 text-blue-400" />
-            <span>Rejoindre une classe ({etablissement.subdomain})</span>
+            <span className="hidden sm:inline">Rejoindre une classe</span>
+            <span className="sm:hidden">Rejoindre</span>
           </button>
         </div>
       </header>
 
       {/* Center Subdomain Login Card (Split-Screen) */}
-      <main className="flex-1 flex items-center justify-center p-3 sm:p-6 z-10">
-        <div className="w-full max-w-4xl bg-[#0e1424] border border-blue-500/30 rounded-[32px] overflow-hidden shadow-2xl shadow-blue-950/40 grid grid-cols-1 md:grid-cols-12 min-h-[560px]">
+      <main className="flex-1 flex flex-col items-center justify-center p-3 sm:p-6 z-10 w-full max-w-7xl mx-auto">
+        <div className="w-full max-w-4xl bg-[#0e1424] border border-blue-500/30 rounded-2xl sm:rounded-[32px] overflow-hidden shadow-2xl shadow-blue-950/40 grid grid-cols-1 md:grid-cols-12 min-h-[540px]">
 
           {/* LEFT COLUMN: School Custom Theme Banner */}
-          <div className="md:col-span-5 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 p-8 flex flex-col justify-between text-white relative overflow-hidden">
+          <div className="md:col-span-5 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 p-6 sm:p-8 flex flex-col justify-between text-white relative overflow-hidden">
             <div className="absolute -top-16 -right-16 w-56 h-56 bg-white/10 rounded-full blur-2xl pointer-events-none" />
             <div className="absolute -bottom-16 -left-16 w-60 h-60 bg-blue-400/20 rounded-full blur-3xl pointer-events-none" />
 

@@ -648,53 +648,53 @@ export function DirecteurDashboard({
       </div>
 
       {/* Navigation Sub-Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-3 flex-wrap">
+      <div className="flex items-center gap-2 border-b border-slate-800 pb-3 overflow-x-auto no-scrollbar whitespace-nowrap -mx-1 px-1">
         <button
           onClick={() => setActiveTab("STUDENTS")}
-          className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all ${
+          className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${
             activeTab === "STUDENTS"
               ? "bg-sky-600 text-white shadow-lg shadow-sky-600/20"
               : "bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800"
           }`}
         >
-          <GraduationCap className="w-4 h-4" />
-          <span>🎓 Inscription & Gestion des Élèves ({schoolStudents.length})</span>
+          <GraduationCap className="w-4 h-4 text-sky-300" />
+          <span><span className="hidden sm:inline">Inscription & </span>Élèves ({schoolStudents.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab("TEACHERS")}
-          className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all ${
+          className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${
             activeTab === "TEACHERS"
               ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
               : "bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800"
           }`}
         >
-          <Users className="w-4 h-4" />
-          <span>👨‍🏫 Inscription des Professeurs ({schoolTeachers.length})</span>
+          <Users className="w-4 h-4 text-emerald-300" />
+          <span><span className="hidden sm:inline">Gestion des </span>Professeurs ({schoolTeachers.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab("CLASSES")}
-          className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all ${
+          className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${
             activeTab === "CLASSES"
               ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
               : "bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800"
           }`}
         >
           <FolderKanban className="w-4 h-4" />
-          <span>🏫 Création & Gestion des Classes ({schoolClasses.length})</span>
+          <span><span className="hidden sm:inline">Création des </span>Classes ({schoolClasses.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab("INSCRIPTIONS")}
-          className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all ${
+          className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${
             activeTab === "INSCRIPTIONS"
               ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
               : "bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800"
           }`}
         >
-          <UserCheck className="w-4 h-4" />
-          <span>📝 Préinscriptions Campus</span>
+          <UserCheck className="w-4 h-4 text-purple-300" />
+          <span>Préinscriptions</span>
           {pendingInscriptionsCount > 0 && (
             <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-mono text-[10px] font-black animate-pulse">
               {pendingInscriptionsCount}

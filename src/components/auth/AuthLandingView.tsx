@@ -305,7 +305,7 @@ export function AuthLandingView({
         </div>
 
         {/* Quick buttons */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 flex-wrap justify-end">
           <ThemeToggle />
 
           <button
@@ -314,39 +314,43 @@ export function AuthLandingView({
               setPreRegRole("STUDENT");
               setIsPreRegModalOpen(true);
             }}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold shadow-md transition-all transform hover:-translate-y-0.5"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold shadow-md transition-all transform hover:-translate-y-0.5"
+            title="Pré-inscription en ligne"
           >
             <span>📝</span>
-            <span>Pré-inscription</span>
+            <span className="hidden sm:inline">Pré-inscription</span>
           </button>
 
           <button
             onClick={onOpenJoinClassModal}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-blue-300 border border-blue-500/30 text-xs font-semibold shadow-md transition-all transform hover:-translate-y-0.5"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-blue-300 border border-blue-500/30 text-xs font-semibold shadow-md transition-all transform hover:-translate-y-0.5"
+            title="Rejoindre avec un code classe"
           >
             <KeyRound className="w-3.5 h-3.5 text-blue-400" />
-            <span>Code Classe</span>
+            <span className="hidden sm:inline">Code Classe</span>
           </button>
 
           {onOpenSuperAdmin && (
             <button
               onClick={onOpenSuperAdmin}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-600/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold shadow-md transition-all transform hover:-translate-y-0.5 font-mono"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-600/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold shadow-md transition-all transform hover:-translate-y-0.5 font-mono"
+              title="Console Super Administrateur"
             >
               <span>🛡️</span>
-              <span>Super Admin (Root)</span>
+              <span className="hidden md:inline">Super Admin (Root)</span>
+              <span className="md:hidden hidden sm:inline">Admin</span>
             </button>
           )}
         </div>
       </header>
 
       {/* Center Auth Card container (Identical structure to reference image) */}
-      <main className="flex-1 flex items-center justify-center p-3 sm:p-6 z-10">
-        <div className="w-full max-w-4xl bg-[#111726] border border-slate-700/60 rounded-[32px] overflow-hidden shadow-2xl shadow-blue-950/40 grid grid-cols-1 md:grid-cols-12 min-h-[580px]">
+      <main className="flex-1 flex flex-col items-center justify-center p-3 sm:p-6 z-10 w-full max-w-7xl mx-auto">
+        <div className="w-full max-w-4xl bg-[#111726] border border-slate-700/60 rounded-2xl sm:rounded-[32px] overflow-hidden shadow-2xl shadow-blue-950/40 grid grid-cols-1 md:grid-cols-12 min-h-[540px]">
           
           {/* LEFT COLUMN: Modern Blue Gradient Banner (5 cols) */}
           <div
-            className={`md:col-span-5 bg-gradient-to-br ${currentConfig.cardBg} p-8 sm:p-10 flex flex-col justify-between text-white relative overflow-hidden transition-all duration-500`}
+            className={`md:col-span-5 bg-gradient-to-br ${currentConfig.cardBg} p-6 sm:p-10 flex flex-col justify-between text-white relative overflow-hidden transition-all duration-500`}
           >
             {/* Soft decorative background shapes */}
             <div className="absolute -top-16 -right-16 w-56 h-56 bg-white/10 rounded-full blur-2xl pointer-events-none" />

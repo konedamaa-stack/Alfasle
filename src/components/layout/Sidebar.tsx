@@ -20,6 +20,7 @@ import {
   Shield,
   Sparkles,
   LogOut,
+  X,
 } from "lucide-react";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
 
@@ -41,9 +42,17 @@ interface SidebarProps {
   setActiveTab: (tab: NavTab) => void;
   onOpenSuperAdminModal?: () => void;
   onLogout?: () => void;
+  isOpenMobile?: boolean;
+  onCloseMobile?: () => void;
 }
 
-export function Sidebar({ activeTab, setActiveTab, onLogout }: SidebarProps) {
+export function Sidebar({
+  activeTab,
+  setActiveTab,
+  onLogout,
+  isOpenMobile,
+  onCloseMobile,
+}: SidebarProps) {
   const { currentUser, inscriptions, submissions, assignments, etablissements } = useStore();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = React.useState(false);
 
@@ -142,20 +151,34 @@ export function Sidebar({ activeTab, setActiveTab, onLogout }: SidebarProps) {
 
   const navItems = getNavItems();
 
-  return (
-    <aside className="w-64 shrink-0 glass-panel border-r border-slate-800/80 p-4 flex flex-col justify-between hidden md:flex min-h-[calc(100vh-65px)]">
+  const renderSidebarContent = (isMobile = false) => (
+    <div className="space-y-5 flex-1 flex flex-col justify-between">
       <div className="space-y-5">
         <div>
-          <p className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">
-            Menu Principal
-          </p>
+          <div className="flex items-center justify-between px-3 mb-3">
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              Menu Principal
+            </p>
+            {isMobile && onCloseMobile && (
+              <button
+                onClick={onCloseMobile}
+                className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
+                aria-label="Fermer le menu"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
           <nav className="space-y-1">
             {navItems.map((item) => {
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id as NavTab)}
+                  onClick={() => {
+                    setActiveTab(item.id as NavTab);
+                    if (isMobile && onCloseMobile) onCloseMobile();
+                  }}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
                     isActive
                       ? item.id === "superadmin"
@@ -194,7 +217,10 @@ export function Sidebar({ activeTab, setActiveTab, onLogout }: SidebarProps) {
               Création d&apos;établissements, quotas d&apos;élèves et gestion des sous-domaines DNS.
             </p>
             <button
-              onClick={() => setActiveTab("superadmin")}
+              onClick={() => {
+                setActiveTab("superadmin");
+                if (isMobile && onCloseMobile) onCloseMobile();
+              }}
               className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-extrabold text-[11px] flex items-center justify-center gap-1.5 shadow-md transition-all"
             >
               <span>Ouvrir Super Admin &rarr;</span>
@@ -229,6 +255,31 @@ export function Sidebar({ activeTab, setActiveTab, onLogout }: SidebarProps) {
           AlFasle v1.0.0 • Tous droits réservés
         </p>
       </div>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Persistent Sidebar */}
+      <aside className="w-64 shrink-0 glass-panel border-r border-slate-800/80 p-4 flex flex-col justify-between hidden md:flex min-h-[calc(100vh-65px)]">
+        {renderSidebarContent(false)}
+      </aside>
+
+      {/* Mobile Slide-Over Drawer with Backdrop */}
+      {isOpenMobile && (
+        <div className="fixed inset-0 z-50 md:hidden animate-fadeIn">
+          {/* Backdrop Blur Overlay */}
+          <div
+            onClick={onCloseMobile}
+            className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+          />
+
+          {/* Drawer Container */}
+          <aside className="absolute top-0 bottom-0 left-0 w-72 max-w-[85vw] bg-[#090e1a] border-r border-slate-800 p-4 flex flex-col justify-between shadow-2xl z-10 overflow-y-auto">
+            {renderSidebarContent(true)}
+          </aside>
+        </div>
+      )}
 
       {/* Sleek Logout Confirmation Dialog */}
       <ConfirmModal
@@ -243,6 +294,6 @@ export function Sidebar({ activeTab, setActiveTab, onLogout }: SidebarProps) {
         cancelLabel="Rester Connecté"
         variant="logout"
       />
-    </aside>
+    </>
   );
 }

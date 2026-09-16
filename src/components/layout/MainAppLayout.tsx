@@ -21,6 +21,15 @@ import { SubmitAssignmentModal } from "@/components/assignments/SubmitAssignment
 import { GradingModal } from "@/components/assignments/GradingModal";
 import { GradebookView } from "@/components/grades/GradebookView";
 import { Soumission, Devoir } from "@/types";
+import {
+  LayoutDashboard,
+  FolderKanban,
+  BookOpen,
+  FileCheck2,
+  Menu,
+  Award,
+  Users,
+} from "lucide-react";
 
 interface MainAppLayoutProps {
   onLogout: () => void;
@@ -28,6 +37,7 @@ interface MainAppLayoutProps {
 
 export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
   const { currentUser, submissions, assignments } = useStore();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTabState] = useState<NavTab>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("alfasle_active_tab") as NavTab;
@@ -41,6 +51,7 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
       localStorage.setItem("alfasle_active_tab", tab);
     }
     setActiveTabState(tab);
+    setIsMobileMenuOpen(false);
   };
 
   // Modals state
@@ -84,15 +95,23 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
       <Navbar
         onLogoutToLanding={onLogout}
         onOpenSuperAdmin={() => setActiveTab("superadmin")}
+        onToggleMobileMenu={() => setIsMobileMenuOpen((prev) => !prev)}
+        isMobileMenuOpen={isMobileMenuOpen}
       />
 
       {/* Main App Layout */}
       <div className="flex-1 flex max-w-[1600px] w-full mx-auto">
-        {/* Left Sidebar */}
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={onLogout} />
+        {/* Left Sidebar (Desktop + Mobile Drawer) */}
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          onLogout={onLogout}
+          isOpenMobile={isMobileMenuOpen}
+          onCloseMobile={() => setIsMobileMenuOpen(false)}
+        />
 
         {/* Content Area */}
-        <main className="flex-1 p-4 sm:p-8 overflow-y-auto max-h-[calc(100vh-65px)]">
+        <main className="flex-1 p-3 sm:p-6 md:p-8 overflow-y-auto max-h-[calc(100vh-65px)] pb-24 md:pb-8">
           {/* SUPER ADMIN DEDICATED CONSOLE TAB */}
           {activeTab === "superadmin" && (
             <SuperAdminDashboard
@@ -295,6 +314,67 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
         isOpen={!!selectedAssignmentForSubmit}
         onClose={() => setSelectedAssignmentForSubmit(null)}
       />
+
+      {/* Mobile Bottom Navigation Bar (Fixed for quick 1-tap thumb navigation) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#080d1a]/95 backdrop-blur-xl border-t border-slate-800/90 px-2 py-1.5 flex items-center justify-around shadow-2xl safe-area-bottom">
+        <button
+          onClick={() => setActiveTab(currentUser.role === "SUPER_ADMIN" ? "superadmin" : "dashboard")}
+          className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all ${
+            activeTab === "dashboard" || activeTab === "superadmin"
+              ? "text-indigo-400 font-bold"
+              : "text-slate-400 hover:text-white"
+          }`}
+        >
+          <LayoutDashboard className="w-5 h-5" />
+          <span className="text-[10px]">Accueil</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("classes")}
+          className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all ${
+            activeTab === "classes" || activeTab === "catalog"
+              ? "text-indigo-400 font-bold"
+              : "text-slate-400 hover:text-white"
+          }`}
+        >
+          <FolderKanban className="w-5 h-5" />
+          <span className="text-[10px]">Classes</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("courses")}
+          className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all ${
+            activeTab === "courses"
+              ? "text-indigo-400 font-bold"
+              : "text-slate-400 hover:text-white"
+          }`}
+        >
+          <BookOpen className="w-5 h-5" />
+          <span className="text-[10px]">Cours</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("assignments")}
+          className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all ${
+            activeTab === "assignments"
+              ? "text-indigo-400 font-bold"
+              : "text-slate-400 hover:text-white"
+          }`}
+        >
+          <FileCheck2 className="w-5 h-5" />
+          <span className="text-[10px]">Devoirs</span>
+        </button>
+
+        <button
+          onClick={() => setIsMobileMenuOpen(true)}
+          className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all ${
+            isMobileMenuOpen ? "text-indigo-400 font-bold" : "text-slate-400 hover:text-white"
+          }`}
+        >
+          <Menu className="w-5 h-5" />
+          <span className="text-[10px]">Menu</span>
+        </button>
+      </nav>
     </div>
   );
 }

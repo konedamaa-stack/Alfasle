@@ -15,6 +15,8 @@ import {
   Search,
   KeyRound,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
@@ -24,9 +26,16 @@ import { ConfirmModal } from "@/components/common/ConfirmModal";
 interface NavbarProps {
   onLogoutToLanding?: () => void;
   onOpenSuperAdmin?: () => void;
+  onToggleMobileMenu?: () => void;
+  isMobileMenuOpen?: boolean;
 }
 
-export function Navbar({ onLogoutToLanding, onOpenSuperAdmin }: NavbarProps) {
+export function Navbar({
+  onLogoutToLanding,
+  onOpenSuperAdmin,
+  onToggleMobileMenu,
+  isMobileMenuOpen,
+}: NavbarProps) {
   const {
     currentUser,
     users,
@@ -82,22 +91,36 @@ export function Navbar({ onLogoutToLanding, onOpenSuperAdmin }: NavbarProps) {
   const badge = getRoleBadge(currentUser.role);
 
   return (
-    <header className="sticky top-0 z-40 w-full glass-panel border-b border-slate-800/80 px-4 sm:px-8 py-3 flex items-center justify-between">
-      {/* Brand Logo */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-          <GraduationCap className="w-6 h-6 text-white" />
+    <header className="sticky top-0 z-40 w-full glass-panel border-b border-slate-800/80 px-3 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between">
+      {/* Brand Logo & Mobile Drawer Toggle */}
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        {onToggleMobileMenu && (
+          <button
+            onClick={onToggleMobileMenu}
+            className="md:hidden p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 transition-colors"
+            aria-label="Menu Mobile"
+          >
+            {isMobileMenuOpen ? (
+              <X className="w-5 h-5 text-indigo-400" />
+            ) : (
+              <Menu className="w-5 h-5 text-indigo-400" />
+            )}
+          </button>
+        )}
+
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 shrink-0">
+          <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </div>
         <div>
-          <div className="flex items-center gap-2">
-            <span className="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-indigo-200">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="font-extrabold text-lg sm:text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-indigo-200">
               ALFASLE
             </span>
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase tracking-wider">
+            <span className="text-[9px] sm:text-[10px] font-semibold px-1.5 sm:px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase tracking-wider">
               LMS Pro
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 hidden sm:block">
+          <p className="text-[10px] sm:text-[11px] text-slate-400 hidden sm:block">
             Plateforme de Gestion de Classes & Cours
           </p>
         </div>
