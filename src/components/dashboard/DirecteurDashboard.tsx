@@ -516,65 +516,98 @@ export function DirecteurDashboard({
   return (
     <div className="space-y-6 animate-fadeIn pb-12">
       {/* Hero Director Banner */}
-      <div className="relative rounded-[28px] p-6 sm:p-8 overflow-hidden bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 border border-blue-500/30 shadow-2xl">
+      <div className="relative rounded-[28px] p-6 sm:p-8 overflow-hidden bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 border border-blue-500/30 shadow-2xl space-y-6">
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs font-mono font-bold">
-              <Shield className="w-3.5 h-3.5 text-blue-400" />
-              <span>ESPACE DIRECTION & ADMINISTRATION D'ÉTABLISSEMENT</span>
+        
+        {/* Top Header Row: Title, Badges & Campus Settings */}
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-2.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs font-mono font-bold">
+                <Shield className="w-3.5 h-3.5 text-blue-400" />
+                <span>ESPACE DIRECTION & ADMINISTRATION D'ÉTABLISSEMENT</span>
+              </div>
+              {currentEtab?.code && (
+                <span className="px-2.5 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 text-[11px] font-mono font-semibold">
+                  {currentEtab.code}
+                </span>
+              )}
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">
               {currentEtab?.name || "Administration du Campus"}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+            
+            <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
               En tant que Directeur, vous avez le contrôle total sur votre établissement : inscrivez vos <strong>Élèves</strong>, recrutez vos <strong>Professeurs</strong>, ouvrez vos <strong>Classes</strong> et validez les admissions.
             </p>
           </div>
 
-          {/* Direct Creation Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            <button
-              onClick={() => setIsAddStudentOpen(true)}
-              className="px-4 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-black text-xs shadow-xl shadow-blue-500/25 flex items-center gap-1.5 transition-all transform hover:-translate-y-0.5"
-            >
-              <GraduationCap className="w-4 h-4" />
-              <span>+ Inscrire Élève</span>
-            </button>
-
-            <button
-              onClick={() => setIsAddTeacherOpen(true)}
-              className="px-4 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-black text-xs shadow-xl shadow-emerald-500/25 flex items-center gap-1.5 transition-all transform hover:-translate-y-0.5"
-            >
-              <Users className="w-4 h-4" />
-              <span>+ Inscrire Professeur</span>
-            </button>
-
-            <button
-              onClick={() => setIsAddClassOpen(true)}
-              className="px-4 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-black font-black text-xs shadow-xl shadow-amber-500/25 flex items-center gap-1.5 transition-all transform hover:-translate-y-0.5"
-            >
-              <FolderKanban className="w-4 h-4" />
-              <span>+ Créer Classe</span>
-            </button>
-
-            <button
-              onClick={() => onNavigate && onNavigate("courses")}
-              className="px-4 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs shadow-xl shadow-purple-600/25 flex items-center gap-1.5 transition-all transform hover:-translate-y-0.5"
-            >
-              <BookOpen className="w-4 h-4" />
-              <span>+ Publier Cours Vidéo</span>
-            </button>
-
+          <div className="shrink-0 flex items-center gap-2">
             <button
               onClick={handleOpenEditCampus}
-              className="px-3.5 py-3 rounded-2xl bg-slate-900/90 hover:bg-slate-800 text-amber-300 border border-amber-500/40 font-bold text-xs flex items-center gap-1.5 transition-all shadow-md"
+              className="px-4 py-2.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold text-xs flex items-center gap-2 transition-all shadow-md hover:border-amber-400"
               title="Modifier les informations et mot de passe du campus"
             >
               <Edit className="w-4 h-4 text-amber-400" />
               <span>Modifier Campus</span>
             </button>
           </div>
+        </div>
+
+        {/* Quick Action Buttons Grid */}
+        <div className="relative z-10 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-4 border-t border-slate-800/80">
+          <button
+            onClick={() => setIsAddStudentOpen(true)}
+            className="p-3.5 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-black text-xs shadow-lg shadow-blue-500/20 flex items-center gap-3 transition-all transform hover:-translate-y-0.5 group"
+          >
+            <div className="p-2 rounded-xl bg-white/20 group-hover:bg-white/30 transition-colors">
+              <GraduationCap className="w-4 h-4 text-white" />
+            </div>
+            <div className="text-left">
+              <div className="font-extrabold text-xs text-white">+ Inscrire Élève</div>
+              <div className="text-[10px] text-sky-100/80 font-normal">Nouveau compte</div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setIsAddTeacherOpen(true)}
+            className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/20 flex items-center gap-3 transition-all transform hover:-translate-y-0.5 group"
+          >
+            <div className="p-2 rounded-xl bg-black/15 group-hover:bg-black/25 transition-colors">
+              <Users className="w-4 h-4 text-slate-950" />
+            </div>
+            <div className="text-left">
+              <div className="font-extrabold text-xs text-slate-950">+ Inscrire Professeur</div>
+              <div className="text-[10px] text-emerald-950/80 font-normal">Recruter enseignant</div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setIsAddClassOpen(true)}
+            className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 flex items-center gap-3 transition-all transform hover:-translate-y-0.5 group"
+          >
+            <div className="p-2 rounded-xl bg-black/15 group-hover:bg-black/25 transition-colors">
+              <FolderKanban className="w-4 h-4 text-slate-950" />
+            </div>
+            <div className="text-left">
+              <div className="font-extrabold text-xs text-slate-950">+ Créer Classe</div>
+              <div className="text-[10px] text-amber-950/80 font-normal">Ouvrir promotion</div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigate && onNavigate("courses")}
+            className="p-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs shadow-lg shadow-purple-600/20 flex items-center gap-3 transition-all transform hover:-translate-y-0.5 group"
+          >
+            <div className="p-2 rounded-xl bg-white/20 group-hover:bg-white/30 transition-colors">
+              <BookOpen className="w-4 h-4 text-white" />
+            </div>
+            <div className="text-left">
+              <div className="font-extrabold text-xs text-white">+ Publier Cours</div>
+              <div className="text-[10px] text-purple-100/80 font-normal">Leçons & vidéos</div>
+            </div>
+          </button>
         </div>
       </div>
 
