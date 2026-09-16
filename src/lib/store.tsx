@@ -112,13 +112,18 @@ function cleanLegacyStorage() {
   if (typeof window !== "undefined") {
     try {
       const keysToRemove: string[] = [];
+      const preservedKeys = new Set([
+        "alfasle_session_active",
+        "alfasle_active_tab",
+        "alfasle_theme",
+      ]);
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (
           key &&
           key.startsWith("alfasle") &&
           !key.startsWith(STORAGE_PREFIX) &&
-          key !== "alfasle_theme"
+          !preservedKeys.has(key)
         ) {
           keysToRemove.push(key);
         }
