@@ -153,19 +153,7 @@ export const initialUsers: User[] = [
     etablissementName: "Institut Supérieur Polytechnique KONE",
     createdAt: "2025-02-01T14:30:00Z",
   },
-  {
-    id: "u_student_1",
-    name: "Amine Benali",
-    username: "amine",
-    email: "amine.benali@student.alfasle.edu",
-    password: "Madouu1966@",
-    role: "STUDENT",
-    bio: "Étudiant passionné par le génie logiciel et les architectures cloud.",
-    avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
-    etablissementId: "etab_gs_alfasle",
-    etablissementName: "Groupe Scolaire AlFasle",
-    createdAt: "2025-02-01T14:30:00Z",
-  },
+
   {
     id: "u_student_2",
     name: "Yasmine Khelifi",
@@ -338,24 +326,7 @@ export const initialInscriptions: Inscription[] = [
     reviewedAt: "2026-08-28T09:30:00Z",
     reviewedBy: "KONE ADAMA (Super Admin)",
   },
-  {
-    id: "ins_1",
-    userId: "u_student_1",
-    userName: "Amine Benali",
-    userEmail: "amine.benali@student.alfasle.edu",
-    userPhone: "+213 55 12 34 56",
-    userAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
-    role: "STUDENT",
-    etablissementId: "etab_gs_alfasle",
-    etablissementName: "Groupe Scolaire AlFasle",
-    classeId: "cls_nextjs_mastery",
-    classeTitle: "Développement Web Moderne avec Next.js 15 & TypeScript",
-    status: "APPROVED",
-    motivation: "Je souhaite perfectionner mes compétences en React et maîtriser l'écosystème Next.js pour mon projet de fin d'études.",
-    appliedAt: "2026-08-28T14:20:00Z",
-    reviewedAt: "2026-08-29T09:00:00Z",
-    reviewedBy: "KONE ADAMA (Super Admin)",
-  },
+
 ];
 
 export const initialCourses: Cours[] = [
@@ -474,32 +445,6 @@ export const initialAssignments: Devoir[] = [
 
 export const initialSubmissions: Soumission[] = [
   {
-    id: "sub_1",
-    devoirId: "dev_1",
-    devoirTitle: "Devoir Pratique 1 : Création d'un catalogue de cours interactif",
-    classeId: "cls_nextjs_mastery",
-    classeTitle: "Développement Web Moderne avec Next.js 15 & TypeScript",
-    studentId: "u_student_1",
-    studentName: "Amine Benali",
-    studentEmail: "amine.benali@student.alfasle.edu",
-    studentAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
-    content: "Bonjour Madame, voici mon rendu pour le TP1. J'ai utilisé Server Components pour le rendu initial et un composant Client pour le filtre instantané avec debounce. Dépôt GitHub : https://github.com/amine-benali/alfasle-tp1",
-    attachmentName: "Rapport_TP1_AmineBenali.pdf",
-    attachmentUrl: "#",
-    submittedAt: "2026-09-03T18:40:00Z",
-    status: "GRADED",
-    correction: {
-      id: "cor_1",
-      soumissionId: "sub_1",
-      graderId: "u_teacher_1",
-      graderName: "Prof. Sarah Mansouri",
-      score: 18.5,
-      maxScore: 20,
-      feedback: "Excellent travail Amine ! La séparation entre composant serveur et client est parfaitement maîtrisée. L'utilisation du debounce pour la recherche est un vrai plus d'optimisation.",
-      gradedAt: "2026-09-04T02:15:00Z",
-    },
-  },
-  {
     id: "sub_2",
     devoirId: "dev_1",
     devoirTitle: "Devoir Pratique 1 : Création d'un catalogue de cours interactif",
@@ -535,14 +480,5 @@ export const initialNotifications: AppNotification[] = [
     type: "ASSIGNMENT",
     isRead: false,
     createdAt: "2026-09-04T01:10:00Z",
-  },
-  {
-    id: "notif_3",
-    userId: "u_student_1",
-    title: "Devoir corrigé !",
-    message: "Votre note pour le Devoir Pratique 1 est disponible (18.5/20).",
-    type: "GRADE",
-    isRead: false,
-    createdAt: "2026-09-04T02:15:00Z",
   },
 ];
