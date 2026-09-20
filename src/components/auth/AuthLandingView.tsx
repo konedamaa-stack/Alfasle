@@ -89,8 +89,8 @@ export function AuthLandingView({
       espaceDesc: "Direction du Groupe Scolaire AlFasle (Abidjan) & Supervision",
       defaultLogin: "diawara@gmail.com",
       defaultPass: "Madouu1966@",
-      cardBg: "from-blue-600 via-blue-700 to-indigo-800",
-      gradient: "from-blue-600 to-indigo-600",
+      cardBg: "from-emerald-600 via-emerald-700 to-teal-900",
+      gradient: "from-emerald-500 to-teal-600",
     },
     TEACHER: {
       badgeIcon: "👨‍🏫",
@@ -348,13 +348,13 @@ export function AuthLandingView({
       <main className="flex-1 flex flex-col items-center justify-center p-3 sm:p-6 z-10 w-full max-w-7xl mx-auto">
         <div className="w-full max-w-4xl bg-[#111726] border border-slate-700/60 rounded-2xl sm:rounded-[32px] overflow-hidden shadow-2xl shadow-blue-950/40 grid grid-cols-1 md:grid-cols-12 min-h-[540px]">
           
-          {/* LEFT COLUMN: Modern Blue Gradient Banner (5 cols) */}
+          {/* LEFT COLUMN: Modern Gradient Banner (5 cols) */}
           <div
             className={`md:col-span-5 bg-gradient-to-br ${currentConfig.cardBg} p-6 sm:p-10 flex flex-col justify-between text-white relative overflow-hidden transition-all duration-500`}
           >
             {/* Soft decorative background shapes */}
             <div className="absolute -top-16 -right-16 w-56 h-56 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="absolute -bottom-16 -left-16 w-60 h-60 bg-blue-400/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-16 -left-16 w-60 h-60 bg-white/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="relative z-10 space-y-6">
               {/* Badge matching screenshot: ESSAYER2 */}
@@ -368,21 +368,21 @@ export function AuthLandingView({
                 <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-tight drop-shadow-sm">
                   {currentConfig.leftTitle}
                 </h1>
-                <p className="text-xs sm:text-sm text-blue-50/90 leading-relaxed max-w-sm">
+                <p className="text-xs sm:text-sm text-white/90 leading-relaxed max-w-sm">
                   {currentConfig.leftDesc}
                 </p>
               </div>
 
               {/* Extra multi-school pill */}
               <div className="pt-2">
-                <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 space-y-1.5 text-xs">
-                  <div className="flex items-center justify-between text-[11px] font-semibold text-blue-100">
+                <div className="p-3 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 space-y-1.5 text-xs">
+                  <div className="flex items-center justify-between text-[11px] font-semibold text-white">
                     <span>Établissements connectés</span>
-                    <span className="font-bold bg-white/20 px-2 py-0.5 rounded-full">
+                    <span className="font-bold bg-white/25 px-2 py-0.5 rounded-full">
                       {etablissements.length} Écoles
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-[11px] text-blue-200">
+                  <div className="flex items-center justify-between text-[11px] text-white/80">
                     <span>Classes actives</span>
                     <span className="font-bold">{classes.length} Formations</span>
                   </div>
@@ -392,11 +392,11 @@ export function AuthLandingView({
 
             {/* Bottom Left Note */}
             <div className="relative z-10 pt-6 border-t border-white/15 space-y-2">
-              <div className="flex items-center gap-2 text-xs text-blue-100">
+              <div className="flex items-center gap-2 text-xs text-white/90">
                 <ShieldCheck className="w-4 h-4 text-emerald-300" />
                 <span>Connexion sécurisée SSL / TLS 256-bit</span>
               </div>
-              <p className="text-[11px] text-blue-200/70">
+              <p className="text-[11px] text-white/70">
                 Année Scolaire & Universitaire 2026-2027
               </p>
             </div>
@@ -420,7 +420,7 @@ export function AuthLandingView({
                 <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                   Se connecter
                 </h2>
-                <p className="text-xs text-blue-400 mt-1 font-medium lowercase">
+                <p className="text-xs text-slate-400 mt-1 font-medium lowercase">
                   {currentConfig.roleSubtitle}
                 </p>
               </div>
@@ -433,11 +433,11 @@ export function AuthLandingView({
                   onClick={() => handleRoleSelect("ADMIN")}
                   className={`p-3 rounded-2xl flex flex-col items-center justify-center gap-2 border transition-all text-center ${
                     selectedRole === "ADMIN"
-                      ? "bg-blue-600/20 border-blue-500 text-white shadow-lg shadow-blue-600/15 ring-2 ring-blue-500/40"
+                      ? "bg-emerald-600/20 border-emerald-500 text-white shadow-lg shadow-emerald-600/15 ring-2 ring-emerald-500/40"
                       : "bg-[#151c2f] border-slate-700/60 text-slate-300 hover:text-white hover:border-slate-600 hover:bg-slate-800"
                   }`}
                 >
-                  <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-lg">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-lg">
                     👑
                   </div>
                   <span className="text-[11px] font-bold">Directeur</span>
@@ -575,7 +575,11 @@ export function AuthLandingView({
                 <div className="flex items-center justify-between gap-3 pt-2">
                   <button
                     type="submit"
-                    className="flex-1 py-3 px-6 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5"
+                    className={`flex-1 py-3 px-6 rounded-2xl ${
+                      selectedRole === "ADMIN"
+                        ? "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/30"
+                        : "bg-blue-600 hover:bg-blue-500 shadow-blue-600/30"
+                    } text-white font-bold text-xs shadow-lg flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5`}
                   >
                     <LogIn className="w-4 h-4" />
                     <span>connexion</span>
