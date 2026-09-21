@@ -273,17 +273,17 @@ export function SchoolSubdomainPortal({
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-[#060a14] text-slate-100 relative overflow-hidden selection:bg-blue-500 selection:text-white">
+    <div className="min-h-screen flex flex-col justify-between bg-[#080504] text-slate-100 relative overflow-hidden selection:bg-[#8B4513] selection:text-white">
       {/* Background glow effects */}
-      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[130px] pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#7B3F00]/15 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-[#3D1A04]/25 rounded-full blur-[130px] pointer-events-none" />
 
       {/* Subdomain Top Indicator Bar */}
-      <div className="w-full bg-[#080e1c] border-b border-blue-500/20 py-2 px-3 sm:px-8 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 z-20">
+      <div className="w-full bg-[#110c09] border-b border-[#8B4513]/25 py-2 px-3 sm:px-8 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 z-20">
         <div className="flex items-center gap-2 font-mono flex-wrap">
-          <Globe className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+          <Globe className="w-3.5 h-3.5 text-amber-500 shrink-0" />
           <span className="text-slate-400">Sous-Domaine :</span>
-          <span className="text-blue-400 font-bold bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/30 text-[11px] truncate max-w-[220px] sm:max-w-none">
+          <span className="text-amber-300 font-bold bg-[#7B3F00]/20 px-2 py-0.5 rounded-md border border-[#8B4513]/30 text-[11px] truncate max-w-[220px] sm:max-w-none">
             https://{etablissement.subdomain}.alfasle.edu
           </span>
         </div>
@@ -300,7 +300,7 @@ export function SchoolSubdomainPortal({
       {/* Main Subdomain Header */}
       <header className="w-full max-w-7xl mx-auto px-3 sm:px-8 py-3 sm:py-4 flex flex-col md:flex-row md:items-center justify-between gap-3.5 z-10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-blue-600 via-blue-500 to-indigo-600 p-0.5 shadow-lg shadow-blue-500/30 shrink-0">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-[#8B4513] via-[#A0522D] to-[#5C2D0A] p-0.5 shadow-lg shadow-[#7B3F00]/30 shrink-0">
             <img
               src={
                 etablissement.logoUrl ||
@@ -313,12 +313,12 @@ export function SchoolSubdomainPortal({
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="font-black text-lg sm:text-xl tracking-tight text-white truncate">{etablissement.name}</h1>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#7B3F00]/25 text-amber-200 border border-[#8B4513]/40">
                 {etablissement.code}
               </span>
             </div>
             <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5 truncate">
-              <MapPin className="w-3 h-3 text-blue-400 shrink-0" />
+              <MapPin className="w-3 h-3 text-amber-500 shrink-0" />
               <span>{etablissement.city}, {etablissement.country} • {etablissement.type}</span>
             </p>
           </div>
@@ -342,10 +342,10 @@ export function SchoolSubdomainPortal({
 
           <button
             onClick={onOpenJoinClassModal}
-            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 text-xs font-semibold shadow-md transition-all"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-[#7B3F00]/25 hover:bg-[#7B3F00]/35 text-amber-200 border border-[#8B4513]/40 text-xs font-semibold shadow-md transition-all"
             title="Rejoindre une classe"
           >
-            <KeyRound className="w-3.5 h-3.5 text-blue-400" />
+            <KeyRound className="w-3.5 h-3.5 text-amber-400" />
             <span className="hidden sm:inline">Rejoindre une classe</span>
             <span className="sm:hidden">Rejoindre</span>
           </button>
@@ -354,12 +354,12 @@ export function SchoolSubdomainPortal({
 
       {/* Center Subdomain Login Card (Split-Screen) */}
       <main className="flex-1 flex flex-col items-center justify-center p-3 sm:p-6 z-10 w-full max-w-7xl mx-auto">
-        <div className="w-full max-w-4xl bg-[#0e1424] border border-blue-500/30 rounded-2xl sm:rounded-[32px] overflow-hidden shadow-2xl shadow-blue-950/40 grid grid-cols-1 md:grid-cols-12 min-h-[540px]">
+        <div className="w-full max-w-4xl bg-[#120d0a] border border-[#8B4513]/40 rounded-2xl sm:rounded-[32px] overflow-hidden shadow-2xl shadow-[#3D1A04]/60 grid grid-cols-1 md:grid-cols-12 min-h-[540px]">
 
-          {/* LEFT COLUMN: School Custom Theme Banner */}
-          <div className="md:col-span-5 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 p-6 sm:p-8 flex flex-col justify-between text-white relative overflow-hidden">
+          {/* LEFT COLUMN: School Custom Theme Banner (Brown) */}
+          <div className="md:col-span-5 bg-gradient-to-br from-[#8B4513] via-[#7B3F00] to-[#3D1A04] p-6 sm:p-8 flex flex-col justify-between text-white relative overflow-hidden">
             <div className="absolute -top-16 -right-16 w-56 h-56 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="absolute -bottom-16 -left-16 w-60 h-60 bg-blue-400/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-16 -left-16 w-60 h-60 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
 
             <div className="relative z-10 space-y-5">
               {/* Badge specific to establishment */}
@@ -374,25 +374,25 @@ export function SchoolSubdomainPortal({
                 <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
                   Espace Campus & Cours en Ligne !
                 </h2>
-                <p className="text-xs text-blue-100/90 leading-relaxed">
+                <p className="text-xs text-amber-100/90 leading-relaxed">
                   {etablissement.description}
                 </p>
               </div>
 
               {/* School Metrics */}
               <div className="p-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 space-y-2 text-xs">
-                <div className="flex items-center justify-between text-blue-100">
+                <div className="flex items-center justify-between text-amber-100">
                   <span>Classes disponibles sur ce campus :</span>
                   <span className="font-bold bg-white/20 px-2 py-0.5 rounded-full">
                     {schoolClasses.length} Classes
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-blue-200">
+                <div className="flex items-center justify-between text-amber-200">
                   <span>Effectif inscrits :</span>
                   <span className="font-bold">{enrolledCount} Élèves</span>
                 </div>
                 {etablissement.directorName && (
-                  <div className="pt-1 border-t border-white/10 flex items-center justify-between text-[11px] text-blue-200">
+                  <div className="pt-1 border-t border-white/10 flex items-center justify-between text-[11px] text-amber-200">
                     <span>Directeur :</span>
                     <span className="font-semibold">{etablissement.directorName}</span>
                   </div>
@@ -400,18 +400,18 @@ export function SchoolSubdomainPortal({
               </div>
             </div>
 
-            <div className="relative z-10 pt-4 border-t border-white/15 text-[11px] text-blue-200/80">
+            <div className="relative z-10 pt-4 border-t border-white/15 text-[11px] text-amber-200/80">
               Instance sécurisée : <strong className="text-white">{etablissement.subdomain}.alfasle.edu</strong>
             </div>
           </div>
 
           {/* RIGHT COLUMN: School-scoped Login Form */}
-          <div className="md:col-span-7 p-6 sm:p-10 flex flex-col justify-between bg-[#0b101e]">
+          <div className="md:col-span-7 p-6 sm:p-10 flex flex-col justify-between bg-[#0e0907]">
             <div className="space-y-6">
 
               <div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-blue-400 uppercase tracking-wider font-mono">
+                  <span className="text-xs font-bold text-amber-500 uppercase tracking-wider font-mono">
                     Portail Étudiant & Enseignant
                   </span>
                   <span className="text-[10px] text-slate-400 font-mono">
@@ -433,8 +433,8 @@ export function SchoolSubdomainPortal({
                   onClick={() => handleRoleSelect("ADMIN")}
                   className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${
                     selectedRole === "ADMIN"
-                      ? "bg-blue-600/20 border-blue-500 text-white shadow-md ring-2 ring-blue-500/30"
-                      : "bg-[#131929] border-slate-700/60 text-slate-400 hover:text-white"
+                      ? "bg-[#7B3F00]/30 border-[#8B4513] text-white shadow-md ring-2 ring-[#8B4513]/40"
+                      : "bg-[#160f0b] border-[#5C2D0A]/40 text-slate-400 hover:text-white"
                   }`}
                 >
                   <span className="text-lg">👑</span>
@@ -446,8 +446,8 @@ export function SchoolSubdomainPortal({
                   onClick={() => handleRoleSelect("TEACHER")}
                   className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${
                     selectedRole === "TEACHER"
-                      ? "bg-blue-600/20 border-blue-500 text-white shadow-md ring-2 ring-blue-500/30"
-                      : "bg-[#131929] border-slate-700/60 text-slate-400 hover:text-white"
+                      ? "bg-[#7B3F00]/30 border-[#8B4513] text-white shadow-md ring-2 ring-[#8B4513]/40"
+                      : "bg-[#160f0b] border-[#5C2D0A]/40 text-slate-400 hover:text-white"
                   }`}
                 >
                   <span className="text-lg">👨‍🏫</span>
@@ -459,8 +459,8 @@ export function SchoolSubdomainPortal({
                   onClick={() => handleRoleSelect("STUDENT")}
                   className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${
                     selectedRole === "STUDENT"
-                      ? "bg-blue-600/20 border-blue-500 text-white shadow-md ring-2 ring-blue-500/30"
-                      : "bg-[#131929] border-slate-700/60 text-slate-400 hover:text-white"
+                      ? "bg-[#7B3F00]/30 border-[#8B4513] text-white shadow-md ring-2 ring-[#8B4513]/40"
+                      : "bg-[#160f0b] border-[#5C2D0A]/40 text-slate-400 hover:text-white"
                   }`}
                 >
                   <span className="text-lg">🎓</span>
@@ -472,8 +472,8 @@ export function SchoolSubdomainPortal({
                   onClick={() => handleRoleSelect("PARENT")}
                   className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all ${
                     selectedRole === "PARENT"
-                      ? "bg-blue-600/20 border-blue-500 text-white shadow-md ring-2 ring-blue-500/30"
-                      : "bg-[#131929] border-slate-700/60 text-slate-400 hover:text-white"
+                      ? "bg-[#7B3F00]/30 border-[#8B4513] text-white shadow-md ring-2 ring-[#8B4513]/40"
+                      : "bg-[#160f0b] border-[#5C2D0A]/40 text-slate-400 hover:text-white"
                   }`}
                 >
                   <span className="text-lg">👨‍👩‍👧</span>
@@ -512,7 +512,7 @@ export function SchoolSubdomainPortal({
                         ? "Ex: parent.kone@gmail.com..."
                         : "Ex: KONE ou matricule..."
                     }
-                    className="w-full px-4 py-2.5 rounded-2xl bg-[#060a14] border border-slate-700 text-white focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-2.5 rounded-2xl bg-[#070504] border border-[#5C2D0A]/60 text-white focus:outline-none focus:border-[#8B4513] focus:ring-1 focus:ring-[#8B4513]/40"
                   />
                 </div>
 
@@ -524,7 +524,7 @@ export function SchoolSubdomainPortal({
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-2xl bg-[#060a14] border border-slate-700 text-white focus:outline-none focus:border-blue-500"
+                      className="w-full px-4 py-2.5 rounded-2xl bg-[#070504] border border-[#5C2D0A]/60 text-white focus:outline-none focus:border-[#8B4513] focus:ring-1 focus:ring-[#8B4513]/40"
                     />
                     <button
                       type="button"
@@ -538,7 +538,7 @@ export function SchoolSubdomainPortal({
 
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5"
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#8B4513] via-[#7B3F00] to-[#5C2D0A] hover:opacity-95 text-white font-bold shadow-lg shadow-[#7B3F00]/40 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5"
                 >
                   <LogIn className="w-4 h-4" />
                   <span>Accéder à mon Espace {etablissement.name}</span>
@@ -568,11 +568,11 @@ export function SchoolSubdomainPortal({
                       setCurrentUser(dirUser);
                       onLoginSuccess();
                     }}
-                    className="flex items-center gap-2 p-2 rounded-xl bg-blue-950/40 border border-blue-600/40 hover:border-blue-400 text-left transition-all text-xs group"
+                    className="flex items-center gap-2 p-2 rounded-xl bg-[#3D1A04]/60 border border-[#8B4513]/50 hover:border-[#A0522D] text-left transition-all text-xs group"
                   >
                     <span className="text-base">👑</span>
                     <div>
-                      <p className="text-[11px] font-bold text-blue-300 group-hover:text-blue-200">
+                      <p className="text-[11px] font-bold text-amber-300 group-hover:text-amber-200">
                         Direction (Admin)
                       </p>
                       <p className="text-[9px] text-slate-400">Élèves, profs & classes</p>
@@ -590,7 +590,7 @@ export function SchoolSubdomainPortal({
                       });
                       onLoginSuccess();
                     }}
-                    className="flex items-center gap-2 p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500 text-left transition-all text-xs"
+                    className="flex items-center gap-2 p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-[#8B4513] text-left transition-all text-xs"
                   >
                     <span className="text-base">👨‍🏫</span>
                     <div>
@@ -610,7 +610,7 @@ export function SchoolSubdomainPortal({
                       });
                       onLoginSuccess();
                     }}
-                    className="flex items-center gap-2 p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500 text-left transition-all text-xs"
+                    className="flex items-center gap-2 p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-[#8B4513] text-left transition-all text-xs"
                   >
                     <span className="text-base">🎓</span>
                     <div>
@@ -639,7 +639,7 @@ export function SchoolSubdomainPortal({
                       });
                       onLoginSuccess();
                     }}
-                    className="flex items-center gap-2 p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500 text-left transition-all text-xs"
+                    className="flex items-center gap-2 p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-[#8B4513] text-left transition-all text-xs"
                   >
                     <span className="text-base">👨‍👩‍👧</span>
                     <div>
@@ -660,7 +660,7 @@ export function SchoolSubdomainPortal({
                     {schoolClasses.map((c) => (
                       <span
                         key={c.id}
-                        className="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-700 text-[10px] text-blue-300 font-mono"
+                        className="px-2 py-0.5 rounded-md bg-slate-900 border border-[#8B4513]/40 text-[10px] text-amber-200 font-mono"
                       >
                         {c.classCode} ({c.title})
                       </span>
@@ -689,7 +689,7 @@ export function SchoolSubdomainPortal({
                     setPreRegRole("TEACHER");
                     setIsPreRegModalOpen(true);
                   }}
-                  className="text-indigo-400 font-bold hover:underline flex items-center gap-1"
+                  className="text-amber-400 font-bold hover:underline flex items-center gap-1"
                 >
                   <span>👨‍🏫 Candidature Professeur</span>
                 </button>
@@ -700,7 +700,7 @@ export function SchoolSubdomainPortal({
                 <button
                   type="button"
                   onClick={onOpenJoinClassModal}
-                  className="text-blue-400 font-bold hover:underline"
+                  className="text-amber-400 font-bold hover:underline"
                 >
                   Rejoindre avec un Code &rarr;
                 </button>
