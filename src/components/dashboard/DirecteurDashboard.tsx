@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 
 import { ConfirmModal, ConfirmVariant } from "@/components/common/ConfirmModal";
+import { useToast } from "@/lib/toast-context";
 
 interface DirecteurDashboardProps {
   onNavigate?: (tab: string) => void;
@@ -76,6 +77,7 @@ export function DirecteurDashboard({
     approveInscription,
     rejectInscription,
   } = useStore();
+  const { toast } = useToast();
 
   // Find the Director's establishment
   const currentEtab =
@@ -469,6 +471,7 @@ export function DirecteurDashboard({
       teacherName: assignedTeacher?.name || editingClass.teacherName,
     });
     setIsEditClassOpen(false);
+    toast.success("Enregistrement effectué avec succès", `La classe « ${editClassTitle} » a été mise à jour.`);
   };
 
   const handleDeleteClass = (c: Classe) => {
@@ -481,6 +484,7 @@ export function DirecteurDashboard({
       onConfirm: () => {
         deleteClass(c.id);
         setIsEditClassOpen(false);
+        toast.success("Enregistrement effectué avec succès", `La classe « ${c.title} » a été supprimée avec succès.`);
       },
     });
   };
@@ -495,6 +499,7 @@ export function DirecteurDashboard({
       onConfirm: () => {
         deleteUser(u.id);
         setIsEditStudentOpen(false);
+        toast.success("Enregistrement effectué avec succès", `Le compte élève « ${u.name} » a été supprimé.`);
       },
     });
   };
@@ -503,12 +508,13 @@ export function DirecteurDashboard({
     setConfirmModal({
       isOpen: true,
       title: `Supprimer l'enseignant « ${u.name} » ?`,
-      message: `Êtes-vous sûr de vouloir supprimer définitivement le compte professeur de « ${u.name} » (${u.email}) ? Ses cours resteront archivés.`,
-      confirmLabel: "Supprimer le professeur",
+      message: `Êtes-vous sûr de vouloir supprimer définitivement le compte enseignant de « ${u.name} » (${u.email}) ? Cette action est irréversible.`,
+      confirmLabel: "Supprimer l'enseignant",
       variant: "danger",
       onConfirm: () => {
         deleteUser(u.id);
         setIsEditTeacherOpen(false);
+        toast.success("Enregistrement effectué avec succès", `L'enseignant « ${u.name} » a été supprimé.`);
       },
     });
   };

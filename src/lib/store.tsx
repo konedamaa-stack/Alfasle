@@ -196,15 +196,15 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
               etabId.includes("coran") ||
               etabId.includes("lycee_excellence");
 
-            return !isDeleted;
-          });
+          let merged = [...filteredSaved];
 
-          const existingIds = new Set(filteredSaved.map((item: T) => item.id));
-          const missingFromInitial = initialData.filter((item) => !existingIds.has(item.id));
-          let merged = [...filteredSaved, ...missingFromInitial];
-
-          // Auto-sync users and distinct identities
+          // Assurer que le compte Super Admin et Directeur existent au minimum dans users
           if (suffix === "users") {
+            const hasSuperAdmin = merged.some((u: any) => u.role === "SUPER_ADMIN");
+            if (!hasSuperAdmin && initialData[0]) {
+              merged.unshift(initialData[0]);
+            }
+
             merged = (merged as unknown as User[]).map((u) => {
               if (u.id === "u_admin_diawara" || u.id === "u_admin_excellence" || u.username === "diawara" || u.email === "diawara@gmail.com") {
                 return {

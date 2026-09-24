@@ -5,6 +5,7 @@ import { useStore } from "@/lib/store";
 import { Etablissement, Classe, User, UserRole, EnrollmentMode, ClassStatus } from "@/types";
 import { ValidationQueue } from "@/components/inscriptions/ValidationQueue";
 import { ConfirmModal, ConfirmVariant } from "@/components/common/ConfirmModal";
+import { useToast } from "@/lib/toast-context";
 import {
   School,
   PlusCircle,
@@ -77,6 +78,7 @@ export function SuperAdminDashboard({
     inscriptions,
     resetStoreToDefaults,
   } = useStore();
+  const { toast } = useToast();
 
   // Active top-level Tab (default: ETABLISSEMENTS for school/class management focus)
   const [activeTab, setActiveTab] = useState<
@@ -200,6 +202,21 @@ export function SuperAdminDashboard({
   // Viewing Students Modal State
   const [viewingClassStudents, setViewingClassStudents] = useState<Classe | null>(null);
 
+  // Confirmation Modal State
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmLabel?: string;
+    variant?: ConfirmVariant;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
+
   // Helper auto-code generator
   const handleGenerateClassCode = (etabId: string, levelVal: string, catVal: string) => {
     const etab = etablissements.find((e) => e.id === etabId) || etablissements[0];
@@ -316,6 +333,7 @@ export function SuperAdminDashboard({
       variant: "danger",
       onConfirm: () => {
         deleteClass(cls.id);
+        toast.success("Enregistrement effectué avec succès", `La classe « ${cls.title} » a été supprimée avec succès.`);
       },
     });
   };

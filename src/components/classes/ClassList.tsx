@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useStore } from "@/lib/store";
+import { useToast } from "@/lib/toast-context";
 import { Classe } from "@/types";
 import {
   FolderKanban,
@@ -35,6 +36,7 @@ export function ClassList({
   onOpenJoinClassModal,
 }: ClassListProps) {
   const { currentUser, classes, inscriptions, etablissements, updateClass, deleteClass, users } = useStore();
+  const { toast } = useToast();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedEtablissement, setSelectedEtablissement] = useState("ALL");
@@ -97,6 +99,7 @@ export function ClassList({
       teacherName: assignedTeacher?.name || editingClass.teacherName,
     });
     setIsEditModalOpen(false);
+    toast.success("Enregistrement effectué avec succès", `La classe « ${editTitle} » a été modifiée avec succès.`);
   };
 
   const handleDeleteClass = (c: Classe) => {
@@ -109,6 +112,7 @@ export function ClassList({
       onConfirm: () => {
         deleteClass(c.id);
         setIsEditModalOpen(false);
+        toast.success("Enregistrement effectué avec succès", `La classe « ${c.title} » a été supprimée avec succès.`);
       },
     });
   };
