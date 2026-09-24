@@ -69,7 +69,7 @@ export function ConfirmModal({
   const vStyles = getVariantStyles();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
       <div
         className={`w-full max-w-md bg-[#0a0f1e] border ${vStyles.border} rounded-3xl overflow-hidden shadow-2xl animate-scaleUp flex flex-col`}
       >

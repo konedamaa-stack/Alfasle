@@ -595,13 +595,52 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const deleteClass = (id: string) => {
-    setClasses((prev) => prev.filter((c) => c.id !== id));
-    setInscriptions((prev) => prev.filter((i) => i.classeId !== id));
-    setCourses((prev) => prev.filter((crs) => crs.classeId !== id));
+    setClasses((prev) => {
+      const next = prev.filter((c) => c.id !== id);
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(`${STORAGE_PREFIX}classes`, JSON.stringify(next));
+        } catch (e) {
+          console.error("Erreur sauvegarde immédiate classe:", e);
+        }
+      }
+      return next;
+    });
+    setInscriptions((prev) => {
+      const next = prev.filter((i) => i.classeId !== id);
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(`${STORAGE_PREFIX}inscriptions`, JSON.stringify(next));
+        } catch (e) {}
+      }
+      return next;
+    });
+    setCourses((prev) => {
+      const next = prev.filter((crs) => crs.classeId !== id);
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(`${STORAGE_PREFIX}courses`, JSON.stringify(next));
+        } catch (e) {}
+      }
+      return next;
+    });
     setAssignments((prev) => {
       const remaining = prev.filter((a) => a.classeId !== id);
       const removedIds = new Set(prev.filter((a) => a.classeId === id).map((a) => a.id));
-      setSubmissions((subs) => subs.filter((s) => !removedIds.has(s.devoirId)));
+      setSubmissions((subs) => {
+        const remainingSubs = subs.filter((s) => !removedIds.has(s.devoirId));
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem(`${STORAGE_PREFIX}submissions`, JSON.stringify(remainingSubs));
+          } catch (e) {}
+        }
+        return remainingSubs;
+      });
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(`${STORAGE_PREFIX}assignments`, JSON.stringify(remaining));
+        } catch (e) {}
+      }
       return remaining;
     });
   };
