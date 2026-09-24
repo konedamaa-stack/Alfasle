@@ -85,10 +85,10 @@ export function AuthLandingView({
       leftDesc:
         "Pilotez l'ensemble des activités, établissements, classes et paramètres de votre système éducatif.",
       roleSubtitle: "connexion en tant que directeur d'établissement",
-      espaceTitle: "Espace Directeur (Dr. DIAWARA)",
-      espaceDesc: "Direction du Groupe Scolaire AlFasle (Abidjan) & Supervision",
-      defaultLogin: "diawara@gmail.com",
-      defaultPass: "Madouu1966@",
+      espaceTitle: "Espace Directeur (KONE ADAMA)",
+      espaceDesc: "Direction du Groupe Scolaire AlFasle (Abidjan) & Supervision Pédagogique",
+      defaultLogin: "konedamaa@gmail.com",
+      defaultPass: "Madouu1966",
       cardBg: "from-[#8B4513] via-[#7B3F00] to-[#3D1A04]",
       gradient: "from-[#8B4513] to-[#5C2D0A]",
     },
@@ -101,7 +101,7 @@ export function AuthLandingView({
       espaceTitle: "Espace Enseignant",
       espaceDesc: "Gestion pédagogique, création de cours et notation",
       defaultLogin: "sarah.mansouri@alfasle.edu",
-      defaultPass: "Madouu1966@",
+      defaultPass: "Madouu1966",
       cardBg: "from-blue-600 via-indigo-600 to-violet-800",
       gradient: "from-indigo-600 to-violet-600",
     },
@@ -114,7 +114,7 @@ export function AuthLandingView({
       espaceTitle: "Espace Élève",
       espaceDesc: "Accès aux cours multimédias, leçons et réception des devoirs",
       defaultLogin: "KONE",
-      defaultPass: "Madouu1966@",
+      defaultPass: "Madouu1966",
       cardBg: "from-sky-600 via-blue-600 to-indigo-800",
       gradient: "from-sky-600 to-blue-600",
     },
@@ -127,7 +127,7 @@ export function AuthLandingView({
       espaceTitle: "Espace Parent d'Élève",
       espaceDesc: "Suivi des résultats scolaires et communications établissement",
       defaultLogin: "parent.kone@gmail.com",
-      defaultPass: "Madouu1966@",
+      defaultPass: "Madouu1966",
       cardBg: "from-indigo-600 via-blue-700 to-sky-800",
       gradient: "from-blue-600 to-cyan-600",
     },
@@ -155,20 +155,72 @@ export function AuthLandingView({
       return;
     }
 
-    // Super Admin Master Shortcut
+    // 0. SPECIAL CASE: When logging in as Directeur (role ADMIN)
+    if (selectedRole === "ADMIN") {
+      const isDirectorKone =
+        cleanId === "konedamaa@gmail.com" ||
+        cleanId === "konedma@gmil.com" ||
+        cleanId === "konedama@gmail.com" ||
+        cleanId === "konedma@gmail.com" ||
+        cleanId === "konedamaa" ||
+        cleanId === "konedama" ||
+        cleanId === "konedma";
+
+      if (isDirectorKone) {
+        if (inputPass && inputPass !== "Madouu1966" && inputPass !== "Madouu1966@" && inputPass !== "admin") {
+          setErrorMsg("Mot de passe incorrect pour le compte Directeur (utilisez Madouu1966).");
+          return;
+        }
+
+        let dirUser = users.find(
+          (u) =>
+            (u.email.toLowerCase() === "konedamaa@gmail.com" || (u.username && u.username.toLowerCase() === "konedamaa")) &&
+            u.role === "ADMIN"
+        );
+
+        if (!dirUser) {
+          dirUser = {
+            id: "u_admin_kone",
+            name: "KONE ADAMA (Directeur)",
+            username: "konedamaa",
+            email: "konedamaa@gmail.com",
+            password: "Madouu1966",
+            role: "ADMIN",
+            bio: "Directeur & Administrateur Principal du Groupe Scolaire AlFasle.",
+            avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
+            etablissementId: "etab_gs_alfasle",
+            etablissementName: "Groupe Scolaire AlFasle",
+            createdAt: new Date().toISOString(),
+          };
+        } else {
+          dirUser = {
+            ...dirUser,
+            role: "ADMIN",
+            password: "Madouu1966",
+          };
+        }
+
+        if (typeof window !== "undefined") {
+          localStorage.setItem("alfasle_active_tab", "dashboard");
+          localStorage.setItem("alfasle_user_role", "ADMIN");
+        }
+        setCurrentUser(dirUser);
+        onLoginSuccess();
+        return;
+      }
+    }
+
+    // Super Admin Master Shortcut (only when role is SUPER_ADMIN or user types superadmin / root)
     const isSuperAdmin =
-      cleanId === "konedamaa@gmail.com" ||
-      cleanId === "konedma@gmil.com" ||
-      cleanId === "konedama@gmail.com" ||
-      cleanId === "konedma@gmail.com" ||
-      cleanId === "konedamaa" ||
-      cleanId === "konedama" ||
-      cleanId === "konedma" ||
-      cleanId === "superadmin" ||
-      cleanId === "root";
+      (selectedRole === "SUPER_ADMIN" || cleanId === "superadmin" || cleanId === "root") &&
+      (cleanId === "konedamaa@gmail.com" ||
+        cleanId === "konedma@gmil.com" ||
+        cleanId === "konedamaa" ||
+        cleanId === "superadmin" ||
+        cleanId === "root");
 
     if (isSuperAdmin) {
-      if (inputPass && inputPass !== "Madouu1966@" && inputPass !== "admin") {
+      if (inputPass && inputPass !== "Madouu1966" && inputPass !== "Madouu1966@" && inputPass !== "admin") {
         setErrorMsg("Mot de passe incorrect pour le compte Super Admin Master.");
         return;
       }

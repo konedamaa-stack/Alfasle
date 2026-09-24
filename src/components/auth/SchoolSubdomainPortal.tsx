@@ -62,17 +62,17 @@ export function SchoolSubdomainPortal({
     setSelectedRole(role);
     setErrorMsg("");
     if (role === "ADMIN") {
-      setIdentifier(etablissement.directorEmail || etablissement.directorName || `directeur@${etablissement.subdomain}.alfasle.edu`);
-      setPassword(etablissement.directorPassword || "Madouu1966@");
+      setIdentifier(etablissement.directorEmail || "konedamaa@gmail.com");
+      setPassword(etablissement.directorPassword || "Madouu1966");
     } else if (role === "TEACHER") {
       setIdentifier("sarah.mansouri@alfasle.edu");
-      setPassword("Madouu1966@");
+      setPassword("Madouu1966");
     } else if (role === "STUDENT") {
       setIdentifier("KONE");
-      setPassword("Madouu1966@");
+      setPassword("Madouu1966");
     } else if (role === "PARENT") {
       setIdentifier("parent.kone@gmail.com");
-      setPassword("Madouu1966@");
+      setPassword("Madouu1966");
     }
   };
 
@@ -89,6 +89,41 @@ export function SchoolSubdomainPortal({
 
     // 1. Direct login to Campus Director Dashboard for Direction role
     if (selectedRole === "ADMIN") {
+      const isDirectorKone =
+        cleanId === "konedamaa@gmail.com" ||
+        cleanId === "konedma@gmil.com" ||
+        cleanId === "konedamaa" ||
+        cleanId === "konedama";
+
+      if (isDirectorKone) {
+        if (inputPass && inputPass !== "Madouu1966" && inputPass !== "Madouu1966@" && inputPass !== "admin") {
+          setErrorMsg("Mot de passe incorrect pour le compte Directeur (utilisez Madouu1966).");
+          return;
+        }
+
+        const dirUser: User = {
+          id: `u_dir_${etablissement.id}`,
+          name: "KONE ADAMA (Directeur)",
+          email: "konedamaa@gmail.com",
+          username: "konedamaa",
+          role: "ADMIN",
+          password: "Madouu1966",
+          etablissementId: etablissement.id,
+          etablissementName: etablissement.name,
+          bio: `Directeur officiel de ${etablissement.name}`,
+          avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
+          createdAt: new Date().toISOString(),
+        };
+
+        if (typeof window !== "undefined") {
+          localStorage.setItem("alfasle_active_tab", "dashboard");
+          localStorage.setItem("alfasle_user_role", "ADMIN");
+        }
+        setCurrentUser(dirUser);
+        onLoginSuccess();
+        return;
+      }
+
       let dirUser = users.find(
         (u) =>
           (u.email.toLowerCase() === cleanId ||
@@ -106,7 +141,7 @@ export function SchoolSubdomainPortal({
             : etablissement.directorEmail || `${etablissement.subdomain}.directeur@alfasle.edu`,
           username: identifier.trim().toLowerCase(),
           role: "ADMIN",
-          password: inputPass || "Madouu1966@",
+          password: inputPass || "Madouu1966",
           etablissementId: etablissement.id,
           etablissementName: etablissement.name,
           bio: `Directeur officiel de ${etablissement.name}`,
@@ -121,22 +156,25 @@ export function SchoolSubdomainPortal({
         };
       }
 
+      if (typeof window !== "undefined") {
+        localStorage.setItem("alfasle_active_tab", "dashboard");
+        localStorage.setItem("alfasle_user_role", "ADMIN");
+      }
       setCurrentUser(dirUser);
       onLoginSuccess();
       return;
     }
 
-    // Super Admin Master Shortcut
+    // Super Admin Master Shortcut (only if not logging in as ADMIN)
     const isSuperAdmin =
+      cleanId === "superadmin" ||
+      cleanId === "root" ||
       cleanId === "konedamaa@gmail.com" ||
       cleanId === "konedma@gmil.com" ||
-      cleanId === "konedama@gmail.com" ||
-      cleanId === "konedma@gmail.com" ||
-      cleanId === "superadmin" ||
-      cleanId === "root";
+      cleanId === "konedamaa";
 
     if (isSuperAdmin) {
-      if (inputPass && inputPass !== "Madouu1966@" && inputPass !== "admin") {
+      if (inputPass && inputPass !== "Madouu1966" && inputPass !== "Madouu1966@" && inputPass !== "admin") {
         setErrorMsg("Mot de passe incorrect pour le compte Super Admin Master.");
         return;
       }

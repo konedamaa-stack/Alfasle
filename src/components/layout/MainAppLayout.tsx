@@ -203,14 +203,22 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
 
           {/* CLASSES VIEW */}
           {activeTab === "classes" && (
-            <ClassList
-              onOpenCreateClass={() => {
-                setCreateClassDefaultEtab(undefined);
-                setIsCreateClassOpen(true);
-              }}
-              onSelectClassForCourses={handleSelectClassForCourses}
-              onOpenJoinClassModal={() => setIsJoinClassOpen(true)}
-            />
+            currentUser.role === "SUPER_ADMIN" ? (
+              <SuperAdminDashboard
+                initialTab="CLASSES"
+                onOpenCreateClassForSchool={handleOpenCreateClassForSchool}
+                onSelectClassForCourses={handleSelectClassForCourses}
+              />
+            ) : (
+              <ClassList
+                onOpenCreateClass={() => {
+                  setCreateClassDefaultEtab(undefined);
+                  setIsCreateClassOpen(true);
+                }}
+                onSelectClassForCourses={handleSelectClassForCourses}
+                onOpenJoinClassModal={() => setIsJoinClassOpen(true)}
+              />
+            )
           )}
 
           {/* CATALOG VIEW */}

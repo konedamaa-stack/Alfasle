@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useStore } from "@/lib/store";
-import { Etablissement, Classe, User, UserRole } from "@/types";
+import { Etablissement, Classe, User, UserRole, EnrollmentMode, ClassStatus } from "@/types";
 import { ValidationQueue } from "@/components/inscriptions/ValidationQueue";
 import { ConfirmModal, ConfirmVariant } from "@/components/common/ConfirmModal";
 import {
@@ -38,14 +38,24 @@ import {
   Check,
   Copy,
   AlertCircle,
+  Archive,
+  ArrowRight,
+  Filter,
+  UserPlus,
+  RefreshCw,
+  BarChart2,
+  BookMarked,
+  Layers3,
 } from "lucide-react";
 
 interface SuperAdminDashboardProps {
+  initialTab?: "ETABLISSEMENTS" | "CLASSES" | "USERS" | "INSCRIPTIONS" | "SYSTEM";
   onOpenCreateClassForSchool?: (etablissementId: string) => void;
   onSelectClassForCourses?: (classId: string) => void;
 }
 
 export function SuperAdminDashboard({
+  initialTab,
   onOpenCreateClassForSchool,
   onSelectClassForCourses,
 }: SuperAdminDashboardProps) {
@@ -55,6 +65,10 @@ export function SuperAdminDashboard({
     createEtablissement,
     updateEtablissement,
     deleteEtablissement,
+    createClass,
+    updateClass,
+    deleteClass,
+    archiveClass,
     users,
     createUser,
     updateUser,
@@ -64,14 +78,17 @@ export function SuperAdminDashboard({
     resetStoreToDefaults,
   } = useStore();
 
-  // Active top-level Tab
-  const [activeTab, setActiveTab] = useState<"ETABLISSEMENTS" | "USERS" | "INSCRIPTIONS" | "SYSTEM">("USERS");
+  // Active top-level Tab (default: ETABLISSEMENTS for school/class management focus)
+  const [activeTab, setActiveTab] = useState<
+    "ETABLISSEMENTS" | "CLASSES" | "USERS" | "INSCRIPTIONS" | "SYSTEM"
+  >(initialTab || "ETABLISSEMENTS");
 
   // --- SCHOOLS MANAGEMENT STATE ---
   const [schoolSearchQuery, setSchoolSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string>("ALL");
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
 
   // New School Wizard Form State
   const [formStep, setFormStep] = useState<1 | 2 | 3>(1);
@@ -142,6 +159,174 @@ export function SuperAdminDashboard({
   const [createUserRole, setCreateUserRole] = useState<UserRole>("STUDENT");
   const [createUserEtabId, setCreateUserEtabId] = useState(etablissements[0]?.id || "");
   const [createUserBio, setCreateUserBio] = useState("");
+
+  // =========================================================================
+  // --- CLASSES MANAGEMENT STATE (SUPER ADMIN) ---
+  // =========================================================================
+  const [classSearchQuery, setClassSearchQuery] = useState("");
+  const [selectedClassEtabFilter, setSelectedClassEtabFilter] = useState<string>("ALL");
+  const [selectedClassStatusFilter, setSelectedClassStatusFilter] = useState<string>("ALL");
+  const [selectedClassLevelFilter, setSelectedClassLevelFilter] = useState<string>("ALL");
+
+  // Create Class Modal State
+  const [isSuperCreateClassOpen, setIsSuperCreateClassOpen] = useState(false);
+  const [newClassEtabId, setNewClassEtabId] = useState(etablissements[0]?.id || "");
+  const [newClassTitle, setNewClassTitle] = useState("");
+  const [newClassCode, setNewClassCode] = useState("");
+  const [newClassTeacherId, setNewClassTeacherId] = useState("");
+  const [newClassLevel, setNewClassLevel] = useState("Terminale");
+  const [newClassCategory, setNewClassCategory] = useState("Sciences");
+  const [newClassCapacity, setNewClassCapacity] = useState(35);
+  const [newClassEnrollmentMode, setNewClassEnrollmentMode] = useState<EnrollmentMode>("OPEN");
+  const [newClassDescription, setNewClassDescription] = useState("");
+  const [newClassCoverImage, setNewClassCoverImage] = useState(
+    "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80"
+  );
+
+  // Edit Class Modal State
+  const [editingClass, setEditingClass] = useState<Classe | null>(null);
+  const [editClassTitle, setEditClassTitle] = useState("");
+  const [editClassCode, setEditClassCode] = useState("");
+  const [editClassEtabId, setEditClassEtabId] = useState("");
+  const [editClassTeacherId, setEditClassTeacherId] = useState("");
+  const [editClassLevel, setEditClassLevel] = useState("");
+  const [editClassCategory, setEditClassCategory] = useState("");
+  const [editClassCapacity, setEditClassCapacity] = useState(35);
+  const [editClassEnrollmentMode, setEditClassEnrollmentMode] = useState<EnrollmentMode>("OPEN");
+  const [editClassStatus, setEditClassStatus] = useState<ClassStatus>("ACTIVE");
+  const [editClassDescription, setEditClassDescription] = useState("");
+  const [editClassCoverImage, setEditClassCoverImage] = useState("");
+
+  // Viewing Students Modal State
+  const [viewingClassStudents, setViewingClassStudents] = useState<Classe | null>(null);
+
+  // Helper auto-code generator
+  const handleGenerateClassCode = (etabId: string, levelVal: string, catVal: string) => {
+    const etab = etablissements.find((e) => e.id === etabId) || etablissements[0];
+    const prefix = (etab?.code || "AF").replace(/[^A-Z0-9]/gi, "").substring(0, 4).toUpperCase();
+    const cleanLevel = levelVal.substring(0, 4).toUpperCase().replace(/[^A-Z0-9]/g, "") || "CLS";
+    const randNum = Math.floor(10 + Math.random() * 90);
+    return `${prefix}-${cleanLevel}-${randNum}`;
+  };
+
+  const resetCreateClassForm = (presetEtabId?: string) => {
+    const targetEtabId = presetEtabId || etablissements[0]?.id || "";
+    setNewClassEtabId(targetEtabId);
+    setNewClassTitle("");
+    setNewClassLevel("Terminale");
+    setNewClassCategory("Sciences");
+    setNewClassCode(handleGenerateClassCode(targetEtabId, "Terminale", "Sciences"));
+    const teacherForSchool =
+      users.find((u) => u.role === "TEACHER" && (!targetEtabId || u.etablissementId === targetEtabId)) ||
+      users.find((u) => u.role === "TEACHER") ||
+      users[0];
+    setNewClassTeacherId(teacherForSchool?.id || "");
+    setNewClassCapacity(35);
+    setNewClassEnrollmentMode("OPEN");
+    setNewClassDescription("");
+    setNewClassCoverImage("https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80");
+  };
+
+  const handleOpenSuperCreateClass = (presetEtabId?: string) => {
+    resetCreateClassForm(presetEtabId);
+    setIsSuperCreateClassOpen(true);
+  };
+
+  const handleCreateSuperClass = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newClassTitle.trim()) return;
+
+    const targetEtab = etablissements.find((et) => et.id === newClassEtabId) || etablissements[0];
+    const targetTeacher = users.find((u) => u.id === newClassTeacherId);
+
+    const generatedCode =
+      newClassCode.trim().toUpperCase() ||
+      handleGenerateClassCode(targetEtab?.id || "", newClassLevel, newClassCategory);
+
+    createClass({
+      title: newClassTitle.trim(),
+      classCode: generatedCode,
+      etablissementId: targetEtab?.id || etablissements[0]?.id || "etab_def",
+      etablissementName: targetEtab?.name || "Établissement AlFasle",
+      teacherId: targetTeacher?.id || currentUser.id,
+      teacherName: targetTeacher?.name || currentUser.name,
+      level: newClassLevel.trim() || "Général",
+      category: newClassCategory.trim() || "Tronc Commun",
+      capacity: newClassCapacity || 35,
+      enrollmentMode: newClassEnrollmentMode,
+      status: "ACTIVE",
+      description:
+        newClassDescription.trim() ||
+        `Classe ${newClassTitle.trim()} rattachée à l'établissement ${targetEtab?.name}.`,
+      coverImage: newClassCoverImage,
+    });
+
+    setIsSuperCreateClassOpen(false);
+  };
+
+  const handleOpenEditClass = (cls: Classe) => {
+    setEditingClass(cls);
+    setEditClassTitle(cls.title);
+    setEditClassCode(cls.classCode);
+    setEditClassEtabId(cls.etablissementId);
+    setEditClassTeacherId(cls.teacherId);
+    setEditClassLevel(cls.level);
+    setEditClassCategory(cls.category);
+    setEditClassCapacity(cls.capacity || 35);
+    setEditClassEnrollmentMode(cls.enrollmentMode || "OPEN");
+    setEditClassStatus(cls.status || "ACTIVE");
+    setEditClassDescription(cls.description || "");
+    setEditClassCoverImage(cls.coverImage || "");
+  };
+
+  const handleSaveEditClass = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingClass || !editClassTitle.trim()) return;
+
+    const targetEtab =
+      etablissements.find((et) => et.id === editClassEtabId) ||
+      etablissements.find((et) => et.id === editingClass.etablissementId);
+    const targetTeacher = users.find((u) => u.id === editClassTeacherId);
+
+    updateClass(editingClass.id, {
+      title: editClassTitle.trim(),
+      classCode: editClassCode.trim().toUpperCase(),
+      etablissementId: targetEtab?.id || editingClass.etablissementId,
+      etablissementName: targetEtab?.name || editingClass.etablissementName,
+      teacherId: targetTeacher ? targetTeacher.id : editingClass.teacherId,
+      teacherName: targetTeacher ? targetTeacher.name : editingClass.teacherName,
+      level: editClassLevel.trim(),
+      category: editClassCategory.trim(),
+      capacity: editClassCapacity,
+      enrollmentMode: editClassEnrollmentMode,
+      status: editClassStatus,
+      description: editClassDescription.trim(),
+      coverImage: editClassCoverImage,
+    });
+
+    setEditingClass(null);
+  };
+
+  const handleDeleteClass = (cls: Classe) => {
+    setConfirmModal({
+      isOpen: true,
+      title: `Supprimer la classe « ${cls.title} » ?`,
+      message: `Êtes-vous certain de vouloir supprimer définitivement la classe « ${cls.title} » (${cls.classCode}) de l'établissement « ${cls.etablissementName} » ? Cette action supprimera également les cours, devoirs et inscriptions associés.`,
+      confirmLabel: "Supprimer la classe",
+      variant: "danger",
+      onConfirm: () => {
+        deleteClass(cls.id);
+      },
+    });
+  };
+
+  const handleToggleArchiveClass = (cls: Classe) => {
+    if (cls.status === "ARCHIVED") {
+      updateClass(cls.id, { status: "ACTIVE" });
+    } else {
+      archiveClass(cls.id);
+    }
+  };
 
   // Handlers for Schools
   const resetSchoolForm = () => {
@@ -434,6 +619,35 @@ export function SuperAdminDashboard({
 
   const totalClassesCount = classes.length;
   const totalEnrolledStudents = classes.reduce((acc, c) => acc + (c.enrolledCount || 0), 0);
+  const activeClassesCount = classes.filter((c) => c.status === "ACTIVE").length;
+  const archivedClassesCount = classes.filter((c) => c.status === "ARCHIVED").length;
+  const totalCapacityCount = classes.reduce((acc, c) => acc + (c.capacity || 0), 0);
+  const distinctLevels = Array.from(new Set(classes.map((c) => c.level).filter(Boolean)));
+
+  // Filtered Classes
+  const filteredClasses = classes.filter((c) => {
+    const q = classSearchQuery.toLowerCase().trim();
+    const matchesSearch =
+      !q ||
+      c.title.toLowerCase().includes(q) ||
+      c.classCode.toLowerCase().includes(q) ||
+      c.etablissementName.toLowerCase().includes(q) ||
+      c.teacherName.toLowerCase().includes(q) ||
+      c.level.toLowerCase().includes(q) ||
+      c.category.toLowerCase().includes(q);
+
+    const matchesEtab =
+      selectedClassEtabFilter === "ALL" || c.etablissementId === selectedClassEtabFilter;
+
+    const matchesStatus =
+      selectedClassStatusFilter === "ALL" || c.status === selectedClassStatusFilter;
+
+    const matchesLevel =
+      selectedClassLevelFilter === "ALL" ||
+      c.level.toLowerCase().includes(selectedClassLevelFilter.toLowerCase());
+
+    return matchesSearch && matchesEtab && matchesStatus && matchesLevel;
+  });
 
   // User breakdown statistics
   const countStudents = users.filter((u) => u.role === "STUDENT").length;
@@ -453,10 +667,10 @@ export function SuperAdminDashboard({
               <span>CONSOLE SUPER ADMINISTRATEUR (ROOT MASTER)</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              Gestion Globale & Identifiants AlFasle
+              Gestion des Établissements & des Classes AlFasle
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Modifiez directement les logins, noms, emails et mots de passe de tous les comptes (Élèves, Professeurs, Parents, Directeurs). Les utilisateurs peuvent se connecter sur leur portail avec leur <strong>Nom / Identifiant</strong> ou leur <strong>Email</strong>.
+              Supervisez l&apos;ensemble de la plateforme multi-tenant : déployez des <strong>établissements</strong> (lycées, collèges, universités), gérez et créez toutes les <strong>classes</strong>, assignez les professeurs et contrôlez les identifiants d&apos;accès.
             </p>
           </div>
 
@@ -478,7 +692,7 @@ export function SuperAdminDashboard({
               className="px-4 py-3.5 rounded-2xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-mono font-bold text-xs shadow-lg flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5"
             >
               <Trash2 className="w-4 h-4 text-rose-400" />
-              <span>🧹 Vider Cache & Réinitialiser</span>
+              <span>🧹 Vider Cache</span>
             </button>
 
             <button
@@ -488,16 +702,24 @@ export function SuperAdminDashboard({
               }}
               className="px-5 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-black font-black text-xs shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 uppercase tracking-wider"
             >
-              <Building2 className="w-5 h-5 text-black" />
+              <Building2 className="w-4 h-4 text-black" />
               <span>+ Créer Établissement</span>
+            </button>
+
+            <button
+              onClick={() => handleOpenSuperCreateClass()}
+              className="px-5 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 hover:from-indigo-400 hover:to-purple-500 text-white font-black text-xs shadow-xl shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 uppercase tracking-wider"
+            >
+              <FolderKanban className="w-4 h-4 text-white" />
+              <span>+ Nouvelle Classe</span>
             </button>
 
             <button
               onClick={() => setIsCreateUserModalOpen(true)}
               className="px-5 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-500 text-black font-black text-xs shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 uppercase tracking-wider"
             >
-              <Users className="w-5 h-5 text-black" />
-              <span>+ Nouvel Utilisateur</span>
+              <Users className="w-4 h-4 text-black" />
+              <span>+ Utilisateur</span>
             </button>
           </div>
         </div>
@@ -505,18 +727,6 @@ export function SuperAdminDashboard({
 
       {/* Main Navigation Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-800 pb-3 overflow-x-auto no-scrollbar whitespace-nowrap -mx-1 px-1">
-        <button
-          onClick={() => setActiveTab("USERS")}
-          className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${
-            activeTab === "USERS"
-              ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
-              : "bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800"
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          <span>👥 Utilisateurs ({users.length})</span>
-        </button>
-
         <button
           onClick={() => setActiveTab("ETABLISSEMENTS")}
           className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${
@@ -527,6 +737,30 @@ export function SuperAdminDashboard({
         >
           <Building2 className="w-4 h-4" />
           <span>🏫 Établissements ({etablissements.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("CLASSES")}
+          className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${
+            activeTab === "CLASSES"
+              ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
+              : "bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800"
+          }`}
+        >
+          <FolderKanban className="w-4 h-4" />
+          <span>🎓 Classes & Filières ({classes.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("USERS")}
+          className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${
+            activeTab === "USERS"
+              ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
+              : "bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800"
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>👥 Utilisateurs ({users.length})</span>
         </button>
 
         <button
@@ -1054,6 +1288,29 @@ export function SuperAdminDashboard({
                     <div className="flex items-center gap-2 flex-wrap self-end md:self-center">
                       <button
                         type="button"
+                        onClick={() => {
+                          setSelectedClassEtabFilter(etab.id);
+                          setActiveTab("CLASSES");
+                        }}
+                        className="px-3.5 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+                        title="Voir et gérer toutes les classes de cet établissement"
+                      >
+                        <FolderKanban className="w-3.5 h-3.5 text-purple-400" />
+                        <span>Gérer les classes ({schoolClasses.length})</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleOpenSuperCreateClass(etab.id)}
+                        className="px-3.5 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all"
+                        title="Créer une nouvelle classe rattachée à cet établissement"
+                      >
+                        <PlusCircle className="w-3.5 h-3.5 text-blue-400" />
+                        <span>+ Ajouter Classe</span>
+                      </button>
+
+                      <button
+                        type="button"
                         onClick={() => handleOpenEditEtab(etab)}
                         className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
                         title="Modifier les informations de l'établissement"
@@ -1061,17 +1318,6 @@ export function SuperAdminDashboard({
                         <Edit className="w-3.5 h-3.5 text-amber-400" />
                         <span>Modifier</span>
                       </button>
-
-                      {onOpenCreateClassForSchool && (
-                        <button
-                          type="button"
-                          onClick={() => onOpenCreateClassForSchool(etab.id)}
-                          className="px-3.5 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all"
-                        >
-                          <PlusCircle className="w-3.5 h-3.5 text-blue-400" />
-                          <span>+ Ajouter Classe</span>
-                        </button>
-                      )}
 
                       <button
                         type="button"
@@ -1168,6 +1414,405 @@ export function SuperAdminDashboard({
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB: CLASSES & CURRICULUM MANAGEMENT (SUPER ADMIN) */}
+      {/* ========================================================================= */}
+      {activeTab === "CLASSES" && (
+        <div className="space-y-6 animate-fadeIn">
+          {/* Header Callout & Add Class Button */}
+          <div className="p-6 rounded-3xl bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-slate-900 border border-purple-500/30 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 font-mono text-xs font-bold mb-2">
+                <FolderKanban className="w-3.5 h-3.5 text-purple-400" />
+                <span>PILOTAGE CENTRALISÉ DES CLASSES</span>
+              </div>
+              <h2 className="text-xl font-black text-white flex items-center gap-2.5">
+                <span>Gestion Globale des Classes ({filteredClasses.length} / {classes.length})</span>
+              </h2>
+              <p className="text-xs text-slate-300 mt-1 max-w-xl leading-relaxed">
+                Créez, modifiez, assignez des professeurs et organisez les classes pour tous les établissements. Vous pouvez également réassigner une classe à un autre campus ou ajuster son quota d&apos;élèves.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleOpenSuperCreateClass(selectedClassEtabFilter !== "ALL" ? selectedClassEtabFilter : undefined)}
+              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 hover:from-indigo-400 hover:to-purple-500 text-white font-black text-xs shadow-xl shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 uppercase tracking-wider shrink-0"
+            >
+              <PlusCircle className="w-4 h-4 fill-white text-indigo-950" />
+              <span>+ Créer une Classe</span>
+            </button>
+          </div>
+
+          {/* Classes Top Metrics (4 cards) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="glass-panel p-4 rounded-2xl border border-slate-800 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider">
+                  Total Classes
+                </span>
+                <FolderKanban className="w-4 h-4 text-indigo-400" />
+              </div>
+              <div className="flex items-baseline gap-2 pt-1">
+                <span className="text-2xl font-black text-white">{classes.length}</span>
+                <span className="text-[10px] text-slate-400">tous campus</span>
+              </div>
+            </div>
+
+            <div className="glass-panel p-4 rounded-2xl border border-slate-800 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">
+                  Classes Actives
+                </span>
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              </div>
+              <div className="flex items-baseline gap-2 pt-1">
+                <span className="text-2xl font-black text-emerald-300">{activeClassesCount}</span>
+                <span className="text-[10px] text-slate-400">{archivedClassesCount} archivée(s)</span>
+              </div>
+            </div>
+
+            <div className="glass-panel p-4 rounded-2xl border border-slate-800 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">
+                  Élèves Inscrits
+                </span>
+                <Users className="w-4 h-4 text-amber-400" />
+              </div>
+              <div className="flex items-baseline gap-2 pt-1">
+                <span className="text-2xl font-black text-amber-300">{totalEnrolledStudents}</span>
+                <span className="text-[10px] text-slate-400">/ {totalCapacityCount} places</span>
+              </div>
+            </div>
+
+            <div className="glass-panel p-4 rounded-2xl border border-slate-800 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-sky-400 uppercase tracking-wider">
+                  Couverture Campus
+                </span>
+                <Building2 className="w-4 h-4 text-sky-400" />
+              </div>
+              <div className="flex items-baseline gap-2 pt-1">
+                <span className="text-2xl font-black text-sky-300">
+                  {new Set(classes.map((c) => c.etablissementId)).size}
+                </span>
+                <span className="text-[10px] text-slate-400">/ {etablissements.length} établissements</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Filter & Search Controls Bar */}
+          <div className="glass-panel rounded-2xl p-4 border border-slate-800 flex flex-col lg:flex-row gap-4 justify-between items-center">
+            {/* Search Input */}
+            <div className="w-full lg:w-96 relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+              <input
+                type="text"
+                placeholder="Rechercher par titre, code, prof, niveau, campus..."
+                value={classSearchQuery}
+                onChange={(e) => setClassSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+              />
+            </div>
+
+            {/* Filter Dropdowns */}
+            <div className="flex items-center gap-3 w-full lg:w-auto flex-wrap">
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-slate-400 font-medium whitespace-nowrap">Campus :</label>
+                <select
+                  value={selectedClassEtabFilter}
+                  onChange={(e) => setSelectedClassEtabFilter(e.target.value)}
+                  className="px-3 py-1.5 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-purple-500 max-w-[200px] truncate"
+                >
+                  <option value="ALL">Tous les établissements ({etablissements.length})</option>
+                  {etablissements.map((et) => (
+                    <option key={et.id} value={et.id}>
+                      {et.name} ({et.city})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-slate-400 font-medium whitespace-nowrap">Statut :</label>
+                <select
+                  value={selectedClassStatusFilter}
+                  onChange={(e) => setSelectedClassStatusFilter(e.target.value)}
+                  className="px-3 py-1.5 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-purple-500"
+                >
+                  <option value="ALL">Tous statuts</option>
+                  <option value="ACTIVE">Actives</option>
+                  <option value="ARCHIVED">Archivées</option>
+                  <option value="DRAFT">Brouillons</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-slate-400 font-medium whitespace-nowrap">Niveau :</label>
+                <select
+                  value={selectedClassLevelFilter}
+                  onChange={(e) => setSelectedClassLevelFilter(e.target.value)}
+                  className="px-3 py-1.5 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-purple-500"
+                >
+                  <option value="ALL">Tous niveaux</option>
+                  {distinctLevels.map((lvl) => (
+                    <option key={lvl} value={lvl}>
+                      {lvl}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {(classSearchQuery || selectedClassEtabFilter !== "ALL" || selectedClassStatusFilter !== "ALL" || selectedClassLevelFilter !== "ALL") && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setClassSearchQuery("");
+                    setSelectedClassEtabFilter("ALL");
+                    setSelectedClassStatusFilter("ALL");
+                    setSelectedClassLevelFilter("ALL");
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-all"
+                >
+                  Réinitialiser
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Classes Cards List */}
+          {filteredClasses.length === 0 ? (
+            <div className="glass-panel p-12 rounded-3xl border border-slate-800 text-center space-y-4">
+              <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 mx-auto flex items-center justify-center">
+                <FolderKanban className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Aucune classe ne correspond à ces critères</h3>
+                <p className="text-xs text-slate-400 mt-1 max-w-md mx-auto">
+                  Ajustez vos filtres ou créez une nouvelle classe pour les établissements configurés.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleOpenSuperCreateClass()}
+                className="px-5 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-purple-600/20 inline-flex items-center gap-2"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>Créer une classe maintenant</span>
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              {filteredClasses.map((cls) => {
+                const parentSchool = etablissements.find((e) => e.id === cls.etablissementId);
+                const isArchived = cls.status === "ARCHIVED";
+                const isDraft = cls.status === "DRAFT";
+                const enrolled = cls.enrolledCount || 0;
+                const capacity = cls.capacity || 35;
+                const fillRatio = Math.round((enrolled / capacity) * 100);
+
+                return (
+                  <div
+                    key={cls.id}
+                    className={`glass-panel rounded-3xl border transition-all shadow-xl overflow-hidden flex flex-col justify-between ${
+                      isArchived
+                        ? "border-slate-800 bg-slate-950/40 opacity-70"
+                        : "border-slate-800/90 hover:border-purple-500/40 bg-gradient-to-b from-[#0d1326] to-[#080d1a]"
+                    }`}
+                  >
+                    <div>
+                      {/* Top Cover Banner */}
+                      <div className="relative h-28 w-full bg-slate-900 overflow-hidden">
+                        <img
+                          src={
+                            cls.coverImage ||
+                            "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80"
+                          }
+                          alt={cls.title}
+                          className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0d1326] via-transparent to-black/60" />
+
+                        {/* Badges on Cover */}
+                        <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedClassEtabFilter(cls.etablissementId)}
+                            className="px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-slate-700/80 text-[10px] font-bold text-white flex items-center gap-1.5 hover:bg-purple-950/80 hover:border-purple-500/50 transition-colors"
+                            title="Filtrer uniquement cet établissement"
+                          >
+                            <Building2 className="w-3 h-3 text-purple-400" />
+                            <span className="truncate max-w-[160px]">{cls.etablissementName}</span>
+                          </button>
+
+                          <div className="flex items-center gap-1.5">
+                            {cls.status === "ACTIVE" && (
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-mono text-[10px] font-bold">
+                                ACTIVE
+                              </span>
+                            )}
+                            {cls.status === "ARCHIVED" && (
+                              <span className="px-2 py-0.5 rounded-full bg-slate-700/60 border border-slate-600 text-slate-300 font-mono text-[10px] font-bold">
+                                ARCHIVÉE
+                              </span>
+                            )}
+                            {cls.status === "DRAFT" && (
+                              <span className="px-2 py-0.5 rounded-full bg-blue-500/20 border border-blue-500/40 text-blue-300 font-mono text-[10px] font-bold">
+                                BROUILLON
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Category & Level Badges Bottom Cover */}
+                        <div className="absolute bottom-2 left-3 flex items-center gap-2 flex-wrap">
+                          <span className="px-2 py-0.5 rounded-md bg-purple-500/30 border border-purple-500/40 text-purple-200 text-[10px] font-bold">
+                            {cls.level}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-md bg-slate-800/80 border border-slate-700 text-slate-300 text-[10px] font-semibold">
+                            {cls.category}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Card Content Body */}
+                      <div className="p-5 space-y-4">
+                        <div>
+                          <h3 className="font-black text-white text-base leading-snug line-clamp-1 hover:text-purple-300 transition-colors">
+                            {cls.title}
+                          </h3>
+                          <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                            {cls.description || "Aucune description renseignée pour cette classe."}
+                          </p>
+                        </div>
+
+                        {/* Class Code & Teacher */}
+                        <div className="space-y-2 pt-2 border-t border-slate-800/80 text-xs">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] text-slate-400">Code de classe :</span>
+                            <div className="flex items-center gap-1 bg-slate-950 border border-purple-500/30 px-2 py-0.5 rounded-lg font-mono text-purple-300 text-[11px] font-bold">
+                              <span>{cls.classCode}</span>
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard(cls.classCode, `code_${cls.id}`)}
+                                className="text-purple-400 hover:text-white ml-1"
+                                title="Copier le code de classe"
+                              >
+                                {copiedId === `code_${cls.id}` ? (
+                                  <Check className="w-3 h-3 text-emerald-400" />
+                                ) : (
+                                  <Copy className="w-3 h-3" />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] text-slate-400">Enseignant :</span>
+                            <div className="flex items-center gap-1.5 text-slate-200 font-semibold truncate max-w-[170px]">
+                              <GraduationCap className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                              <span className="truncate">{cls.teacherName || "Non affecté"}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] text-slate-400">Mode Inscription :</span>
+                            <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-300 border border-slate-800">
+                              {cls.enrollmentMode === "OPEN"
+                                ? "Accès Libre"
+                                : cls.enrollmentMode === "INVITATION"
+                                ? "Invitation Seulement"
+                                : "Validation Manuelle"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Enrolled Students Progress Bar */}
+                        <div className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800/80 space-y-1.5">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-[11px] text-slate-400">Occupation :</span>
+                            <span className="font-bold text-white font-mono text-[11px]">
+                              {enrolled} / {capacity} élèves ({fillRatio}%)
+                            </span>
+                          </div>
+                          <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all duration-500 ${
+                                fillRatio >= 90
+                                  ? "bg-rose-500"
+                                  : fillRatio >= 70
+                                  ? "bg-amber-500"
+                                  : "bg-emerald-500"
+                              }`}
+                              style={{ width: `${Math.min(fillRatio, 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card Actions Footer */}
+                    <div className="p-4 pt-3 border-t border-slate-800/80 bg-slate-950/40 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEditClass(cls)}
+                          className="px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-semibold flex items-center gap-1 transition-all"
+                          title="Modifier les paramètres de la classe"
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                          <span>Modifier</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setViewingClassStudents(cls)}
+                          className="px-2.5 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 text-xs font-semibold flex items-center gap-1 transition-all"
+                          title="Consulter la liste des élèves inscrits"
+                        >
+                          <Users className="w-3.5 h-3.5" />
+                          <span>Élèves ({enrolled})</span>
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        {onSelectClassForCourses && (
+                          <button
+                            type="button"
+                            onClick={() => onSelectClassForCourses(cls.id)}
+                            className="p-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 transition-all"
+                            title="Voir les cours et leçons de cette classe"
+                          >
+                            <BookOpen className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => handleToggleArchiveClass(cls)}
+                          className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all"
+                          title={isArchived ? "Restaurer la classe (Activer)" : "Archiver la classe"}
+                        >
+                          <Archive className="w-3.5 h-3.5 text-slate-400" />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteClass(cls)}
+                          className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-all"
+                          title="Supprimer la classe"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
@@ -2241,6 +2886,571 @@ export function SuperAdminDashboard({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 1: SUPER ADMIN CREATE CLASS MODAL */}
+      {/* ========================================================================= */}
+      {isSuperCreateClassOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-xl bg-[#0a0f1e] border border-purple-500/40 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
+            <div className="px-6 py-5 border-b border-slate-800 bg-[#070b16] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 shadow-lg shadow-purple-500/20">
+                  <FolderKanban className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white">
+                    Créer une Classe (Super Admin)
+                  </h3>
+                  <p className="text-xs text-purple-400 font-mono">
+                    DÉPLOIEMENT MULTI-TENANT SUR N&apos;IMPORTE QUEL CAMPUS
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSuperCreateClassOpen(false)}
+                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateSuperClass} className="p-6 overflow-y-auto flex-1 space-y-4 text-xs">
+              {/* Target Establishment */}
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Établissement de rattachement *
+                </label>
+                <select
+                  required
+                  value={newClassEtabId}
+                  onChange={(e) => {
+                    const newEtab = e.target.value;
+                    setNewClassEtabId(newEtab);
+                    setNewClassCode(handleGenerateClassCode(newEtab, newClassLevel, newClassCategory));
+                  }}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-purple-500"
+                >
+                  {etablissements.map((et) => (
+                    <option key={et.id} value={et.id}>
+                      {et.name} ({et.city} • .{et.subdomain}.alfasle.xyz)
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Class Title */}
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Nom / Intitulé de la Classe *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newClassTitle}
+                  onChange={(e) => setNewClassTitle(e.target.value)}
+                  placeholder="Ex: Terminale S1 - Sciences Expérimentales, Licence 1 Informatique..."
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-purple-500"
+                />
+              </div>
+
+              {/* Class Code & Auto-generate */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-slate-300 font-semibold">Code de Classe *</label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setNewClassCode(
+                          handleGenerateClassCode(newClassEtabId, newClassLevel, newClassCategory)
+                        )
+                      }
+                      className="text-[10px] text-purple-400 hover:text-purple-300 font-mono underline"
+                    >
+                      Générer auto
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    value={newClassCode}
+                    onChange={(e) => setNewClassCode(e.target.value.toUpperCase())}
+                    placeholder="Ex: AF-TERM-S1"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-purple-500/40 text-purple-300 font-mono font-bold focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">
+                    Enseignant Responsable
+                  </label>
+                  <select
+                    value={newClassTeacherId}
+                    onChange={(e) => setNewClassTeacherId(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-purple-500"
+                  >
+                    <option value="">Sélectionner un professeur...</option>
+                    {users
+                      .filter((u) => u.role === "TEACHER")
+                      .map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name} ({t.etablissementName || "Professeur Global"})
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Level & Category */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Niveau / Grade</label>
+                  <input
+                    type="text"
+                    value={newClassLevel}
+                    onChange={(e) => setNewClassLevel(e.target.value)}
+                    placeholder="Ex: Terminale, 1ère, L1, Collège..."
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Discipline / Filière</label>
+                  <input
+                    type="text"
+                    value={newClassCategory}
+                    onChange={(e) => setNewClassCategory(e.target.value)}
+                    placeholder="Ex: Sciences, Mathématiques, Informatique..."
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+              </div>
+
+              {/* Capacity & Enrollment Mode */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Capacité Max Élèves</label>
+                  <input
+                    type="number"
+                    min={5}
+                    max={500}
+                    value={newClassCapacity}
+                    onChange={(e) => setNewClassCapacity(parseInt(e.target.value) || 30)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Mode d&apos;Inscription</label>
+                  <select
+                    value={newClassEnrollmentMode}
+                    onChange={(e) => setNewClassEnrollmentMode(e.target.value as EnrollmentMode)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-purple-500"
+                  >
+                    <option value="OPEN">Accès Libre (Immédiat)</option>
+                    <option value="INVITATION">Sur Invitation / Code Privé</option>
+                    <option value="MANUAL_APPROVAL">Validation Manuelle Requise</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Description & Programme
+                </label>
+                <textarea
+                  rows={2}
+                  value={newClassDescription}
+                  onChange={(e) => setNewClassDescription(e.target.value)}
+                  placeholder="Objectifs pédagogiques, matières dispensées, informations importantes..."
+                  className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-purple-500"
+                />
+              </div>
+
+              {/* Cover Image URL */}
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Image d&apos;Illustration (URL)
+                </label>
+                <input
+                  type="url"
+                  value={newClassCoverImage}
+                  onChange={(e) => setNewClassCoverImage(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 text-xs focus:outline-none focus:border-purple-500"
+                />
+              </div>
+
+              {/* Footer Buttons */}
+              <div className="pt-4 border-t border-slate-800 flex justify-between items-center">
+                <button
+                  type="button"
+                  onClick={() => setIsSuperCreateClassOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 hover:from-indigo-400 hover:to-purple-500 text-white font-black shadow-lg shadow-indigo-500/25 flex items-center gap-2 uppercase tracking-wider"
+                >
+                  <CheckCircle2 className="w-4 h-4 fill-white text-indigo-950" />
+                  <span>+ Déployer la Classe</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 2: SUPER ADMIN EDIT CLASS MODAL */}
+      {/* ========================================================================= */}
+      {editingClass && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-xl bg-[#0a0f1e] border border-amber-500/40 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
+            <div className="px-6 py-5 border-b border-slate-800 bg-[#070b16] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-lg shadow-amber-500/20">
+                  <Edit className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white">
+                    Modifier la Classe
+                  </h3>
+                  <p className="text-xs text-amber-400 font-mono">
+                    {editingClass.title} ({editingClass.classCode})
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingClass(null)}
+                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditClass} className="p-6 overflow-y-auto flex-1 space-y-4 text-xs">
+              {/* Transfer School */}
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Établissement d&apos;appartenance (Transfert possible) *
+                </label>
+                <select
+                  required
+                  value={editClassEtabId}
+                  onChange={(e) => setEditClassEtabId(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                >
+                  {etablissements.map((et) => (
+                    <option key={et.id} value={et.id}>
+                      {et.name} ({et.city})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Title */}
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Intitulé de la classe *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editClassTitle}
+                  onChange={(e) => setEditClassTitle(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              {/* Code & Teacher */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Code de classe *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editClassCode}
+                    onChange={(e) => setEditClassCode(e.target.value.toUpperCase())}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-amber-500/40 text-amber-300 font-mono font-bold focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">
+                    Enseignant Responsable
+                  </label>
+                  <select
+                    value={editClassTeacherId}
+                    onChange={(e) => setEditClassTeacherId(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="">Sélectionner un enseignant...</option>
+                    {users
+                      .filter((u) => u.role === "TEACHER")
+                      .map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name} ({t.etablissementName || "Global"})
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Level & Category */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Niveau / Grade</label>
+                  <input
+                    type="text"
+                    value={editClassLevel}
+                    onChange={(e) => setEditClassLevel(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Discipline / Filière</label>
+                  <input
+                    type="text"
+                    value={editClassCategory}
+                    onChange={(e) => setEditClassCategory(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              {/* Status, Mode, Capacity */}
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Statut</label>
+                  <select
+                    value={editClassStatus}
+                    onChange={(e) => setEditClassStatus(e.target.value as ClassStatus)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="ACTIVE">Active</option>
+                    <option value="ARCHIVED">Archivée</option>
+                    <option value="DRAFT">Brouillon</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Mode d&apos;accès</label>
+                  <select
+                    value={editClassEnrollmentMode}
+                    onChange={(e) => setEditClassEnrollmentMode(e.target.value as EnrollmentMode)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="OPEN">Libre</option>
+                    <option value="INVITATION">Invitation</option>
+                    <option value="MANUAL_APPROVAL">Validation</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Capacité</label>
+                  <input
+                    type="number"
+                    min={5}
+                    max={500}
+                    value={editClassCapacity}
+                    onChange={(e) => setEditClassCapacity(parseInt(e.target.value) || 30)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Description</label>
+                <textarea
+                  rows={2}
+                  value={editClassDescription}
+                  onChange={(e) => setEditClassDescription(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              {/* Cover Image */}
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Image URL</label>
+                <input
+                  type="url"
+                  value={editClassCoverImage}
+                  onChange={(e) => setEditClassCoverImage(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 text-xs focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              {/* Footer */}
+              <div className="pt-4 border-t border-slate-800 flex justify-between items-center">
+                <button
+                  type="button"
+                  onClick={() => setEditingClass(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-black font-black shadow-lg shadow-amber-500/25 flex items-center gap-2 uppercase tracking-wider"
+                >
+                  <CheckCircle2 className="w-4 h-4 fill-black" />
+                  <span>Enregistrer les Modifications</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 3: VIEW CLASS STUDENTS LIST */}
+      {/* ========================================================================= */}
+      {viewingClassStudents && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-2xl bg-[#0a0f1e] border border-sky-500/40 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="px-6 py-5 border-b border-slate-800 bg-[#070b16] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-sky-500/20 border border-sky-500/40 flex items-center justify-center text-sky-400 shadow-lg shadow-sky-500/20">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white">
+                    Élèves Inscrits ({viewingClassStudents.enrolledCount || 0} / {viewingClassStudents.capacity})
+                  </h3>
+                  <p className="text-xs text-sky-400 font-mono">
+                    {viewingClassStudents.title} • {viewingClassStudents.classCode}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setViewingClassStudents(null)}
+                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto flex-1 space-y-4">
+              {/* Summary Stats */}
+              <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs">
+                <div>
+                  <p className="text-slate-400 text-[11px]">Établissement :</p>
+                  <p className="font-bold text-white mt-0.5">{viewingClassStudents.etablissementName}</p>
+                </div>
+                <div>
+                  <p className="text-slate-400 text-[11px]">Enseignant Référent :</p>
+                  <p className="font-bold text-indigo-300 mt-0.5">{viewingClassStudents.teacherName || "Non affecté"}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-slate-400 text-[11px]">Taux d&apos;occupation :</p>
+                  <p className="font-mono font-bold text-emerald-400 mt-0.5">
+                    {Math.round(((viewingClassStudents.enrolledCount || 0) / viewingClassStudents.capacity) * 100)}%
+                  </p>
+                </div>
+              </div>
+
+              {/* Students List from Inscriptions & Users */}
+              {(() => {
+                const classInscriptions = inscriptions.filter(
+                  (i) => i.classeId === viewingClassStudents.id && i.status === "APPROVED"
+                );
+                // Also find students belonging to this school if inscriptions is empty
+                const schoolStudents = users.filter(
+                  (u) => u.role === "STUDENT" && u.etablissementId === viewingClassStudents.etablissementId
+                );
+
+                const displayStudents = classInscriptions.length > 0
+                  ? classInscriptions.map((i) => ({
+                      id: i.id,
+                      name: i.userName,
+                      email: i.userEmail,
+                      avatar: i.userAvatar,
+                      date: i.appliedAt,
+                      phone: i.userPhone,
+                    }))
+                  : schoolStudents.slice(0, viewingClassStudents.enrolledCount || 5).map((u) => ({
+                      id: u.id,
+                      name: u.name,
+                      email: u.email,
+                      avatar: u.avatarUrl,
+                      date: u.createdAt,
+                      phone: "+225 05 06 07 08",
+                    }));
+
+                if (displayStudents.length === 0) {
+                  return (
+                    <div className="py-8 text-center space-y-3">
+                      <GraduationCap className="w-12 h-12 text-slate-600 mx-auto" />
+                      <p className="text-sm font-semibold text-slate-300">
+                        Aucun élève inscrit pour le moment dans cette classe
+                      </p>
+                      <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                        Partagez le code de classe <strong className="text-purple-300 font-mono">{viewingClassStudents.classCode}</strong> avec vos élèves pour leur permettre de rejoindre la classe.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(viewingClassStudents.classCode, "modal_code")}
+                        className="px-4 py-2 rounded-xl bg-purple-600/20 text-purple-300 border border-purple-500/30 text-xs font-bold inline-flex items-center gap-2 hover:bg-purple-600/30 transition-all"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Copier le Code ({viewingClassStudents.classCode})</span>
+                      </button>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="space-y-2">
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      Liste des Inscrits ({displayStudents.length}) :
+                    </p>
+                    <div className="divide-y divide-slate-800/80 rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden">
+                      {displayStudents.map((st, idx) => (
+                        <div key={st.id || idx} className="p-3.5 flex items-center justify-between text-xs hover:bg-slate-900/60 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-sky-500/20 border border-sky-500/30 overflow-hidden shrink-0 flex items-center justify-center text-sky-300 font-bold text-xs">
+                              {st.avatar ? (
+                                <img src={st.avatar} alt={st.name} className="w-full h-full object-cover" />
+                              ) : (
+                                st.name.substring(0, 2).toUpperCase()
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-bold text-white">{st.name}</p>
+                              <p className="text-[11px] text-slate-400 font-mono">{st.email}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold font-mono">
+                              INSCRIT ACTIF
+                            </span>
+                            <p className="text-[10px] text-slate-500 mt-0.5">
+                              {new Date(st.date).toLocaleDateString("fr-FR")}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            <div className="px-6 py-4 border-t border-slate-800 bg-[#070b16] flex justify-end">
+              <button
+                type="button"
+                onClick={() => setViewingClassStudents(null)}
+                className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors"
+              >
+                Fermer
+              </button>
+            </div>
           </div>
         </div>
       )}

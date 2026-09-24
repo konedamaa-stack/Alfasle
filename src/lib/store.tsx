@@ -106,7 +106,7 @@ interface StoreContextType {
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
-const STORAGE_PREFIX = "alfasle_v7_";
+const STORAGE_PREFIX = "alfasle_v8_";
 
 function cleanLegacyStorage() {
   if (typeof window !== "undefined") {
@@ -453,7 +453,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     // 2. If director has email, provision Director user in system
     if (data.directorEmail && data.directorName) {
-      const directorPass = data.directorPassword?.trim() || "Madouu1966@";
+      const directorPass = data.directorPassword?.trim() || "Madouu1966";
       const directorUser: User = {
         id: `u_dir_${Date.now()}`,
         name: data.directorName,
