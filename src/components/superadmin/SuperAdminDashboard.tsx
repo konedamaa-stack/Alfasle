@@ -203,7 +203,7 @@ export function SuperAdminDashboard({
   const [viewingClassStudents, setViewingClassStudents] = useState<Classe | null>(null);
 
   // Confirmation Modal State
-  const [confirmModal, setConfirmModal] = useState<{
+  const [adminConfirmModal, setAdminConfirmModal] = useState<{
     isOpen: boolean;
     title: string;
     message: string;
@@ -325,7 +325,7 @@ export function SuperAdminDashboard({
   };
 
   const handleDeleteClass = (cls: Classe) => {
-    setConfirmModal({
+    setAdminConfirmModal({
       isOpen: true,
       title: `Supprimer la classe « ${cls.title} » ?`,
       message: `Êtes-vous certain de vouloir supprimer définitivement la classe « ${cls.title} » (${cls.classCode}) de l'établissement « ${cls.etablissementName} » ? Cette action supprimera également les cours, devoirs et inscriptions associés.`,
@@ -566,7 +566,7 @@ export function SuperAdminDashboard({
 
   const handleDeleteUser = (u: User) => {
     if (u.id === "u_super_admin_root" || u.email === "konedamaa@gmail.com") {
-      setConfirmModal({
+      setAdminConfirmModal({
         isOpen: true,
         title: "Action impossible",
         message: "Impossible de supprimer le compte Super Admin Master principal.",
@@ -576,7 +576,7 @@ export function SuperAdminDashboard({
       });
       return;
     }
-    setConfirmModal({
+    setAdminConfirmModal({
       isOpen: true,
       title: `Supprimer le compte de « ${u.name} » ?`,
       message: `Êtes-vous sûr de vouloir supprimer définitivement le compte de « ${u.name} » (${u.email}) ? Cette action est irréversible.`,
@@ -3475,13 +3475,13 @@ export function SuperAdminDashboard({
 
       {/* Uniform In-App Confirmation Modal */}
       <ConfirmModal
-        isOpen={confirmModal.isOpen}
-        title={confirmModal.title}
-        message={confirmModal.message}
-        confirmLabel={confirmModal.confirmLabel}
-        variant={confirmModal.variant}
-        onConfirm={confirmModal.onConfirm}
-        onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+        isOpen={adminConfirmModal.isOpen}
+        title={adminConfirmModal.title}
+        message={adminConfirmModal.message}
+        confirmLabel={adminConfirmModal.confirmLabel}
+        variant={adminConfirmModal.variant}
+        onConfirm={adminConfirmModal.onConfirm}
+        onClose={() => setAdminConfirmModal((prev) => ({ ...prev, isOpen: false }))}
       />
     </div>
   );

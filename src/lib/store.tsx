@@ -196,6 +196,9 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
               etabId.includes("coran") ||
               etabId.includes("lycee_excellence");
 
+            return !isDeleted;
+          });
+
           let merged = [...filteredSaved];
 
           // Assurer que le compte Super Admin et Directeur existent au minimum dans users
