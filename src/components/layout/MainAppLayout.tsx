@@ -41,16 +41,31 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
   const [activeTab, setActiveTabState] = useState<NavTab>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("alfasle_active_tab") as NavTab;
-      if (saved) return saved;
+      if (saved) {
+        if (saved === "superadmin" && currentUser.role !== "SUPER_ADMIN") {
+          return "dashboard";
+        }
+        return saved;
+      }
     }
     return currentUser.role === "SUPER_ADMIN" ? "superadmin" : "dashboard";
   });
 
-  const setActiveTab = (tab: NavTab) => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("alfasle_active_tab", tab);
+  React.useEffect(() => {
+    if (currentUser.role !== "SUPER_ADMIN" && activeTab === "superadmin") {
+      setActiveTabState("dashboard");
+      if (typeof window !== "undefined") {
+        localStorage.setItem("alfasle_active_tab", "dashboard");
+      }
     }
-    setActiveTabState(tab);
+  }, [currentUser.role, activeTab]);
+
+  const setActiveTab = (tab: NavTab) => {
+    const validTab = tab === "superadmin" && currentUser.role !== "SUPER_ADMIN" ? "dashboard" : tab;
+    if (typeof window !== "undefined") {
+      localStorage.setItem("alfasle_active_tab", validTab);
+    }
+    setActiveTabState(validTab);
     setIsMobileMenuOpen(false);
   };
 
@@ -113,7 +128,7 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
         {/* Content Area */}
         <main className="flex-1 p-3 sm:p-6 md:p-8 overflow-y-auto max-h-[calc(100vh-65px)] pb-24 md:pb-8">
           {/* SUPER ADMIN DEDICATED CONSOLE TAB */}
-          {activeTab === "superadmin" && (
+          {activeTab === "superadmin" && currentUser.role === "SUPER_ADMIN" && (
             <SuperAdminDashboard
               onOpenCreateClassForSchool={handleOpenCreateClassForSchool}
               onSelectClassForCourses={handleSelectClassForCourses}

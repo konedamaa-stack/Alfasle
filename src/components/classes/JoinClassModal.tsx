@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { useStore } from "@/lib/store";
+import { useToast } from "@/lib/toast-context";
+import { ValidationMessage } from "@/components/common/ValidationMessage";
 import { Classe, Etablissement } from "@/types";
 import {
   X,
@@ -31,6 +33,7 @@ export function JoinClassModal({
 }: JoinClassModalProps) {
   const { currentUser, etablissements, classes, inscriptions, joinClassByCode, applyToClass } =
     useStore();
+  const { toast } = useToast();
 
   const [activeTab, setActiveTab] = useState<"code" | "browse">("code");
   const [classCode, setClassCode] = useState("");
@@ -71,12 +74,14 @@ export function JoinClassModal({
         message: result.message,
         joinedClass: result.classe,
       });
+      toast.success("Enregistrement effectué avec succès", result.message);
       setClassCode("");
     } else {
       setStatusFeedback({
         type: "error",
         message: result.message,
       });
+      toast.error("Inscription impossible", result.message);
     }
   };
 
@@ -90,15 +95,18 @@ export function JoinClassModal({
         message: `Vous êtes déjà inscrit à la classe « ${cls.title} ».`,
         joinedClass: cls,
       });
+      toast.info("Déjà inscrit", `Vous êtes déjà inscrit à la classe « ${cls.title} ».`);
       return;
     }
 
     applyToClass(cls.id, motivation || `Inscription via le catalogue établissement`);
+    const successMsg = `Votre inscription pour « ${cls.title} » (${cls.etablissementName}) a été enregistrée avec succès !`;
     setStatusFeedback({
       type: "success",
-      message: `Votre inscription pour « ${cls.title} » (${cls.etablissementName}) a été enregistrée avec succès !`,
+      message: successMsg,
       joinedClass: cls,
     });
+    toast.success("Enregistrement effectué avec succès", successMsg);
   };
 
   const currentSelectedEtab = etablissements.find(

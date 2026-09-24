@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useStore } from "@/lib/store";
+import { useToast } from "@/lib/toast-context";
 import { InscriptionStatus, InscriptionRole } from "@/types";
 import {
   UserCheck,
@@ -25,6 +26,7 @@ import { AccountActivationModal } from "./AccountActivationModal";
 
 export function ValidationQueue() {
   const { inscriptions, classes, etablissements, approveInscription, rejectInscription } = useStore();
+  const { toast } = useToast();
 
   const [filterStatus, setFilterStatus] = useState<"ALL" | InscriptionStatus>("PENDING");
   const [filterRole, setFilterRole] = useState<"ALL" | InscriptionRole>("ALL");
@@ -64,8 +66,8 @@ export function ValidationQueue() {
             <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
               File de Validation des Préinscriptions
             </h2>
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5" /> Super Admin
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5" /> Administration & Direction
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
@@ -341,14 +343,26 @@ export function ValidationQueue() {
                     {ins.status === "PENDING" && (
                       <>
                         <button
-                          onClick={() => approveInscription(ins.id)}
+                          onClick={() => {
+                            approveInscription(ins.id);
+                            toast.success(
+                              "Enregistrement effectué avec succès",
+                              `Candidature de « ${ins.userName} » validée. Le compte a été activé.`
+                            );
+                          }}
                           className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all transform hover:-translate-y-0.5"
                         >
                           <CheckCircle2 className="w-4 h-4" />
                           <span>Valider & Créer Compte</span>
                         </button>
                         <button
-                          onClick={() => rejectInscription(ins.id)}
+                          onClick={() => {
+                            rejectInscription(ins.id);
+                            toast.info(
+                              "Candidature refusée",
+                              `La candidature de « ${ins.userName} » a été refusée.`
+                            );
+                          }}
                           className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800/90 hover:bg-rose-950/50 text-slate-400 hover:text-rose-300 border border-slate-700 text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
                         >
                           <XCircle className="w-4 h-4" />
@@ -359,7 +373,13 @@ export function ValidationQueue() {
 
                     {ins.status === "APPROVED" && (
                       <button
-                        onClick={() => rejectInscription(ins.id)}
+                        onClick={() => {
+                          rejectInscription(ins.id);
+                          toast.warning(
+                            "Accès révoqué",
+                            `L'accès de « ${ins.userName} » a été révoqué.`
+                          );
+                        }}
                         className="px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-rose-950/40 text-slate-400 hover:text-rose-300 text-xs font-medium transition-colors border border-slate-700 flex items-center gap-1.5"
                       >
                         <XCircle className="w-3.5 h-3.5" /> Révoquer l'accès
@@ -368,7 +388,13 @@ export function ValidationQueue() {
 
                     {ins.status === "REJECTED" && (
                       <button
-                        onClick={() => approveInscription(ins.id)}
+                        onClick={() => {
+                          approveInscription(ins.id);
+                          toast.success(
+                            "Enregistrement effectué avec succès",
+                            `Candidature de « ${ins.userName} » reconsidérée et validée avec succès.`
+                          );
+                        }}
                         className="px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-emerald-950/40 text-slate-400 hover:text-emerald-300 text-xs font-medium transition-colors border border-slate-700 flex items-center gap-1.5"
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" /> Reconsidérer & Valider

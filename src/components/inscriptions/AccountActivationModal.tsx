@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useStore } from "@/lib/store";
+import { useToast } from "@/lib/toast-context";
 import { Inscription, UserRole } from "@/types";
 import {
   X,
@@ -36,6 +37,7 @@ export function AccountActivationModal({
   onSuccess,
 }: AccountActivationModalProps) {
   const { inscriptions, activateAccountWithPassword, etablissements } = useStore();
+  const { toast } = useToast();
 
   const [step, setStep] = useState<"EMAIL_PREVIEW" | "SET_PASSWORD" | "SUCCESS">("EMAIL_PREVIEW");
   const [password, setPassword] = useState("");
@@ -96,12 +98,14 @@ export function AccountActivationModal({
       setIsLoading(false);
       if (result.success) {
         setStep("SUCCESS");
+        toast.success("Enregistrement effectué avec succès", result.message);
         setTimeout(() => {
           if (onSuccess) onSuccess();
           onClose();
         }, 2200);
       } else {
         setErrorMsg(result.message);
+        toast.error("Erreur d'activation", result.message);
       }
     }, 600);
   };

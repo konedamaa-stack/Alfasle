@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useStore } from "@/lib/store";
+import { useToast } from "@/lib/toast-context";
 import { Etablissement, Classe } from "@/types";
 import {
   School,
@@ -32,6 +33,7 @@ export function SchoolManager({
   onOpenSuperAdmin,
 }: SchoolManagerProps) {
   const { etablissements, classes, createEtablissement, currentUser } = useStore();
+  const { toast } = useToast();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string>("ALL");
@@ -70,6 +72,11 @@ export function SchoolManager({
       description: newDesc || "Nouvel établissement académique rattaché au réseau AlFasle.",
       logoUrl: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=150&auto=format&fit=crop&q=80",
     });
+
+    toast.success(
+      "Enregistrement effectué avec succès",
+      `L'établissement « ${newName} » a été ajouté à votre réseau avec succès.`
+    );
 
     setIsCreateModalOpen(false);
     // Reset form
@@ -112,9 +119,9 @@ export function SchoolManager({
           </div>
         </div>
 
-        {currentUser.role === "ADMIN" && (
+        {(currentUser.role === "SUPER_ADMIN" || currentUser.role === "ADMIN") && (
           <div className="flex items-center gap-2.5 self-start sm:self-auto">
-            {onOpenSuperAdmin && (
+            {currentUser.role === "SUPER_ADMIN" && onOpenSuperAdmin && (
               <button
                 onClick={onOpenSuperAdmin}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-600/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold font-mono shadow-md transition-all transform hover:-translate-y-0.5"
@@ -124,13 +131,15 @@ export function SchoolManager({
               </button>
             )}
 
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg shadow-blue-600/30 transition-all"
-            >
-              <PlusCircle className="w-4 h-4" />
-              <span>Ajouter un Établissement</span>
-            </button>
+            {currentUser.role === "SUPER_ADMIN" && (
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg shadow-blue-600/30 transition-all"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>Ajouter un Établissement</span>
+              </button>
+            )}
           </div>
         )}
       </div>

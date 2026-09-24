@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useStore } from "@/lib/store";
+import { useToast } from "@/lib/toast-context";
 import { EnrollmentMode, ClassStatus } from "@/types";
 import { X, Sparkles, FolderKanban, Users, BookOpen } from "lucide-react";
 
@@ -17,6 +18,7 @@ export function CreateClassModal({
   defaultEtablissementId,
 }: CreateClassModalProps) {
   const { createClass, etablissements } = useStore();
+  const { toast } = useToast();
 
   const [selectedEtabId, setSelectedEtabId] = useState<string>(
     defaultEtablissementId || etablissements[0]?.id || ""
@@ -71,6 +73,11 @@ export function CreateClassModal({
       status: "ACTIVE",
       coverImage,
     });
+
+    toast.success(
+      "Enregistrement effectué avec succès",
+      `La classe « ${title} » (${generatedCode}) a été créée et activée.`
+    );
 
     onClose();
     // Reset form

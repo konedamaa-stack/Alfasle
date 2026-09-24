@@ -217,15 +217,15 @@ export function Sidebar({
           </nav>
         </div>
 
-        {/* Super Admin Access Banner for Admins */}
-        {currentUser.role === "ADMIN" && (
+        {/* Super Admin Access Banner (uniquement pour le rôle SUPER_ADMIN) */}
+        {currentUser.role === "SUPER_ADMIN" && (
           <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-950/40 via-[#141208] to-orange-950/40 border border-amber-500/40 space-y-2.5 shadow-lg">
             <div className="flex items-center gap-2 text-amber-300 text-xs font-bold font-mono">
               <Shield className="w-3.5 h-3.5 text-amber-400" />
-              <span>Accès Super Admin</span>
+              <span>Console Root Master</span>
             </div>
             <p className="text-[10px] text-slate-300 leading-relaxed">
-              Création d&apos;établissements, quotas d&apos;élèves et gestion des sous-domaines DNS.
+              Création d&apos;établissements, quotas d&apos;élèves et gestion globale des sous-domaines.
             </p>
             <button
               onClick={() => {
@@ -234,7 +234,7 @@ export function Sidebar({
               }}
               className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-extrabold text-[11px] flex items-center justify-center gap-1.5 shadow-md transition-all"
             >
-              <span>Ouvrir Super Admin &rarr;</span>
+              <span>Ouvrir Console Master &rarr;</span>
             </button>
           </div>
         )}

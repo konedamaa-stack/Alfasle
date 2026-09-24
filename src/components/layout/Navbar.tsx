@@ -141,8 +141,8 @@ export function Navbar({
         {/* Light / Dark Mode Switcher */}
         <ThemeToggle />
 
-        {/* Direct Super Admin button for Admins */}
-        {(currentUser.role === "ADMIN" || currentUser.role === "SUPER_ADMIN") && onOpenSuperAdmin && (
+        {/* Direct Super Admin button for Super Admins only */}
+        {currentUser.role === "SUPER_ADMIN" && onOpenSuperAdmin && (
           <button
             onClick={onOpenSuperAdmin}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-600/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold font-mono transition-all transform hover:-translate-y-0.5 shadow-sm"

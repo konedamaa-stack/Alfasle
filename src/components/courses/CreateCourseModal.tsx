@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useStore } from "@/lib/store";
+import { useToast } from "@/lib/toast-context";
 import { X, Video, BookOpen, Plus, FileText } from "lucide-react";
 
 interface CreateCourseModalProps {
@@ -16,6 +17,7 @@ export function CreateCourseModal({
   defaultClassId,
 }: CreateCourseModalProps) {
   const { classes, createCourse } = useStore();
+  const { toast } = useToast();
 
   const [classeId, setClasseId] = useState(defaultClassId || (classes[0]?.id || ""));
   const [chapterTitle, setChapterTitle] = useState("Module 1 : Fondations");
@@ -55,6 +57,11 @@ export function CreateCourseModal({
         { name: "Support_de_cours.pdf", url: "#", size: "1.8 Mo" },
       ],
     });
+
+    toast.success(
+      "Enregistrement effectué avec succès",
+      `Le cours « ${title} » a été publié avec succès.`
+    );
 
     onClose();
     setTitle("");

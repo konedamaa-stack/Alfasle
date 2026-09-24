@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { useStore } from "@/lib/store";
+import { useToast } from "@/lib/toast-context";
+import { ValidationMessage } from "@/components/common/ValidationMessage";
 import { InscriptionRole } from "@/types";
 import {
   X,
@@ -48,6 +50,7 @@ export function PreRegistrationModal({
   defaultRole = "STUDENT",
 }: PreRegistrationModalProps) {
   const { etablissements, classes, submitPreRegistration } = useStore();
+  const { toast } = useToast();
 
   const [role, setRole] = useState<InscriptionRole>(defaultRole);
   const [userName, setUserName] = useState("");
@@ -146,8 +149,13 @@ export function PreRegistrationModal({
 
     if (result.success) {
       setIsSubmitted(true);
+      toast.success(
+        "Enregistrement effectué avec succès",
+        `Votre préinscription auprès de ${selectedEstablishment?.name || "l'établissement"} a été soumise avec succès.`
+      );
     } else {
       setErrorMsg(result.message);
+      toast.error("Erreur de validation", result.message);
     }
   };
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useStore } from "@/lib/store";
+import { useToast } from "@/lib/toast-context";
 import { Classe } from "@/types";
 import { X, Send, GraduationCap, CheckCircle2, AlertCircle } from "lucide-react";
 
@@ -13,6 +14,7 @@ interface ApplyModalProps {
 
 export function ApplyModal({ targetClass, isOpen, onClose }: ApplyModalProps) {
   const { applyToClass, currentUser } = useStore();
+  const { toast } = useToast();
   const [motivation, setMotivation] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
@@ -22,6 +24,10 @@ export function ApplyModal({ targetClass, isOpen, onClose }: ApplyModalProps) {
     e.preventDefault();
     applyToClass(targetClass.id, motivation);
     setSubmitted(true);
+    toast.success(
+      "Enregistrement effectué avec succès",
+      `Votre préinscription pour la classe « ${targetClass.title} » a été enregistrée.`
+    );
     setTimeout(() => {
       setSubmitted(false);
       onClose();

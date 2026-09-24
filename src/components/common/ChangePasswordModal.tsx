@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { useStore } from "@/lib/store";
+import { useToast } from "@/lib/toast-context";
+import { ValidationMessage } from "@/components/common/ValidationMessage";
 import { X, Lock, Eye, EyeOff, CheckCircle2, ShieldCheck, KeyRound } from "lucide-react";
 
 interface ChangePasswordModalProps {
@@ -11,6 +13,7 @@ interface ChangePasswordModalProps {
 
 export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProps) {
   const { currentUser, changeUserPassword } = useStore();
+  const { toast } = useToast();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -48,15 +51,17 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
       setIsLoading(false);
       if (res.success) {
         setSuccessMsg(res.message);
+        toast.success("Enregistrement effectué avec succès", res.message);
         setTimeout(() => {
           onClose();
           setSuccessMsg("");
           setCurrentPassword("");
           setNewPassword("");
           setConfirmPassword("");
-        }, 1800);
+        }, 1500);
       } else {
         setErrorMsg(res.message);
+        toast.error("Échec de modification", res.message);
       }
     }, 400);
   };
@@ -86,17 +91,21 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4 text-slate-200">
           {errorMsg && (
-            <div className="p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-              <span>⚠️</span>
-              <span>{errorMsg}</span>
-            </div>
+            <ValidationMessage
+              type="error"
+              title="Erreur"
+              message={errorMsg}
+              onClose={() => setErrorMsg("")}
+            />
           )}
 
           {successMsg && (
-            <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              <span>{successMsg}</span>
-            </div>
+            <ValidationMessage
+              type="success"
+              title="Succès"
+              message={successMsg}
+              onClose={() => setSuccessMsg("")}
+            />
           )}
 
           <div>
