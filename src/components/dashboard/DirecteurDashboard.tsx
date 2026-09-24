@@ -1090,7 +1090,11 @@ export function DirecteurDashboard({
                     )}
 
                     <button
-                      onClick={() => handleDeleteClass(cls)}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClass(cls);
+                      }}
                       title="Supprimer définitivement cette classe"
                       className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-all flex items-center justify-center shrink-0"
                     >

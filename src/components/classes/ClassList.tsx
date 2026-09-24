@@ -102,16 +102,18 @@ export function ClassList({
     toast.success("Enregistrement effectué avec succès", `La classe « ${editTitle} » a été modifiée avec succès.`);
   };
 
-  const handleDeleteClass = (c: Classe) => {
+  const handleDeleteClass = (c: Classe | null) => {
+    if (!c) return;
     setConfirmModal({
       isOpen: true,
       title: `Supprimer la classe « ${c.title} » ?`,
-      message: `Êtes-vous sûr de vouloir supprimer définitivement la classe « ${c.title} » (${c.classCode}) ? Tous les cours et inscriptions associés seront supprimés.`,
+      message: `Êtes-vous sûr de vouloir supprimer définitivement la classe « ${c.title} » (${c.classCode || ""}) ? Tous les cours et inscriptions associés seront supprimés.`,
       confirmLabel: "Supprimer la classe",
       variant: "danger",
       onConfirm: () => {
         deleteClass(c.id);
         setIsEditModalOpen(false);
+        setEditingClass(null);
         toast.success("Enregistrement effectué avec succès", `La classe « ${c.title} » a été supprimée avec succès.`);
       },
     });
@@ -342,7 +344,11 @@ export function ClassList({
                         </button>
 
                         <button
-                          onClick={() => handleDeleteClass(cls)}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClass(cls);
+                          }}
                           className="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs font-bold flex items-center justify-center transition-all"
                           title="Supprimer cette classe"
                         >

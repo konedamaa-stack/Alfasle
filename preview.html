@@ -497,8 +497,159 @@
     </div>
   </div>
 
+  <!-- TOAST CONTAINER -->
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2"></div>
+
+  <!-- MODAL: CONFIRM DELETE CLASS -->
+  <div id="confirmDeleteClassModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md hidden animate-fadeIn">
+    <div class="w-full max-w-md bg-[#0a0f1e] border border-rose-500/40 rounded-3xl overflow-hidden shadow-2xl p-6 text-center space-y-4">
+      <div class="w-14 h-14 rounded-2xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center mx-auto text-rose-400">
+        <i data-lucide="trash-2" class="w-7 h-7"></i>
+      </div>
+      <div class="space-y-2">
+        <h3 id="deleteClassModalTitle" class="text-lg font-black text-white">Supprimer cette classe ?</h3>
+        <p id="deleteClassModalDesc" class="text-xs text-slate-300">Cette action est irréversible. Tous les cours et devoirs associés seront supprimés.</p>
+      </div>
+      <div class="p-4 bg-slate-950/80 border-t border-slate-800 -mx-6 -mb-6 mt-4 flex items-center justify-end gap-2.5">
+        <button type="button" onclick="closeModal('confirmDeleteClassModal')" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">Annuler</button>
+        <button id="confirmDeleteClassBtn" type="button" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white text-xs font-bold shadow-lg shadow-rose-600/30">Supprimer la classe</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    lucide.createIcons();
+    let appClasses = [
+      {
+        id: 'cls_1',
+        title: 'Développement Web Moderne Next.js 15 & TypeScript',
+        desc: 'Apprenez à concevoir des applications web complètes avec App Router et Supabase.',
+        level: 'Intermédiaire',
+        enrolled: '24/35',
+        image: 'https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800'
+      },
+      {
+        id: 'cls_2',
+        title: 'Algorithmique Avancée & Structures de Données',
+        desc: 'Maîtrisez les graphes, arbres binaires et programmation dynamique.',
+        level: 'Avancé',
+        enrolled: '18/25',
+        image: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800'
+      },
+      {
+        id: 'cls_3',
+        title: 'Physique & Chimie Fondamentale',
+        desc: 'Mécanique newtonienne, électrostatique et réactions acido-basiques.',
+        level: 'Intermédiaire',
+        enrolled: '22/30',
+        image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800'
+      }
+    ];
+
+    function showToast(title, message) {
+      const c = document.getElementById('toastContainer');
+      if (!c) return;
+      const toast = document.createElement('div');
+      toast.className = 'flex items-center gap-3 p-4 bg-emerald-950/95 border border-emerald-500/40 rounded-2xl text-white shadow-2xl animate-scaleUp';
+      toast.innerHTML = `
+        <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">✓</div>
+        <div>
+          <p class="text-xs font-bold text-emerald-300">${title}</p>
+          <p class="text-[11px] text-slate-300">${message}</p>
+        </div>
+      `;
+      c.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    function renderClasses() {
+      const grid = document.getElementById('classesGrid');
+      if (!grid) return;
+      if (appClasses.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-3 text-center py-16 glass-panel rounded-3xl border border-slate-800">
+            <p class="text-slate-400 text-sm font-semibold">Aucune classe disponible.</p>
+            <button onclick="openModal('createClassModal')" class="mt-3 px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold">Créer la première classe</button>
+          </div>
+        `;
+        return;
+      }
+      grid.innerHTML = appClasses.map(c => `
+        <div class="glass-card rounded-2xl overflow-hidden border border-slate-800 flex flex-col justify-between" id="card-${c.id}">
+          <img src="${c.image}" class="h-36 w-full object-cover" />
+          <div class="p-5 space-y-3 flex-1 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-bold">${c.level}</span>
+                <span class="text-[11px] text-emerald-400 font-semibold">Sur sélection</span>
+              </div>
+              <h3 class="text-sm font-bold text-white">${c.title}</h3>
+              <p class="text-xs text-slate-400 mt-1 leading-relaxed">${c.desc}</p>
+            </div>
+            <div class="pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
+              <span class="text-xs text-slate-400">Inscrits : <b class="text-white">${c.enrolled}</b></span>
+              <div class="flex items-center gap-1.5">
+                <button onclick="setTab('courses')" class="px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 text-xs font-bold transition-all">Cours</button>
+                <button onclick="askDeleteClass('${c.id}')" title="Supprimer cette classe" class="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 transition-all flex items-center justify-center">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function askDeleteClass(id) {
+      const cls = appClasses.find(c => c.id === id);
+      if (!cls) return;
+      document.getElementById('deleteClassModalTitle').innerText = `Supprimer la classe « ${cls.title} » ?`;
+      document.getElementById('deleteClassModalDesc').innerText = `Êtes-vous sûr de vouloir supprimer définitivement la classe « ${cls.title} » ? Tous les cours et inscriptions associés seront supprimés.`;
+      
+      const confirmBtn = document.getElementById('confirmDeleteClassBtn');
+      confirmBtn.onclick = function() {
+        executeDeleteClass(cls.id);
+      };
+      
+      openModal('confirmDeleteClassModal');
+      lucide.createIcons();
+    }
+
+    function executeDeleteClass(id) {
+      const cls = appClasses.find(c => c.id === id);
+      const title = cls ? cls.title : 'Classe';
+      appClasses = appClasses.filter(c => c.id !== id);
+      closeModal('confirmDeleteClassModal');
+      renderClasses();
+      showToast('Enregistrement effectué avec succès', `La classe « ${title} » a été supprimée avec succès.`);
+    }
+
+    function handleCreateClass(e) {
+      e.preventDefault();
+      const title = document.getElementById('newClassTitle').value;
+      const desc = document.getElementById('newClassDesc').value;
+
+      const newCls = {
+        id: 'cls_' + Date.now(),
+        title: title.trim(),
+        desc: desc.trim() || 'Aucune description fournie.',
+        level: 'Intermédiaire',
+        enrolled: '0/35',
+        image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800'
+      };
+
+      appClasses.unshift(newCls);
+      closeModal('createClassModal');
+      document.getElementById('newClassTitle').value = '';
+      document.getElementById('newClassDesc').value = '';
+      renderClasses();
+      setTab('classes');
+      showToast('Enregistrement effectué avec succès', `La classe « ${title} » a été créée avec succès.`);
+    }
 
     function setTab(tabName) {
       const sections = ['dashboard', 'classes', 'courses', 'assignments', 'grades'];
@@ -514,6 +665,9 @@
           }
         }
       });
+      if (tabName === 'classes') {
+        renderClasses();
+      }
       lucide.createIcons();
     }
 
@@ -532,20 +686,27 @@
       const el = document.getElementById(id);
       if (el) {
         el.innerHTML = `<div class="p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-emerald-300 text-xs font-semibold flex items-center gap-2">✅ Candidature de ${name} validée avec succès !</div>`;
+        showToast('Enregistrement effectué avec succès', `Candidature de ${name} approuvée.`);
         setTimeout(() => el.remove(), 2500);
       }
     }
 
     function rejectIns(id) {
       const el = document.getElementById(id);
-      if (el) el.remove();
+      if (el) {
+        el.remove();
+        showToast('Candidature rejetée', 'La préinscription a été refusée.');
+      }
     }
 
     function openModal(id) {
-      document.getElementById(id).classList.remove('hidden');
+      const m = document.getElementById(id);
+      if (m) m.classList.remove('hidden');
+      lucide.createIcons();
     }
     function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
+      const m = document.getElementById(id);
+      if (m) m.classList.add('hidden');
     }
 
     function openGradingModal(student, assignment) {
@@ -576,37 +737,12 @@
       }
 
       closeModal('gradingModal');
-      alert(`Note de ${score}/20 enregistrée pour ${student} !`);
+      showToast('Enregistrement effectué avec succès', `Note de ${score}/20 enregistrée pour ${student}.`);
     }
 
-    function handleCreateClass(e) {
-      e.preventDefault();
-      const title = document.getElementById('newClassTitle').value;
-      const desc = document.getElementById('newClassDesc').value;
-
-      const grid = document.getElementById('classesGrid');
-      const card = document.createElement('div');
-      card.className = 'glass-card rounded-2xl overflow-hidden border border-slate-800 animate-fadeIn';
-      card.innerHTML = `
-        <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800" class="h-36 w-full object-cover" />
-        <div class="p-5 space-y-3">
-          <div class="flex justify-between items-center">
-            <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-bold">Nouveau</span>
-            <span class="text-[11px] text-emerald-400 font-semibold">Sur sélection</span>
-          </div>
-          <h3 class="text-sm font-bold text-white">${title}</h3>
-          <p class="text-xs text-slate-400">${desc}</p>
-          <div class="pt-3 border-t border-slate-800 flex justify-between text-xs text-slate-400">
-            <span>Inscrits : <b class="text-white">0/30</b></span>
-            <button onclick="setTab('courses')" class="text-indigo-400 font-bold hover:underline">Voir les cours →</button>
-          </div>
-        </div>
-      `;
-      grid.prepend(card);
-      closeModal('createClassModal');
-      setTab('classes');
-      alert(`Classe « ${title} » créée avec succès !`);
-    }
+    // Initial render
+    renderClasses();
+    lucide.createIcons();
   </script>
 </body>
 </html>
