@@ -383,20 +383,53 @@ export function PreRegistrationModal({
                   </label>
                   <select
                     value={classeId}
-                    onChange={(e) => setClasseId(e.target.value)}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      setClasseId(selectedId);
+                      // Auto-sync establishment if user picks a class from another school
+                      const chosenClass = classes.find((c) => c.id === selectedId);
+                      if (chosenClass?.etablissementId && establishmentId !== chosenClass.etablissementId) {
+                        setEstablishmentId(chosenClass.etablissementId);
+                      }
+                    }}
                     required
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer"
                   >
                     <option value="">
-                      {availableClasses.length === 0
-                        ? "-- Aucune classe pour cet établissement (Choisissez 'Tous les établissements') --"
-                        : `-- Sélectionnez une classe (${availableClasses.length} disponible${availableClasses.length > 1 ? "s" : ""}) --`}
+                      -- Sélectionnez votre classe ({classes.length} classes actives au total) --
                     </option>
-                    {availableClasses.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        [{c.etablissementName || "Campus"}] {c.title} • {c.level} ({c.enrolledCount || 0}/{c.capacity} élèves)
-                      </option>
-                    ))}
+
+                    {availableClasses.length > 0 ? (
+                      <>
+                        <optgroup label={`Classes sur ce campus (${availableClasses.length})`}>
+                          {availableClasses.map((c) => (
+                            <option key={c.id} value={c.id}>
+                              ✨ {c.title} ({c.classCode || c.level}) • {c.enrolledCount || 0}/{c.capacity} élèves
+                            </option>
+                          ))}
+                        </optgroup>
+
+                        {classes.filter((c) => !availableClasses.some((ac) => ac.id === c.id)).length > 0 && (
+                          <optgroup label="Toutes les autres classes disponibles sur le réseau">
+                            {classes
+                              .filter((c) => !availableClasses.some((ac) => ac.id === c.id))
+                              .map((c) => (
+                                <option key={c.id} value={c.id}>
+                                  [{c.etablissementName || "Campus"}] {c.title} • {c.level} ({c.enrolledCount || 0}/{c.capacity} élèves)
+                                </option>
+                              ))}
+                          </optgroup>
+                        )}
+                      </>
+                    ) : (
+                      <optgroup label="Toutes les classes disponibles sur le réseau AlFasle">
+                        {classes.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            [{c.etablissementName || "Campus"}] {c.title} • {c.level} ({c.enrolledCount || 0}/{c.capacity} élèves)
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
                   </select>
                 </div>
 
