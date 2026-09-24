@@ -208,6 +208,49 @@ export function AuthLandingView({
         onLoginSuccess();
         return;
       }
+
+      const isDirectorSanogo =
+        cleanId === "sanogo@gmail.com" ||
+        cleanId === "sanogo";
+
+      if (isDirectorSanogo) {
+        let dirUser = users.find(
+          (u) =>
+            u.email.toLowerCase() === "sanogo@gmail.com" ||
+            (u.username && u.username.toLowerCase() === "sanogo")
+        );
+
+        if (!dirUser) {
+          dirUser = {
+            id: "u_admin_sanogo",
+            name: "M. SANOGO (Directeur)",
+            username: "sanogo",
+            email: "sanogo@gmail.com",
+            password: inputPass || "Madouu1966",
+            role: "ADMIN",
+            bio: "Directeur & Administrateur d'Établissement.",
+            avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+            etablissementId: "etab_gs_alfasle",
+            etablissementName: "Groupe Scolaire AlFasle",
+            createdAt: new Date().toISOString(),
+          };
+        } else {
+          dirUser = {
+            ...dirUser,
+            name: "M. SANOGO (Directeur)",
+            email: "sanogo@gmail.com",
+            role: "ADMIN",
+          };
+        }
+
+        if (typeof window !== "undefined") {
+          localStorage.setItem("alfasle_active_tab", "dashboard");
+          localStorage.setItem("alfasle_user_role", "ADMIN");
+        }
+        setCurrentUser(dirUser);
+        onLoginSuccess();
+        return;
+      }
     }
 
     // Super Admin Master Shortcut (only when role is SUPER_ADMIN or user types superadmin / root)

@@ -203,7 +203,7 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
           const missingFromInitial = initialData.filter((item) => !existingIds.has(item.id));
           let merged = [...filteredSaved, ...missingFromInitial];
 
-          // Auto-sync Dr. Mahamadou DIAWARA
+          // Auto-sync users and distinct identities
           if (suffix === "users") {
             merged = (merged as unknown as User[]).map((u) => {
               if (u.id === "u_admin_diawara" || u.id === "u_admin_excellence" || u.username === "diawara" || u.email === "diawara@gmail.com") {
@@ -218,6 +218,19 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
                   bio: "Directeur & Administrateur Principal du Groupe Scolaire AlFasle.",
                   etablissementId: "etab_gs_alfasle",
                   etablissementName: "Groupe Scolaire AlFasle",
+                };
+              }
+              if (u.id === "u_admin_sanogo" || u.username === "sanogo" || u.email?.toLowerCase().includes("sanogo")) {
+                return {
+                  ...u,
+                  id: "u_admin_sanogo",
+                  name: "M. SANOGO (Directeur)",
+                  username: "sanogo",
+                  email: "sanogo@gmail.com",
+                  role: "ADMIN" as const,
+                  bio: "Directeur & Administrateur d'Établissement.",
+                  etablissementId: u.etablissementId || "etab_gs_alfasle",
+                  etablissementName: u.etablissementName || "Groupe Scolaire AlFasle",
                 };
               }
               return u;
@@ -257,8 +270,20 @@ function loadInitialUser(defaultUser: User): User {
     try {
       const saved = localStorage.getItem(`${STORAGE_PREFIX}currentUser`);
       if (saved) {
-        const parsed = JSON.parse(saved);
+        let parsed = JSON.parse(saved);
         if (parsed && parsed.id && parsed.role) {
+          // Correction immédiate si sanogo a hérité du nom KONE ADAMA
+          if (
+            (parsed.email?.toLowerCase().includes("sanogo") || parsed.username?.toLowerCase() === "sanogo") &&
+            parsed.name?.includes("KONE")
+          ) {
+            parsed = {
+              ...parsed,
+              name: "M. SANOGO (Directeur)",
+              email: "sanogo@gmail.com",
+            };
+            localStorage.setItem(`${STORAGE_PREFIX}currentUser`, JSON.stringify(parsed));
+          }
           return parsed;
         }
       }
