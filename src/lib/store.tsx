@@ -24,6 +24,14 @@ import {
   initialSubmissions,
   initialNotifications,
 } from "./mock-data";
+import {
+  supabase,
+  isSupabaseConfigured,
+  mapRowToClasse,
+  mapClasseToRow,
+  mapRowToEtablissement,
+  mapEtablissementToRow,
+} from "./supabase";
 
 interface StoreContextType {
   currentUser: User;
@@ -109,40 +117,32 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 const STORAGE_PREFIX = "alfasle_v8_";
 
 function cleanLegacyStorage() {
-  if (typeof window !== "undefined") {
-    try {
-      const keysToRemove: string[] = [];
-      const preservedKeys = new Set([
-        "alfasle_session_active",
-        "alfasle_active_tab",
-        "alfasle_theme",
-      ]);
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (
-          key &&
-          key.startsWith("alfasle") &&
-          !key.startsWith(STORAGE_PREFIX) &&
-          !preservedKeys.has(key)
-        ) {
-          keysToRemove.push(key);
-        }
-      }
-      keysToRemove.forEach((k) => localStorage.removeItem(k));
-    } catch (e) {
-      console.error("Erreur nettoyage legacy localStorage:", e);
-    }
-  }
+  // Safe: no aggressive deletion of user data
 }
-
-// Run legacy storage clean immediately
-cleanLegacyStorage();
 
 function loadInitialData<T extends { id: string }>(suffix: string, initialData: T[]): T[] {
   const key = `${STORAGE_PREFIX}${suffix}`;
   if (typeof window !== "undefined") {
     try {
-      const saved = localStorage.getItem(key);
+      let saved = localStorage.getItem(key);
+
+      // Fallback: check if older versions exist (e.g. alfasle_v7_classes or alfasle_v6_classes)
+      if (!saved) {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith("alfasle_") && k.endsWith(`_${suffix}`)) {
+            const legacyData = localStorage.getItem(k);
+            if (legacyData && legacyData !== "null" && legacyData !== "undefined") {
+              saved = legacyData;
+              try {
+                localStorage.setItem(key, legacyData);
+              } catch (_) {}
+              break;
+            }
+          }
+        }
+      }
+
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
@@ -361,6 +361,43 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     loadInitialData("notifications", initialNotifications)
   );
 
+  // Synchronisation Cloud avec Supabase au chargement
+  useEffect(() => {
+    async function syncFromSupabase() {
+      if (!isSupabaseConfigured()) return;
+      try {
+        const [etabsRes, classesRes] = await Promise.all([
+          supabase.from("etablissements").select("*"),
+          supabase.from("classes").select("*"),
+        ]);
+
+        if (etabsRes.data && etabsRes.data.length > 0) {
+          const fetchedEtabs = etabsRes.data.map(mapRowToEtablissement);
+          setEtablissements((prev) => {
+            const map = new Map<string, Etablissement>();
+            prev.forEach((e) => map.set(e.id, e));
+            fetchedEtabs.forEach((e) => map.set(e.id, e));
+            return Array.from(map.values());
+          });
+        }
+
+        if (classesRes.data && classesRes.data.length > 0) {
+          const fetchedClasses = classesRes.data.map(mapRowToClasse);
+          setClasses((prev) => {
+            const map = new Map<string, Classe>();
+            prev.forEach((c) => map.set(c.id, c));
+            fetchedClasses.forEach((c) => map.set(c.id, c));
+            return Array.from(map.values());
+          });
+        }
+      } catch (err) {
+        console.warn("Supabase initial sync:", err);
+      }
+    }
+
+    syncFromSupabase();
+  }, []);
+
   // Sync to localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -527,6 +564,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       },
       ...prev,
     ]);
+
+    if (isSupabaseConfigured()) {
+      supabase.from("etablissements").upsert(mapEtablissementToRow(newEtab)).then();
+      supabase.from("classes").upsert(mapClasseToRow(starterClass)).then();
+    }
+
     return newEtab;
   };
 
@@ -562,6 +605,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setClasses((prev) => prev.filter((c) => c.etablissementId !== id));
     setInscriptions((prev) => prev.filter((i) => i.etablissementId !== id));
     setUsers((prev) => prev.filter((u) => u.etablissementId !== id || u.role === "SUPER_ADMIN"));
+
+    if (isSupabaseConfigured()) {
+      supabase.from("etablissements").delete().eq("id", id).then();
+    }
   };
 
   // Class Management
@@ -579,6 +626,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     };
     setClasses((prev) => [newClass, ...prev]);
 
+    // Persistance Cloud Supabase
+    if (isSupabaseConfigured()) {
+      supabase
+        .from("classes")
+        .upsert(mapClasseToRow(newClass))
+        .then(({ error }) => {
+          if (error) console.error("Erreur sauvegarde classe Supabase:", error);
+        })
+        .catch((err) => console.error("Erreur réseau Supabase:", err));
+    }
+
     // Notification
     const newNotif: AppNotification = {
       id: `notif_${Date.now()}`,
@@ -594,10 +652,20 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateClass = (id: string, data: Partial<Classe>) => {
-    setClasses((prev) => prev.map((c) => (c.id === id ? { ...c, ...data } : c)));
+    setClasses((prev) => {
+      const next = prev.map((c) => (c.id === id ? { ...c, ...data } : c));
+      const target = next.find((c) => c.id === id);
+      if (target && isSupabaseConfigured()) {
+        supabase.from("classes").upsert(mapClasseToRow(target)).then();
+      }
+      return next;
+    });
   };
 
   const deleteClass = (id: string) => {
+    if (isSupabaseConfigured()) {
+      supabase.from("classes").delete().eq("id", id).then();
+    }
     setClasses((prev) => {
       const next = prev.filter((c) => c.id !== id);
       if (typeof window !== "undefined") {
