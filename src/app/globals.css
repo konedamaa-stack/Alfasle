@@ -4,15 +4,15 @@
 
 @layer base {
   :root {
-    --background: #f8fafc;
-    --foreground: #0f172a;
-    --card: #ffffff;
-    --card-foreground: #0f172a;
-    --primary: #2563eb;
+    --background: #090d16;
+    --foreground: #f8fafc;
+    --card: #0f172a;
+    --card-foreground: #f8fafc;
+    --primary: #6366f1;
     --primary-foreground: #ffffff;
-    --border: #e2e8f0;
-    --input: #ffffff;
-    --ring: #3b82f6;
+    --border: #334155;
+    --input: #0f172a;
+    --ring: #6366f1;
   }
 }
 
@@ -23,27 +23,38 @@ body {
   overflow-x: hidden;
 }
 
-/* Glassmorphism Clean Light Mode */
+/* Glassmorphism Dark Mode Styling */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(15, 23, 42, 0.92);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(15, 23, 42, 0.75);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card:hover {
-  background: #ffffff;
-  border-color: rgba(59, 130, 246, 0.5);
-  box-shadow: 0 12px 24px rgba(59, 130, 246, 0.12);
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 12px 24px rgba(99, 102, 241, 0.15);
   transform: translateY(-2px);
+}
+
+/* Force dark styling on all form inputs and browser native dropdown selects */
+select option,
+select optgroup {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+input, select, textarea {
+  color-scheme: dark;
 }
 
 /* Custom scrollbar */
@@ -52,12 +63,12 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #0b1120;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #334155;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #475569;
 }
