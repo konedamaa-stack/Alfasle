@@ -114,7 +114,7 @@ interface StoreContextType {
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
-const STORAGE_PREFIX = "alfasle_v10_";
+const STORAGE_PREFIX = "alfasle_v11_";
 
 function cleanLegacyStorage() {
   // Safe: no aggressive deletion of user data
@@ -126,7 +126,7 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
     try {
       let saved = localStorage.getItem(key);
 
-      // Fallback: check if older versions exist (e.g. alfasle_v7_classes or alfasle_v6_classes)
+      // Fallback: check if older versions exist
       if (!saved) {
         for (let i = 0; i < localStorage.length; i++) {
           const k = localStorage.key(i);
@@ -162,12 +162,20 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
               id.includes("quran") ||
               id.includes("coran") ||
               id.includes("lycee_excellence") ||
+              id.includes("el_manar") ||
+              id.includes("elmanar") ||
+              id.includes("yasmine") ||
               name.includes("raya") ||
               name.includes("arqam") ||
               name.includes("tawhid") ||
               name.includes("djibril") ||
               name.includes("quran") ||
               name.includes("coran") ||
+              name.includes("el-manar") ||
+              name.includes("el manar") ||
+              name.includes("fatima") ||
+              name.includes("zahra") ||
+              name.includes("yasmine") ||
               name.includes("lycée d'excellence") ||
               name.includes("lycee d'excellence") ||
               name.includes("قرآن") ||
@@ -177,23 +185,32 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
               desc.includes("قرآن") ||
               desc.includes("القرآن") ||
               desc.includes("تعليم القرآن") ||
+              desc.includes("el-manar") ||
+              desc.includes("el manar") ||
               email.includes("raya") ||
               email.includes("arqam") ||
               email.includes("djibril") ||
               email.includes("quran") ||
               email.includes("coran") ||
               email.includes("tawhid") ||
+              email.includes("elmanar") ||
+              email.includes("fatima") ||
+              email.includes("yasmine") ||
               subdomain.includes("raya") ||
               subdomain.includes("arqam") ||
               subdomain.includes("tawhid") ||
               subdomain.includes("quran") ||
               subdomain.includes("coran") ||
+              subdomain.includes("el-manar") ||
+              subdomain.includes("elmanar") ||
               subdomain.includes("lycee-excellence") ||
               etabId.includes("raya") ||
               etabId.includes("arqam") ||
               etabId.includes("tawhid") ||
               etabId.includes("quran") ||
               etabId.includes("coran") ||
+              etabId.includes("el_manar") ||
+              etabId.includes("elmanar") ||
               etabId.includes("lycee_excellence");
 
             return !isDeleted;
