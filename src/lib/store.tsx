@@ -298,44 +298,24 @@ function loadInitialUser(defaultUser: User): User {
 }
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<"dark" | "light">(() => {
-    if (typeof window !== "undefined") {
-      const savedTheme = localStorage.getItem("alfasle_theme") as "dark" | "light";
-      if (savedTheme === "light" || savedTheme === "dark") return savedTheme;
-    }
-    return "dark";
-  });
+  const [theme, setTheme] = useState<"dark" | "light">("light");
 
   const toggleTheme = () => {
-    setTheme((prev) => {
-      const next = prev === "dark" ? "light" : "dark";
-      if (typeof window !== "undefined") {
-        localStorage.setItem("alfasle_theme", next);
-        document.documentElement.setAttribute("data-theme", next);
-        if (next === "light") {
-          document.documentElement.classList.add("light");
-          document.documentElement.classList.remove("dark");
-        } else {
-          document.documentElement.classList.add("dark");
-          document.documentElement.classList.remove("light");
-        }
-      }
-      return next;
-    });
+    // Theme sombre supprimé, permanent light mode
+    setTheme("light");
   };
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      document.documentElement.setAttribute("data-theme", theme);
-      if (theme === "light") {
-        document.documentElement.classList.add("light");
-        document.documentElement.classList.remove("dark");
-      } else {
-        document.documentElement.classList.add("dark");
-        document.documentElement.classList.remove("light");
-      }
+      try {
+        localStorage.removeItem("alfasle_theme");
+        localStorage.setItem("alfasle_theme", "light");
+      } catch (_) {}
+      document.documentElement.setAttribute("data-theme", "light");
+      document.documentElement.classList.add("light");
+      document.documentElement.classList.remove("dark");
     }
-  }, [theme]);
+  }, []);
 
   const [users, setUsers] = useState<User[]>(() => loadInitialData("users", initialUsers));
   const [currentUser, setCurrentUser] = useState<User>(() => loadInitialUser(initialUsers[1])); // Default: Dr. Mahamadou DIAWARA (Directeur)

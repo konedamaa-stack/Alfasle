@@ -91,36 +91,36 @@ export function Navbar({
   const badge = getRoleBadge(currentUser.role);
 
   return (
-    <header className="sticky top-0 z-40 w-full glass-panel border-b border-slate-800/80 px-3 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between">
+    <header className="sticky top-0 z-40 w-full bg-white border-b border-slate-200 px-3 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between shadow-sm">
       {/* Brand Logo & Mobile Drawer Toggle */}
       <div className="flex items-center gap-2.5 sm:gap-3">
         {onToggleMobileMenu && (
           <button
             onClick={onToggleMobileMenu}
-            className="md:hidden p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 transition-colors"
+            className="md:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors"
             aria-label="Menu Mobile"
           >
             {isMobileMenuOpen ? (
-              <X className="w-5 h-5 text-indigo-400" />
+              <X className="w-5 h-5 text-[#0D5B4D]" />
             ) : (
-              <Menu className="w-5 h-5 text-indigo-400" />
+              <Menu className="w-5 h-5 text-[#0D5B4D]" />
             )}
           </button>
         )}
 
-        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 shrink-0">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-[#0D5B4D] via-[#0D5B4D] to-[#00A896] flex items-center justify-center shadow-md shadow-[#0D5B4D]/20 shrink-0">
           <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </div>
         <div>
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <span className="font-extrabold text-lg sm:text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-indigo-200">
+            <span className="font-extrabold text-lg sm:text-xl tracking-tight text-[#0D5B4D]">
               ALFASLE
             </span>
-            <span className="text-[9px] sm:text-[10px] font-semibold px-1.5 sm:px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase tracking-wider">
+            <span className="text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E8F5F2] text-[#0D5B4D] border border-[#00A896]/30 uppercase tracking-wider">
               LMS Pro
             </span>
           </div>
-          <p className="text-[10px] sm:text-[11px] text-slate-400 hidden sm:block">
+          <p className="text-[10px] sm:text-[11px] text-slate-500 hidden sm:block">
             Plateforme de Gestion de Classes & Cours
           </p>
         </div>
@@ -132,22 +132,19 @@ export function Navbar({
         <input
           type="text"
           placeholder="Rechercher un cours, une classe, un devoir..."
-          className="w-full pl-9 pr-4 py-1.5 text-xs bg-slate-900/60 border border-slate-700/60 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+          className="w-full pl-9 pr-4 py-1.5 text-xs bg-[#F8FAFC] border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#00A896] focus:ring-1 focus:ring-[#00A896] transition-all"
         />
       </div>
 
       {/* Right Controls: Role Switcher & Notifications & Profile */}
       <div className="flex items-center gap-2.5 sm:gap-3">
-        {/* Light / Dark Mode Switcher */}
-        <ThemeToggle />
-
         {/* Direct Super Admin button for Super Admins only */}
         {currentUser.role === "SUPER_ADMIN" && onOpenSuperAdmin && (
           <button
             onClick={onOpenSuperAdmin}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-600/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold font-mono transition-all transform hover:-translate-y-0.5 shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#EB6A1D] hover:bg-[#D95511] text-white border border-[#EB6A1D] text-xs font-bold font-mono transition-all transform hover:-translate-y-0.5 shadow-sm shadow-orange-500/20"
           >
-            <Shield className="w-3.5 h-3.5 text-amber-400" />
+            <Shield className="w-3.5 h-3.5 text-white" />
             <span className="hidden sm:inline">Console Super Admin</span>
             <span className="sm:hidden">Super Admin</span>
           </button>
@@ -157,7 +154,7 @@ export function Navbar({
         <div className="relative">
           <button
             onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/90 border border-slate-700 hover:border-slate-600 text-xs font-medium text-slate-200 transition-all shadow-sm"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-[#00A896] text-xs font-semibold text-slate-800 transition-all shadow-sm"
           >
             <span
               className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[11px] font-semibold ${badge.color}`}
@@ -165,11 +162,11 @@ export function Navbar({
               {badge.icon}
               {badge.label}
             </span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
           </button>
 
           {showRoleDropdown && (
-            <div className="absolute right-0 mt-2 w-64 glass-panel rounded-xl shadow-2xl border border-slate-700 p-2 z-50">
+            <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-slate-200 p-2 z-50">
               <div className="px-3 py-2 border-b border-slate-700/60 mb-1">
                 <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                   Changer de vue (Mode Démo)
@@ -216,30 +213,30 @@ export function Navbar({
         <div className="relative">
           <button
             onClick={() => setShowNotifs(!showNotifs)}
-            className="relative p-2 rounded-lg bg-slate-800/80 border border-slate-700/80 hover:bg-slate-700 text-slate-300 transition-colors"
+            className="relative p-2 rounded-lg bg-white border border-slate-200 hover:border-[#00A896] text-slate-700 hover:text-[#0D5B4D] transition-colors shadow-sm"
           >
             <Bell className="w-4 h-4" />
             {unreadNotifs.length > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white ring-2 ring-slate-900 animate-pulse">
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#EB6A1D] text-[10px] font-bold text-white ring-2 ring-white animate-pulse">
                 {unreadNotifs.length}
               </span>
             )}
           </button>
 
           {showNotifs && (
-            <div className="absolute right-0 mt-2 w-80 sm:w-96 glass-panel rounded-xl shadow-2xl border border-slate-700 p-3 z-50">
-              <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-700/60">
+            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-2xl border border-slate-200 p-3 z-50">
+              <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-slate-200">Notifications</span>
+                  <span className="text-xs font-bold text-slate-800">Notifications</span>
                   {unreadNotifs.length > 0 && (
-                    <span className="px-1.5 py-0.2 rounded-full bg-rose-500/20 text-rose-400 text-[10px] font-medium">
+                    <span className="px-1.5 py-0.2 rounded-full bg-orange-100 text-[#EB6A1D] text-[10px] font-bold">
                       {unreadNotifs.length} nouvelle{unreadNotifs.length > 1 ? "s" : ""}
                     </span>
                   )}
                 </div>
                 <button
                   onClick={clearAllNotifications}
-                  className="text-[11px] text-indigo-400 hover:text-indigo-300"
+                  className="text-[11px] text-[#00A896] hover:text-[#0D5B4D] font-semibold"
                 >
                   Tout marquer lu
                 </button>
@@ -257,17 +254,17 @@ export function Navbar({
                       onClick={() => markNotificationAsRead(n.id)}
                       className={`p-2.5 rounded-lg text-xs cursor-pointer transition-all ${
                         !n.isRead
-                          ? "bg-slate-800/90 border-l-2 border-indigo-500 text-slate-200"
-                          : "bg-slate-900/40 text-slate-400"
+                          ? "bg-[#E8F5F2] border-l-2 border-[#00A896] text-slate-800"
+                          : "bg-slate-50 text-slate-500"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <p className="font-semibold text-slate-200 text-xs">{n.title}</p>
-                        <span className="text-[10px] text-slate-500 whitespace-nowrap">
+                        <p className="font-semibold text-slate-800 text-xs">{n.title}</p>
+                        <span className="text-[10px] text-slate-400 whitespace-nowrap">
                           {formatDateTime(n.createdAt)}
                         </span>
                       </div>
-                      <p className="text-[11px] mt-1 text-slate-300 leading-relaxed">{n.message}</p>
+                      <p className="text-[11px] mt-1 text-slate-600 leading-relaxed">{n.message}</p>
                     </div>
                   ))
                 )}
@@ -277,7 +274,7 @@ export function Navbar({
         </div>
 
         {/* User Avatar & Info */}
-        <div className="flex items-center gap-2.5 pl-2 border-l border-slate-800">
+        <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
           <img
             src={currentUser.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100"}
             alt={currentUser.name}

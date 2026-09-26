@@ -3,202 +3,290 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: #090d16;
-    --foreground: #f8fafc;
-    --card: #1e293b;
-    --card-foreground: #f8fafc;
-    --primary: #3b82f6;
-    --primary-foreground: #ffffff;
-    --border: #334155;
-    --input: #1e293b;
-    --ring: #60a5fa;
-  }
-
+  :root,
   html.light,
   [data-theme="light"] {
-    --background: #f4f6f9;
+    --background: #f4f7f6;
     --foreground: #0f172a;
     --card: #ffffff;
     --card-foreground: #0f172a;
-    --primary: #2563eb;
+    --primary: #0d5b4d;
     --primary-foreground: #ffffff;
     --border: #e2e8f0;
     --input: #ffffff;
-    --ring: #3b82f6;
+    --ring: #00a896;
   }
 }
 
+/* Force Light Theme & General Reset */
+html,
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: #0f172a !important;
+  background-color: #f4f7f6 !important;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   overflow-x: hidden;
-  transition: background-color 0.25s ease, color 0.25s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Glassmorphism Dark Mode */
+/* ==========================================================================
+   ONECI DESIGN SYSTEM UTILITIES
+   ========================================================================== */
+
+/* Hero / Header Institutional Green Banner */
+.oneci-hero-banner {
+  background: linear-gradient(135deg, #0d5b4d 0%, #0a493e 100%);
+  color: #ffffff;
+}
+
+/* Large Clean White Institutional Card (as seen in ONECI screenshot) */
+.oneci-main-card {
+  background: #ffffff;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(13, 91, 77, 0.1);
+  box-shadow: 0 10px 30px -5px rgba(13, 91, 77, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* Choice / Selector Cards (as seen with CNI, DID, CRC) */
+.oneci-choice-card {
+  background: #ffffff;
+  border: 2px solid #00a896;
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.oneci-choice-card:hover {
+  border-color: #0d5b4d;
+  box-shadow: 0 6px 16px rgba(0, 168, 150, 0.15);
+  transform: translateY(-2px);
+}
+
+.oneci-choice-card.active,
+.oneci-choice-card[aria-selected="true"] {
+  border-color: #eb6a1d !important;
+  background: #fff8f2 !important;
+  box-shadow: 0 6px 18px rgba(235, 106, 29, 0.18) !important;
+}
+
+/* Stepper (Badge 1 Orange, connecting line, Step 2 & 3 Gray) */
+.oneci-step-active {
+  background-color: #eb6a1d !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 8px rgba(235, 106, 29, 0.35);
+}
+
+.oneci-step-inactive {
+  background-color: #94a3b8 !important;
+  color: #ffffff !important;
+}
+
+.oneci-step-line {
+  background-color: #cbd5e1;
+}
+
+/* Primary Action Button (Orange "Acheter Un Timbre") */
+.btn-oneci-orange {
+  background-color: #eb6a1d !important;
+  color: #ffffff !important;
+  border-radius: 0.75rem !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(235, 106, 29, 0.25) !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-oneci-orange:hover {
+  background-color: #d95511 !important;
+  box-shadow: 0 6px 16px rgba(235, 106, 29, 0.35) !important;
+  transform: translateY(-1px);
+}
+
+/* Secondary Action Button (Teal "Mon Timbre") */
+.btn-oneci-teal {
+  background-color: #00a896 !important;
+  color: #ffffff !important;
+  border-radius: 0.75rem !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(0, 168, 150, 0.25) !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-oneci-teal:hover {
+  background-color: #009688 !important;
+  box-shadow: 0 6px 16px rgba(0, 168, 150, 0.35) !important;
+  transform: translateY(-1px);
+}
+
+/* Institutional Forest Green Button */
+.btn-oneci-green {
+  background-color: #0d5b4d !important;
+  color: #ffffff !important;
+  border-radius: 0.75rem !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(13, 91, 77, 0.25) !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-oneci-green:hover {
+  background-color: #0a493e !important;
+  box-shadow: 0 6px 16px rgba(13, 91, 77, 0.35) !important;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   GLOBAL HARMONIZATION: Replace Dark UI with Pristine White & Emerald/Teal
+   ========================================================================== */
+
+/* Glass Panels & Glass Cards -> Clean White Elevated Panels */
 .glass-panel {
-  background: rgba(19, 27, 46, 0.85);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 20px -2px rgba(13, 91, 77, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03) !important;
+  color: #0f172a !important;
 }
 
 .glass-card {
-  background: rgba(21, 28, 47, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  color: #0f172a !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card:hover {
-  background: rgba(30, 41, 59, 0.9);
-  border-color: rgba(99, 102, 241, 0.4);
+  background: #ffffff !important;
+  border-color: #00a896 !important;
+  box-shadow: 0 10px 24px -4px rgba(0, 168, 150, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.03) !important;
   transform: translateY(-2px);
 }
 
-/* Light Mode Overrides */
-html.light body,
-[data-theme="light"] body {
-  background-color: #f4f6f9;
-  color: #0f172a;
-}
-
-html.light .glass-panel,
-[data-theme="light"] .glass-panel {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(203, 213, 225, 0.8);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
-}
-
-html.light .glass-card,
-[data-theme="light"] .glass-card {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-}
-
-html.light .glass-card:hover,
-[data-theme="light"] .glass-card:hover {
-  background: #ffffff;
-  border-color: rgba(59, 130, 246, 0.5);
-  box-shadow: 0 12px 24px rgba(59, 130, 246, 0.12);
-  transform: translateY(-2px);
-}
-
-/* Light Mode Inputs, Selects & Forms */
-html.light input,
-html.light select,
-html.light textarea,
-[data-theme="light"] input,
-[data-theme="light"] select,
-[data-theme="light"] textarea {
+/* Replace dark backgrounds across all legacy components */
+.bg-slate-900,
+.bg-slate-950,
+.bg-slate-900\/60,
+.bg-slate-900\/80,
+.bg-slate-900\/90,
+.bg-slate-900\/95,
+.bg-\[\#070b14\],
+.bg-\[\#090d16\],
+.bg-\[\#060a14\],
+.bg-\[\#111726\],
+.bg-\[\#0b101e\],
+.bg-\[\#131b2e\],
+.bg-\[\#151c2f\],
+.bg-\[\#131929\],
+.bg-\[\#06120e\],
+.bg-\[\#071410\],
+.bg-\[\#0a1814\],
+.bg-\[\#081713\],
+.bg-emerald-950,
+.bg-emerald-950\/60,
+.bg-emerald-950\/80,
+.bg-emerald-950\/90,
+.bg-blue-950,
+.bg-blue-950\/60,
+.bg-indigo-950 {
   background-color: #ffffff !important;
   color: #0f172a !important;
-  border-color: #cbd5e1 !important;
 }
 
-html.light input::placeholder,
-html.light textarea::placeholder,
-[data-theme="light"] input::placeholder,
-[data-theme="light"] textarea::placeholder {
-  color: #94a3b8 !important;
-}
-
-/* Light Mode Typography */
-html.light .text-white,
-[data-theme="light"] .text-white {
-  color: #0f172a !important;
-}
-
-html.light .text-slate-100,
-html.light .text-slate-200,
-html.light .text-slate-300,
-[data-theme="light"] .text-slate-100,
-[data-theme="light"] .text-slate-200,
-[data-theme="light"] .text-slate-300 {
-  color: #1e293b !important;
-}
-
-html.light .text-slate-400,
-[data-theme="light"] .text-slate-400 {
-  color: #475569 !important;
-}
-
-html.light .text-slate-500,
-[data-theme="light"] .text-slate-500 {
-  color: #64748b !important;
-}
-
-/* Light Mode Backgrounds */
-html.light .bg-slate-900,
-html.light .bg-slate-950,
-html.light .bg-\[\#070b14\],
-html.light .bg-\[\#090d16\],
-html.light .bg-\[\#060a14\],
-html.light .bg-\[\#111726\],
-html.light .bg-\[\#0b101e\],
-html.light .bg-\[\#131b2e\],
-html.light .bg-\[\#151c2f\],
-html.light .bg-\[\#131929\],
-[data-theme="light"] .bg-slate-900,
-[data-theme="light"] .bg-slate-950,
-[data-theme="light"] .bg-\[\#070b14\],
-[data-theme="light"] .bg-\[\#090d16\],
-[data-theme="light"] .bg-\[\#060a14\],
-[data-theme="light"] .bg-\[\#111726\],
-[data-theme="light"] .bg-\[\#0b101e\],
-[data-theme="light"] .bg-\[\#131b2e\],
-[data-theme="light"] .bg-\[\#151c2f\],
-[data-theme="light"] .bg-\[\#131929\] {
-  background-color: #ffffff !important;
-}
-
-html.light .bg-slate-800,
-html.light .bg-slate-800\/80,
-html.light .bg-slate-800\/90,
-html.light .bg-slate-900\/90,
-[data-theme="light"] .bg-slate-800,
-[data-theme="light"] .bg-slate-800\/80,
-[data-theme="light"] .bg-slate-800\/90,
-[data-theme="light"] .bg-slate-900\/90 {
+.bg-slate-800,
+.bg-slate-800\/60,
+.bg-slate-800\/80,
+.bg-slate-800\/90,
+.bg-slate-800\/95,
+.bg-slate-700\/40,
+.bg-slate-700\/50 {
   background-color: #f1f5f9 !important;
 }
 
-/* Light Mode Borders */
-html.light .border-slate-800,
-html.light .border-slate-800\/80,
-html.light .border-slate-800\/90,
-html.light .border-slate-700,
-html.light .border-slate-700\/60,
-html.light .border-slate-700\/80,
-[data-theme="light"] .border-slate-800,
-[data-theme="light"] .border-slate-800\/80,
-[data-theme="light"] .border-slate-800\/90,
-[data-theme="light"] .border-slate-700,
-[data-theme="light"] .border-slate-700\/60,
-[data-theme="light"] .border-slate-700\/80 {
+/* Borders */
+.border-slate-800,
+.border-slate-800\/60,
+.border-slate-800\/80,
+.border-slate-800\/90,
+.border-slate-700,
+.border-slate-700\/60,
+.border-slate-700\/80,
+.border-slate-600 {
   border-color: #e2e8f0 !important;
 }
 
-/* Custom scrollbar */
+/* Typography Harmony */
+.text-white {
+  color: #0f172a !important;
+}
+
+.text-slate-100,
+.text-slate-200,
+.text-slate-300 {
+  color: #1e293b !important;
+}
+
+.text-slate-400 {
+  color: #475569 !important;
+}
+
+.text-slate-500 {
+  color: #64748b !important;
+}
+
+/* Keep white text inside colored buttons and badges */
+.btn-oneci-orange *,
+.btn-oneci-orange,
+.btn-oneci-teal *,
+.btn-oneci-teal,
+.btn-oneci-green *,
+.btn-oneci-green,
+.bg-emerald-600,
+.bg-emerald-700,
+.bg-blue-600,
+.bg-blue-700,
+.bg-indigo-600,
+.bg-purple-600,
+.bg-amber-600,
+.bg-orange-500,
+.bg-orange-600,
+.oneci-hero-banner,
+.oneci-hero-banner * {
+  color: #ffffff !important;
+}
+
+/* Inputs, Selects & Forms */
+input,
+select,
+textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 0.75rem !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #00a896 !important;
+  box-shadow: 0 0 0 3px rgba(0, 168, 150, 0.15) !important;
+  outline: none !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--background);
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #00a896;
   border-radius: 4px;
 }
-html.dark ::-webkit-scrollbar-thumb,
-[data-theme="dark"] ::-webkit-scrollbar-thumb {
-  background: #334155;
-}
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #0d5b4d;
 }
