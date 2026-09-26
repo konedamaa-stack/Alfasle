@@ -114,7 +114,7 @@ interface StoreContextType {
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
-const STORAGE_PREFIX = "alfasle_v11_";
+const STORAGE_PREFIX = "alfasle_v12_";
 
 function cleanLegacyStorage() {
   // Safe: no aggressive deletion of user data
@@ -165,6 +165,8 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
               id.includes("el_manar") ||
               id.includes("elmanar") ||
               id.includes("yasmine") ||
+              id.includes("polytech") ||
+              id.includes("bakary") ||
               name.includes("raya") ||
               name.includes("arqam") ||
               name.includes("tawhid") ||
@@ -176,6 +178,9 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
               name.includes("fatima") ||
               name.includes("zahra") ||
               name.includes("yasmine") ||
+              name.includes("polytech") ||
+              name.includes("polytechnique") ||
+              name.includes("bakary") ||
               name.includes("lycée d'excellence") ||
               name.includes("lycee d'excellence") ||
               name.includes("قرآن") ||
@@ -187,6 +192,7 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
               desc.includes("تعليم القرآن") ||
               desc.includes("el-manar") ||
               desc.includes("el manar") ||
+              desc.includes("polytech") ||
               email.includes("raya") ||
               email.includes("arqam") ||
               email.includes("djibril") ||
@@ -196,6 +202,8 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
               email.includes("elmanar") ||
               email.includes("fatima") ||
               email.includes("yasmine") ||
+              email.includes("polytech") ||
+              email.includes("bakary") ||
               subdomain.includes("raya") ||
               subdomain.includes("arqam") ||
               subdomain.includes("tawhid") ||
@@ -203,6 +211,7 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
               subdomain.includes("coran") ||
               subdomain.includes("el-manar") ||
               subdomain.includes("elmanar") ||
+              subdomain.includes("polytech") ||
               subdomain.includes("lycee-excellence") ||
               etabId.includes("raya") ||
               etabId.includes("arqam") ||
@@ -211,6 +220,7 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
               etabId.includes("coran") ||
               etabId.includes("el_manar") ||
               etabId.includes("elmanar") ||
+              etabId.includes("polytech") ||
               etabId.includes("lycee_excellence");
 
             return !isDeleted;
