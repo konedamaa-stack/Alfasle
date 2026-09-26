@@ -167,13 +167,13 @@ export function Sidebar({
       <div className="space-y-5">
         <div>
           <div className="flex items-center justify-between px-3 mb-3">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
               Menu Principal
             </p>
             {isMobile && onCloseMobile && (
               <button
                 onClick={onCloseMobile}
-                className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
+                className="p-1.5 rounded-lg bg-slate-100 text-slate-600 hover:text-slate-900 cursor-pointer"
                 aria-label="Fermer le menu"
               >
                 <X className="w-4 h-4" />
@@ -190,12 +190,12 @@ export function Sidebar({
                     setActiveTab(item.id as NavTab);
                     if (isMobile && onCloseMobile) onCloseMobile();
                   }}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
                     isActive
                       ? item.id === "superadmin"
-                        ? "bg-[#EB6A1D] text-white font-bold shadow-md shadow-orange-500/25"
-                        : "bg-[#0D5B4D] text-white font-bold shadow-md shadow-[#0D5B4D]/25"
-                      : "text-slate-600 hover:bg-[#E8F5F2] hover:text-[#0D5B4D]"
+                        ? "bg-gradient-to-r from-amber-600 to-orange-600 text-white font-bold shadow-md shadow-amber-600/20"
+                        : "bg-indigo-600 text-white font-semibold shadow-md shadow-indigo-600/20"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -219,9 +219,9 @@ export function Sidebar({
 
         {/* Super Admin Access Banner (uniquement pour le rôle SUPER_ADMIN) */}
         {currentUser.role === "SUPER_ADMIN" && (
-          <div className="p-3.5 rounded-2xl bg-orange-50/80 border border-orange-200 space-y-2.5 shadow-sm">
-            <div className="flex items-center gap-2 text-[#EB6A1D] text-xs font-bold font-mono">
-              <Shield className="w-3.5 h-3.5 text-[#EB6A1D]" />
+          <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 space-y-2.5 shadow-sm">
+            <div className="flex items-center gap-2 text-amber-800 text-xs font-bold font-mono">
+              <Shield className="w-3.5 h-3.5 text-amber-600" />
               <span>Console Root Master</span>
             </div>
             <p className="text-[10px] text-slate-600 leading-relaxed">
@@ -232,7 +232,7 @@ export function Sidebar({
                 setActiveTab("superadmin");
                 if (isMobile && onCloseMobile) onCloseMobile();
               }}
-              className="w-full py-2 px-3 rounded-xl bg-[#EB6A1D] hover:bg-[#D95511] text-white font-extrabold text-[11px] flex items-center justify-center gap-1.5 shadow-sm shadow-orange-500/20 transition-all"
+              className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-extrabold text-[11px] flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
             >
               <span>Ouvrir Console Master &rarr;</span>
             </button>
@@ -240,10 +240,10 @@ export function Sidebar({
         )}
 
         {/* Quick status card */}
-        <div className="p-3.5 rounded-xl bg-[#E8F5F2] border border-[#00A896]/30">
+        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#00A896] animate-pulse" />
-            <span className="text-[11px] font-bold text-[#0D5B4D]">Plateforme en Ligne</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+            <span className="text-[11px] font-semibold text-emerald-700">Plateforme en Ligne</span>
           </div>
           <p className="text-[11px] text-slate-600 leading-relaxed">
             Année Académique 2026-2027 • Multi-Campus
@@ -256,14 +256,14 @@ export function Sidebar({
         {onLogout && (
           <button
             onClick={() => setIsLogoutConfirmOpen(true)}
-            className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 border border-slate-200 hover:border-rose-200 text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm group"
+            className="w-full py-2.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm group cursor-pointer"
           >
-            <LogOut className="w-4 h-4 text-slate-500 group-hover:text-rose-500 group-hover:-translate-x-0.5 transition-transform" />
+            <LogOut className="w-4 h-4 text-rose-600 group-hover:-translate-x-0.5 transition-transform" />
             <span>Se Déconnecter</span>
           </button>
         )}
         <p className="text-[10px] text-slate-400 text-center">
-          AlFasle • Tous droits réservés
+          AlFasle v1.0.0 • Tous droits réservés
         </p>
       </div>
     </div>
@@ -282,7 +282,7 @@ export function Sidebar({
           {/* Backdrop Blur Overlay */}
           <div
             onClick={onCloseMobile}
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
           />
 
           {/* Drawer Container */}

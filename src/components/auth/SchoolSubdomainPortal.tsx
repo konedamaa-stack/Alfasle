@@ -354,495 +354,412 @@ export function SchoolSubdomainPortal({
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-[#F4F7F6] text-slate-800 relative selection:bg-[#0D5B4D] selection:text-white">
-      {/* Subdomain Top Indicator Bar (Light & Clean) */}
-      <div className="w-full bg-white border-b border-slate-200 py-2.5 px-4 sm:px-8 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 z-20 shadow-sm">
+    <div className="min-h-screen flex flex-col justify-between bg-slate-50 text-slate-800 relative overflow-hidden selection:bg-emerald-600 selection:text-white">
+      {/* Background glow effects */}
+      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-emerald-100/40 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-teal-100/40 rounded-full blur-[130px] pointer-events-none" />
+
+      {/* Subdomain Top Indicator Bar */}
+      <div className="w-full bg-white border-b border-slate-200 py-2 px-3 sm:px-8 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 z-20 shadow-sm">
         <div className="flex items-center gap-2 font-mono flex-wrap">
-          <Globe className="w-4 h-4 text-[#00A896] shrink-0" />
-          <span className="text-slate-500 font-sans font-medium">Sous-Domaine Dédié :</span>
-          <span className="text-[#0D5B4D] font-bold bg-[#E8F5F2] px-2.5 py-0.5 rounded-md border border-[#00A896]/30 text-xs truncate max-w-[260px] sm:max-w-none">
+          <Globe className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+          <span className="text-slate-500">Sous-Domaine :</span>
+          <span className="text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 text-[11px] truncate max-w-[220px] sm:max-w-none">
             https://{etablissement.subdomain}.alfasle.edu
           </span>
         </div>
 
         <button
           onClick={onBackToGlobal}
-          className="text-[#0D5B4D] hover:text-[#EB6A1D] font-medium flex items-center gap-1.5 transition-colors text-xs self-end sm:self-auto cursor-pointer"
+          className="text-slate-600 hover:text-slate-900 flex items-center gap-1 transition-colors text-[11px] self-end sm:self-auto cursor-pointer"
         >
           <span>Changer d&apos;établissement (Portail Global)</span>
-          <ExternalLink className="w-3.5 h-3.5" />
+          <ExternalLink className="w-3 h-3" />
         </button>
       </div>
 
-      {/* Main Subdomain Header / Deep Green Hero Banner (ONECI Signature Banner) */}
-      <section className="w-full bg-[#0D5B4D] text-white pt-6 pb-14 sm:pb-16 px-4 sm:px-8 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white p-1 shadow-md shrink-0 border border-white/20">
-              <img
-                src={
-                  etablissement.logoUrl ||
-                  "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=150"
-                }
-                alt={etablissement.name}
-                className="w-full h-full object-cover rounded-xl"
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="font-black text-xl sm:text-2xl tracking-tight text-white">
-                  {etablissement.name}
-                </h1>
-                <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-white/20 text-white border border-white/30">
-                  {etablissement.code}
-                </span>
-              </div>
-              <p className="text-xs text-emerald-100/90 flex items-center gap-1.5 mt-1">
-                <MapPin className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
-                <span>{etablissement.city}, {etablissement.country} • {etablissement.type}</span>
-              </p>
-            </div>
+      {/* Main Subdomain Header */}
+      <header className="w-full max-w-7xl mx-auto px-3 sm:px-8 py-3 sm:py-4 flex flex-col md:flex-row md:items-center justify-between gap-3.5 z-10">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-800 p-0.5 shadow-lg shadow-emerald-500/20 shrink-0">
+            <img
+              src={
+                etablissement.logoUrl ||
+                "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=150"
+              }
+              alt={etablissement.name}
+              className="w-full h-full object-cover rounded-[14px]"
+            />
           </div>
-
-          <div className="flex items-center gap-2.5 flex-wrap justify-end">
-            <button
-              type="button"
-              onClick={() => {
-                setPreRegRole("STUDENT");
-                setIsPreRegModalOpen(true);
-              }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#EB6A1D] hover:bg-[#d85b12] text-white text-xs font-bold shadow-md shadow-orange-500/30 transition-all transform hover:-translate-y-0.5 cursor-pointer"
-            >
-              <span>📝</span>
-              <span>Pré-inscription</span>
-            </button>
-
-            <button
-              onClick={onOpenJoinClassModal}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/30 text-xs font-semibold shadow-sm transition-all cursor-pointer"
-            >
-              <KeyRound className="w-3.5 h-3.5 text-emerald-300" />
-              <span>Rejoindre une classe</span>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Center Subdomain Login Card (ONECI Style) */}
-      <main className="flex-1 flex flex-col items-center justify-center p-3 sm:p-6 z-10 w-full max-w-5xl mx-auto -mt-8 sm:-mt-10">
-        <div className="w-full bg-white border border-slate-200/80 rounded-2xl sm:rounded-[28px] shadow-2xl shadow-emerald-950/10 p-6 sm:p-10 transition-all">
-          
-          {/* Card Header (Title & Breadcrumbs) */}
-          <div className="text-center space-y-2 mb-8">
-            <h2 className="text-2xl sm:text-3xl font-black text-[#0D5B4D] tracking-tight">
-              Inscrire l&apos;identité exacte du concerné
-            </h2>
-            <div className="flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold text-[#00A896] flex-wrap">
-              <span>Sélection du profil</span>
-              <span className="text-slate-300">/</span>
-              <span>Authentification Campus</span>
-              <span className="text-slate-300">/</span>
-              <span>Accès aux cours</span>
-            </div>
-          </div>
-
-          {/* Stepper matching ONECI screenshot */}
-          <div className="relative max-w-2xl mx-auto mb-10 px-4">
-            <div className="absolute top-5 left-12 right-12 h-[2px] bg-slate-200 -z-0" />
-            <div className="relative z-10 flex items-center justify-between">
-              {/* Step 1: Active Orange */}
-              <div className="flex flex-col items-center text-center space-y-2">
-                <div className="w-10 h-10 rounded-full bg-[#EB6A1D] text-white font-bold flex items-center justify-center shadow-md shadow-orange-500/30 text-sm">
-                  1
-                </div>
-                <span className="text-xs sm:text-sm font-bold text-slate-800 max-w-[110px] leading-tight">
-                  Choix du Rôle
-                </span>
-              </div>
-
-              {/* Step 2 */}
-              <div className="flex flex-col items-center text-center space-y-2">
-                <div className="w-10 h-10 rounded-full bg-slate-100 border-2 border-slate-300 text-slate-500 font-bold flex items-center justify-center text-sm">
-                  2
-                </div>
-                <span className="text-xs sm:text-sm font-medium text-slate-500 max-w-[110px] leading-tight">
-                  Identifiants
-                </span>
-              </div>
-
-              {/* Step 3 */}
-              <div className="flex flex-col items-center text-center space-y-2">
-                <div className="w-10 h-10 rounded-full bg-slate-100 border-2 border-slate-300 text-slate-500 font-bold flex items-center justify-center text-sm">
-                  3
-                </div>
-                <span className="text-xs sm:text-sm font-medium text-slate-500 max-w-[120px] leading-tight">
-                  Espace {etablissement.name}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-slate-100 pt-8 space-y-8">
-            <div className="text-center">
-              <h3 className="text-xl sm:text-2xl font-bold text-slate-800">
-                Sélectionnez un rôle
-              </h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Portail officiel de formation de {etablissement.name}
-              </p>
-            </div>
-
-            {/* 4 Choice Cards matching CNI / DID / CRC style with teal / orange borders */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* 1: DIRECTEUR */}
-              <button
-                type="button"
-                onClick={() => handleRoleSelect("ADMIN")}
-                className={`p-4 sm:p-5 rounded-2xl border-2 transition-all flex flex-col items-center justify-center text-center group ${
-                  selectedRole === "ADMIN"
-                    ? "border-[#EB6A1D] bg-[#FFF8F2] shadow-md ring-2 ring-[#EB6A1D]/20"
-                    : "border-[#00A896] bg-white hover:bg-slate-50 hover:border-[#0D5B4D]"
-                }`}
-              >
-                <div className="text-2xl mb-1">👑</div>
-                <h4
-                  className={`text-base sm:text-lg font-black tracking-tight ${
-                    selectedRole === "ADMIN" ? "text-[#EB6A1D]" : "text-[#0D5B4D]"
-                  }`}
-                >
-                  DIRECTEUR
-                </h4>
-                <p className="text-[11px] text-[#00A896] font-medium mt-0.5">
-                  Direction & Administration
-                </p>
-              </button>
-
-              {/* 2: ENSEIGNANT */}
-              <button
-                type="button"
-                onClick={() => handleRoleSelect("TEACHER")}
-                className={`p-4 sm:p-5 rounded-2xl border-2 transition-all flex flex-col items-center justify-center text-center group ${
-                  selectedRole === "TEACHER"
-                    ? "border-[#EB6A1D] bg-[#FFF8F2] shadow-md ring-2 ring-[#EB6A1D]/20"
-                    : "border-[#00A896] bg-white hover:bg-slate-50 hover:border-[#0D5B4D]"
-                }`}
-              >
-                <div className="text-2xl mb-1">👨‍🏫</div>
-                <h4
-                  className={`text-base sm:text-lg font-black tracking-tight ${
-                    selectedRole === "TEACHER" ? "text-[#EB6A1D]" : "text-[#0D5B4D]"
-                  }`}
-                >
-                  ENSEIGNANT
-                </h4>
-                <p className="text-[11px] text-[#00A896] font-medium mt-0.5">
-                  Gestion des Cours & Notes
-                </p>
-              </button>
-
-              {/* 3: ÉLÈVE */}
-              <button
-                type="button"
-                onClick={() => handleRoleSelect("STUDENT")}
-                className={`p-4 sm:p-5 rounded-2xl border-2 transition-all flex flex-col items-center justify-center text-center group ${
-                  selectedRole === "STUDENT"
-                    ? "border-[#EB6A1D] bg-[#FFF8F2] shadow-md ring-2 ring-[#EB6A1D]/20"
-                    : "border-[#00A896] bg-white hover:bg-slate-50 hover:border-[#0D5B4D]"
-                }`}
-              >
-                <div className="text-2xl mb-1">🎓</div>
-                <h4
-                  className={`text-base sm:text-lg font-black tracking-tight ${
-                    selectedRole === "STUDENT" ? "text-[#EB6A1D]" : "text-[#0D5B4D]"
-                  }`}
-                >
-                  ÉLÈVE
-                </h4>
-                <p className="text-[11px] text-[#00A896] font-medium mt-0.5">
-                  Apprenant & Devoirs
-                </p>
-              </button>
-
-              {/* 4: PARENT */}
-              <button
-                type="button"
-                onClick={() => handleRoleSelect("PARENT")}
-                className={`p-4 sm:p-5 rounded-2xl border-2 transition-all flex flex-col items-center justify-center text-center group ${
-                  selectedRole === "PARENT"
-                    ? "border-[#EB6A1D] bg-[#FFF8F2] shadow-md ring-2 ring-[#EB6A1D]/20"
-                    : "border-[#00A896] bg-white hover:bg-slate-50 hover:border-[#0D5B4D]"
-                }`}
-              >
-                <div className="text-2xl mb-1">👨‍👩‍👧</div>
-                <h4
-                  className={`text-base sm:text-lg font-black tracking-tight ${
-                    selectedRole === "PARENT" ? "text-[#EB6A1D]" : "text-[#0D5B4D]"
-                  }`}
-                >
-                  PARENT
-                </h4>
-                <p className="text-[11px] text-[#00A896] font-medium mt-0.5">
-                  Suivi Scolaire & Bulletins
-                </p>
-              </button>
-            </div>
-
-            {/* School Stats Pill */}
-            <div className="p-3.5 rounded-xl bg-[#E8F5F2] border border-[#00A896]/30 flex flex-wrap items-center justify-between text-xs text-[#0D5B4D] gap-2">
-              <div className="flex items-center gap-2">
-                <span className="font-bold">🏫 {etablissement.name}</span>
-                <span className="text-slate-500">•</span>
-                <span className="text-slate-600">{schoolClasses.length} classe(s) actives</span>
-                <span className="text-slate-500">•</span>
-                <span className="text-slate-600">{enrolledCount} apprenant(s)</span>
-              </div>
-              <span className="font-bold text-[11px] bg-white text-[#0D5B4D] px-2.5 py-1 rounded-full border border-[#00A896]/20">
-                Portail {selectedRole}
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="font-black text-lg sm:text-xl tracking-tight text-slate-900 truncate">{etablissement.name}</h1>
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300">
+                {etablissement.code}
               </span>
             </div>
+            <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5 truncate">
+              <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
+              <span>{etablissement.city}, {etablissement.country} • {etablissement.type}</span>
+            </p>
+          </div>
+        </div>
 
-            {/* Login Form */}
-            <form onSubmit={handleLogin} className="space-y-4 max-w-xl mx-auto pt-2">
-              {errorMsg && (
-                <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
-                  <span>⚠️</span>
-                  <span>{errorMsg}</span>
-                </div>
-              )}
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          <ThemeToggle />
 
-              {/* Identifiant */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  {selectedRole === "ADMIN"
-                    ? "Identifiant Direction / Nom / Email"
-                    : selectedRole === "TEACHER"
-                    ? "Identifiant Enseignant / Email"
-                    : selectedRole === "PARENT"
-                    ? "Identifiant Parent / Email"
-                    : "Identifiant Élève / Nom / Matricule"}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder={
-                    selectedRole === "ADMIN"
-                      ? `Ex: ${etablissement.directorName || "Directeur"} ou konedamaa@gmail.com`
-                      : selectedRole === "TEACHER"
-                      ? "Ex: sarah.mansouri@alfasle.edu"
-                      : selectedRole === "PARENT"
-                      ? "Ex: parent.kone@gmail.com"
-                      : "Ex: KONE ou matricule..."
-                  }
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#00A896] focus:bg-white focus:ring-2 focus:ring-[#00A896]/20 text-sm transition-all"
-                />
+          <button
+            type="button"
+            onClick={() => {
+              setPreRegRole("STUDENT");
+              setIsPreRegModalOpen(true);
+            }}
+            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold shadow-sm transition-all transform hover:-translate-y-0.5 cursor-pointer"
+            title="Pré-inscription"
+          >
+            <span>📝</span>
+            <span className="hidden sm:inline">Pré-inscription</span>
+          </button>
+
+          <button
+            onClick={onOpenJoinClassModal}
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold shadow-sm transition-all cursor-pointer"
+            title="Rejoindre une classe"
+          >
+            <KeyRound className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="hidden sm:inline">Rejoindre une classe</span>
+            <span className="sm:hidden">Rejoindre</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Center Subdomain Login Card (Split-Screen) */}
+      <main className="flex-1 flex flex-col items-center justify-center p-3 sm:p-6 z-10 w-full max-w-7xl mx-auto">
+        <div className="w-full max-w-4xl bg-white border border-slate-200 rounded-2xl sm:rounded-[32px] overflow-hidden shadow-2xl shadow-slate-300/40 grid grid-cols-1 md:grid-cols-12 min-h-[540px]">
+
+          {/* LEFT COLUMN: School Custom Theme Banner (Green / Emerald) */}
+          <div className="md:col-span-5 bg-gradient-to-br from-emerald-800 via-emerald-900 to-[#041911] p-6 sm:p-8 flex flex-col justify-between text-white relative overflow-hidden">
+            <div className="absolute -top-16 -right-16 w-56 h-56 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute -bottom-16 -left-16 w-60 h-60 bg-emerald-400/15 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 space-y-5">
+              {/* Badge specific to establishment */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-xs font-bold shadow-sm">
+                <span>🏫</span>
+                <span className="tracking-wide uppercase truncate max-w-[200px]">
+                  {etablissement.name}
+                </span>
               </div>
 
-              {/* Mot de passe */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Mot de passe
-                  </label>
-                  <span className="text-xs text-[#00A896] hover:underline cursor-pointer font-medium">
-                    Mot de passe oublié ?
+              <div className="space-y-3 pt-2">
+                <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
+                  Espace Campus & Cours en Ligne !
+                </h2>
+                <p className="text-xs text-emerald-100/90 leading-relaxed">
+                  {etablissement.description}
+                </p>
+              </div>
+
+              {/* School Metrics */}
+              <div className="p-3.5 rounded-2xl bg-black/20 backdrop-blur-md border border-emerald-400/20 space-y-2 text-xs">
+                <div className="flex items-center justify-between text-emerald-100">
+                  <span>Classes disponibles sur ce campus :</span>
+                  <span className="font-bold bg-emerald-500/30 px-2 py-0.5 rounded-full border border-emerald-400/30 text-emerald-200">
+                    {schoolClasses.length} Classes
                   </span>
                 </div>
-                <div className="relative">
+                <div className="flex items-center justify-between text-emerald-200">
+                  <span>Effectif inscrits :</span>
+                  <span className="font-bold">{enrolledCount} Élèves</span>
+                </div>
+                {etablissement.directorName && (
+                  <div className="pt-1 border-t border-emerald-400/15 flex items-center justify-between text-[11px] text-emerald-200">
+                    <span>Directeur :</span>
+                    <span className="font-semibold">{etablissement.directorName}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="relative z-10 pt-4 border-t border-emerald-400/20 text-[11px] text-emerald-200/90">
+              Instance sécurisée : <strong className="text-white">{etablissement.subdomain}.alfasle.edu</strong>
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN: School-scoped Login Form */}
+          <div className="md:col-span-7 p-6 sm:p-10 flex flex-col justify-between bg-white text-slate-800">
+            <div className="space-y-6">
+
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider font-mono">
+                    Portail Étudiant & Enseignant
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-mono">
+                    {etablissement.code}
+                  </span>
+                </div>
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-1">
+                  Se connecter à {etablissement.name}
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Accédez aux cours, devoirs et ressources dispensés par votre établissement.
+                </p>
+              </div>
+
+              {/* 4 Role Selector Buttons - Direction FIRST */}
+              <div className="grid grid-cols-4 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleRoleSelect("ADMIN")}
+                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all cursor-pointer ${
+                    selectedRole === "ADMIN"
+                      ? "bg-emerald-50 border-emerald-500 text-emerald-800 shadow-md ring-2 ring-emerald-500/30"
+                      : "bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+                  }`}
+                >
+                  <span className="text-lg">👑</span>
+                  <span className="text-[10px] font-bold">Direction</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleRoleSelect("TEACHER")}
+                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all cursor-pointer ${
+                    selectedRole === "TEACHER"
+                      ? "bg-emerald-50 border-emerald-500 text-emerald-800 shadow-md ring-2 ring-emerald-500/30"
+                      : "bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+                  }`}
+                >
+                  <span className="text-lg">👨‍🏫</span>
+                  <span className="text-[10px] font-bold">Prof</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleRoleSelect("STUDENT")}
+                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all cursor-pointer ${
+                    selectedRole === "STUDENT"
+                      ? "bg-emerald-50 border-emerald-500 text-emerald-800 shadow-md ring-2 ring-emerald-500/30"
+                      : "bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+                  }`}
+                >
+                  <span className="text-lg">🎓</span>
+                  <span className="text-[10px] font-bold">Élève</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleRoleSelect("PARENT")}
+                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all cursor-pointer ${
+                    selectedRole === "PARENT"
+                      ? "bg-emerald-50 border-emerald-500 text-emerald-800 shadow-md ring-2 ring-emerald-500/30"
+                      : "bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+                  }`}
+                >
+                  <span className="text-lg">👨‍👩‍👧</span>
+                  <span className="text-[10px] font-bold">Parent</span>
+                </button>
+              </div>
+
+              {/* Login Form */}
+              <form onSubmit={handleLogin} className="space-y-4 text-xs">
+                {errorMsg && (
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+                    {errorMsg}
+                  </div>
+                )}
+                <div>
+                  <label className="block text-slate-700 font-medium mb-1">
+                    {selectedRole === "ADMIN"
+                      ? "Identifiant Direction / Nom / Email *"
+                      : selectedRole === "TEACHER"
+                      ? "Identifiant Enseignant / Nom / Email *"
+                      : selectedRole === "PARENT"
+                      ? "Identifiant Parent / Nom / Email *"
+                      : "Identifiant Élève / Nom / Email *"}
+                  </label>
                   <input
-                    type={showPassword ? "text" : "password"}
+                    type="text"
                     required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••••••"
-                    className="w-full pl-4 pr-11 py-3 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#00A896] focus:bg-white focus:ring-2 focus:ring-[#00A896]/20 text-sm transition-all"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    placeholder={
+                      selectedRole === "ADMIN"
+                        ? `Ex: ${etablissement.directorName || "Directeur"} ou email...`
+                        : selectedRole === "TEACHER"
+                        ? "Ex: sarah.mansouri@alfasle.edu..."
+                        : selectedRole === "PARENT"
+                        ? "Ex: parent.kone@gmail.com..."
+                        : "Ex: KONE ou matricule..."
+                    }
+                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40 shadow-sm"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 font-medium mb-1">Mot de passe *</label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40 shadow-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-bold shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 cursor-pointer"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span>Accéder à mon Espace {etablissement.name}</span>
+                </button>
+              </form>
+
+              {/* Quick 1-Click Demo Profiles */}
+              <div className="pt-3 border-t border-slate-100">
+                <p className="text-[11px] font-semibold text-slate-500 mb-2">
+                  ⚡ Connexion Rapide Démo sur ce Campus :
+                </p>
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600"
+                    onClick={() => {
+                      const dirUser: User = {
+                        id: `u_dir_${etablissement.id}`,
+                        name: etablissement.directorName || "Direction de l'Établissement",
+                        email: etablissement.directorEmail || `${etablissement.subdomain}.directeur@alfasle.edu`,
+                        username: "directeur",
+                        role: "ADMIN",
+                        etablissementId: etablissement.id,
+                        etablissementName: etablissement.name,
+                        bio: `Directeur officiel de ${etablissement.name}`,
+                        createdAt: new Date().toISOString(),
+                      };
+                      setCurrentUser(dirUser);
+                      onLoginSuccess();
+                    }}
+                    className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/50 text-left transition-all text-xs group cursor-pointer"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    <span className="text-base">👑</span>
+                    <div>
+                      <p className="text-[11px] font-bold text-slate-800 group-hover:text-emerald-700">
+                        Direction (Admin)
+                      </p>
+                      <p className="text-[9px] text-slate-500">Élèves, profs & classes</p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const tc = users.find((u) => u.role === "TEACHER") || users[0];
+                      setCurrentUser({
+                        ...tc,
+                        etablissementId: etablissement.id,
+                        etablissementName: etablissement.name,
+                      });
+                      onLoginSuccess();
+                    }}
+                    className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/50 text-left transition-all text-xs cursor-pointer"
+                  >
+                    <span className="text-base">👨‍🏫</span>
+                    <div>
+                      <p className="text-[11px] font-bold text-slate-800">Professeur</p>
+                      <p className="text-[9px] text-slate-500">Pédagogie & devoirs</p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const st = users.find((u) => u.role === "STUDENT") || users[0];
+                      setCurrentUser({
+                        ...st,
+                        etablissementId: etablissement.id,
+                        etablissementName: etablissement.name,
+                      });
+                      onLoginSuccess();
+                    }}
+                    className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/50 text-left transition-all text-xs cursor-pointer"
+                  >
+                    <span className="text-base">🎓</span>
+                    <div>
+                      <p className="text-[11px] font-bold text-slate-800">Élève KONE</p>
+                      <p className="text-[9px] text-slate-500">Accès cours & devoirs</p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const pr = users.find((u) => u.role === "PARENT") || {
+                        id: `u_parent_${Date.now()}`,
+                        name: "Parent d'Élève",
+                        email: "parent.kone@gmail.com",
+                        username: "parentkone",
+                        role: "PARENT" as const,
+                        etablissementId: etablissement.id,
+                        etablissementName: etablissement.name,
+                        createdAt: new Date().toISOString(),
+                      };
+                      setCurrentUser({
+                        ...pr,
+                        etablissementId: etablissement.id,
+                        etablissementName: etablissement.name,
+                      });
+                      onLoginSuccess();
+                    }}
+                    className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/50 text-left transition-all text-xs cursor-pointer"
+                  >
+                    <span className="text-base">👨‍👩‍👧</span>
+                    <div>
+                      <p className="text-[11px] font-bold text-slate-800">Parent</p>
+                      <p className="text-[9px] text-slate-500">Suivi des notes</p>
+                    </div>
                   </button>
                 </div>
               </div>
 
-              {/* Remember Me */}
-              <div className="flex items-center justify-between text-xs pt-1">
-                <label className="flex items-center gap-2 cursor-pointer text-slate-600">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="rounded border-slate-300 text-[#EB6A1D] focus:ring-[#EB6A1D]"
-                  />
-                  <span>Mémoriser mes identifiants</span>
-                </label>
-                <span className="text-slate-400 text-[11px]">Instance isolée SSL</span>
-              </div>
-
-              {/* Submit Button (ONECI Vibrant Orange) */}
-              <div className="pt-3">
-                <button
-                  type="submit"
-                  className="w-full py-3.5 px-6 rounded-xl bg-[#EB6A1D] hover:bg-[#d85b12] active:bg-[#c44f0d] text-white font-bold text-sm shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 cursor-pointer"
-                >
-                  <LogIn className="w-4 h-4" />
-                  <span>Accéder à l&apos;Espace {etablissement.name}</span>
-                </button>
-              </div>
-            </form>
-
-            {/* Quick 1-Click Demo Profiles (Light harmonized style) */}
-            <div className="pt-6 border-t border-slate-100">
-              <p className="text-xs font-bold text-slate-700 mb-3 flex items-center gap-1.5">
-                <span>⚡</span>
-                <span>Connexion Rapide Démo sur ce Campus :</span>
-              </p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const dirUser: User = {
-                      id: `u_dir_${etablissement.id}`,
-                      name: etablissement.directorName || "Direction de l'Établissement",
-                      email: etablissement.directorEmail || `${etablissement.subdomain}.directeur@alfasle.edu`,
-                      username: "directeur",
-                      role: "ADMIN",
-                      etablissementId: etablissement.id,
-                      etablissementName: etablissement.name,
-                      bio: `Directeur officiel de ${etablissement.name}`,
-                      createdAt: new Date().toISOString(),
-                    };
-                    setCurrentUser(dirUser);
-                    onLoginSuccess();
-                  }}
-                  className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-[#00A896] hover:bg-[#E8F5F2]/40 text-left transition-all text-xs group flex items-center gap-2.5 shadow-sm"
-                >
-                  <span className="text-xl">👑</span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold text-slate-800 truncate group-hover:text-[#0D5B4D]">
-                      Direction
-                    </p>
-                    <p className="text-[10px] text-[#00A896] truncate font-medium">
-                      Gestion campus
-                    </p>
+              {/* Classes Preview on Subdomain */}
+              {schoolClasses.length > 0 && (
+                <div className="pt-3 border-t border-slate-100">
+                  <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+                    Classes ouvertes aux inscriptions sur ce campus :
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {schoolClasses.map((c) => (
+                      <span
+                        key={c.id}
+                        className="px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-[10px] text-emerald-800 font-mono font-medium"
+                      >
+                        {c.classCode} ({c.title})
+                      </span>
+                    ))}
                   </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const tc = users.find((u) => u.role === "TEACHER") || users[0];
-                    setCurrentUser({
-                      ...tc,
-                      etablissementId: etablissement.id,
-                      etablissementName: etablissement.name,
-                    });
-                    onLoginSuccess();
-                  }}
-                  className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-[#00A896] hover:bg-[#E8F5F2]/40 text-left transition-all text-xs group flex items-center gap-2.5 shadow-sm"
-                >
-                  <span className="text-xl">👨‍🏫</span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold text-slate-800 truncate group-hover:text-[#0D5B4D]">
-                      Professeur
-                    </p>
-                    <p className="text-[10px] text-[#00A896] truncate font-medium">
-                      Pédagogie
-                    </p>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const st = users.find((u) => u.role === "STUDENT") || users[0];
-                    setCurrentUser({
-                      ...st,
-                      etablissementId: etablissement.id,
-                      etablissementName: etablissement.name,
-                    });
-                    onLoginSuccess();
-                  }}
-                  className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-[#00A896] hover:bg-[#E8F5F2]/40 text-left transition-all text-xs group flex items-center gap-2.5 shadow-sm"
-                >
-                  <span className="text-xl">🎓</span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold text-slate-800 truncate group-hover:text-[#0D5B4D]">
-                      Élève KONE
-                    </p>
-                    <p className="text-[10px] text-[#00A896] truncate font-medium">
-                      Apprenant
-                    </p>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const pr = users.find((u) => u.role === "PARENT") || {
-                      id: `u_parent_${Date.now()}`,
-                      name: "Parent d'Élève",
-                      email: "parent.kone@gmail.com",
-                      username: "parentkone",
-                      role: "PARENT" as const,
-                      etablissementId: etablissement.id,
-                      etablissementName: etablissement.name,
-                      createdAt: new Date().toISOString(),
-                    };
-                    setCurrentUser({
-                      ...pr,
-                      etablissementId: etablissement.id,
-                      etablissementName: etablissement.name,
-                    });
-                    onLoginSuccess();
-                  }}
-                  className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-[#00A896] hover:bg-[#E8F5F2]/40 text-left transition-all text-xs group flex items-center gap-2.5 shadow-sm"
-                >
-                  <span className="text-xl">👨‍👩‍👧</span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold text-slate-800 truncate group-hover:text-[#0D5B4D]">
-                      Parent
-                    </p>
-                    <p className="text-[10px] text-[#00A896] truncate font-medium">
-                      Suivi notes
-                    </p>
-                  </div>
-                </button>
-              </div>
+                </div>
+              )}
             </div>
 
-            {/* Classes Preview on Subdomain */}
-            {schoolClasses.length > 0 && (
-              <div className="pt-4 border-t border-slate-100">
-                <p className="text-xs font-bold text-slate-700 mb-2">
-                  Classes ouvertes sur ce campus :
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {schoolClasses.map((c) => (
-                    <span
-                      key={c.id}
-                      className="px-2.5 py-1 rounded-lg bg-[#E8F5F2] border border-[#00A896]/30 text-xs text-[#0D5B4D] font-mono font-medium"
-                    >
-                      {c.classCode} ({c.title})
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Inscriptions & Join class links */}
-            <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
-              <div className="flex items-center gap-4">
+            <div className="pt-4 border-t border-slate-100 space-y-2 text-center text-xs text-slate-500">
+              <div className="flex flex-wrap items-center justify-center gap-3">
                 <button
                   type="button"
                   onClick={() => {
                     setPreRegRole("STUDENT");
                     setIsPreRegModalOpen(true);
                   }}
-                  className="text-[#0D5B4D] font-bold hover:underline flex items-center gap-1"
+                  className="text-emerald-600 font-bold hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <span>🎓 Pré-inscription Élève</span>
                 </button>
@@ -853,18 +770,18 @@ export function SchoolSubdomainPortal({
                     setPreRegRole("TEACHER");
                     setIsPreRegModalOpen(true);
                   }}
-                  className="text-[#00A896] font-bold hover:underline flex items-center gap-1"
+                  className="text-emerald-700 font-bold hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <span>👨‍🏫 Candidature Professeur</span>
                 </button>
               </div>
 
               <div>
-                Pas encore inscrit ?{" "}
+                Pas encore inscrit dans une classe ?{" "}
                 <button
                   type="button"
                   onClick={onOpenJoinClassModal}
-                  className="text-[#EB6A1D] font-bold hover:underline"
+                  className="text-emerald-600 font-bold hover:underline cursor-pointer"
                 >
                   Rejoindre avec un Code &rarr;
                 </button>
@@ -875,11 +792,11 @@ export function SchoolSubdomainPortal({
       </main>
 
       {/* Footer */}
-      <footer className="w-full text-center py-4 px-4 text-xs text-slate-500 border-t border-slate-200/80 z-10 flex flex-col sm:flex-row items-center justify-between gap-2 max-w-5xl mx-auto">
+      <footer className="w-full text-center py-4 px-4 text-xs text-slate-500 border-t border-slate-200 z-10 flex flex-col sm:flex-row items-center justify-between gap-2 max-w-5xl mx-auto">
         <span>© 2026-2027 {etablissement.name} • Hébergé sur la plateforme AlFasle Multi-Tenant</span>
         <button
           onClick={() => setIsResetConfirmOpen(true)}
-          className="text-[11px] text-slate-400 hover:text-rose-400 underline transition-colors flex items-center gap-1"
+          className="text-[11px] text-slate-400 hover:text-rose-500 underline transition-colors flex items-center gap-1 cursor-pointer"
         >
           <span>🧹 Vider le cache & Réinitialiser</span>
         </button>

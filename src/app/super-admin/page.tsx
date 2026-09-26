@@ -74,24 +74,24 @@ export default function SuperAdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F7F6] text-slate-800 selection:bg-[#0D5B4D] selection:text-white flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col">
       {/* Top Header Dedicated to Super Admin Route */}
-      <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           {/* Left Brand & Badge */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#0D5B4D] to-[#00A896] p-0.5 shadow-md flex items-center justify-center">
-                <div className="w-full h-full bg-[#0D5B4D] rounded-[14px] flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 p-0.5 shadow-lg shadow-amber-500/25 flex items-center justify-center">
+                <div className="w-full h-full bg-amber-50 rounded-[14px] flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-amber-600" />
                 </div>
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-black text-[#0D5B4D] text-base sm:text-lg tracking-tight">
+                  <span className="font-black text-slate-900 text-base sm:text-lg tracking-tight">
                     AlFasle
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#FFF8F2] border border-[#EB6A1D]/40 text-[#EB6A1D] font-mono text-[10px] font-bold uppercase tracking-wider">
+                  <span className="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 font-mono text-[10px] font-bold uppercase tracking-wider">
                     Super Admin Root
                   </span>
                 </div>
@@ -106,7 +106,7 @@ export default function SuperAdminPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={handleBackToStandard}
-              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+              className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
               title="Retourner à l'interface standard de cours et tableaux de bord"
             >
               <ArrowLeft className="w-4 h-4 text-slate-500" />
@@ -114,13 +114,13 @@ export default function SuperAdminPage() {
             </button>
 
             {/* Super Admin Profile badge */}
-            <div className="hidden md:flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-[#E8F5F2] border border-[#00A896]/30">
-              <div className="w-7 h-7 rounded-lg bg-[#0D5B4D] flex items-center justify-center text-white font-bold text-xs">
+            <div className="hidden md:flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200">
+              <div className="w-7 h-7 rounded-lg bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-800 font-bold text-xs">
                 KA
               </div>
               <div className="text-left text-xs">
-                <p className="font-bold text-[#0D5B4D] leading-none">KONE ADAMA</p>
-                <p className="text-[10px] text-[#EB6A1D] font-mono leading-none mt-0.5 font-bold">
+                <p className="font-bold text-slate-900 leading-none">KONE ADAMA</p>
+                <p className="text-[10px] text-amber-700 font-mono leading-none mt-0.5">
                   Root Master
                 </p>
               </div>
@@ -128,10 +128,10 @@ export default function SuperAdminPage() {
 
             <button
               onClick={handleLogout}
-              className="p-2 sm:px-3 sm:py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+              className="p-2 sm:px-3 sm:py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold flex items-center gap-1.5 transition-all"
               title="Déconnexion de la session Super Admin"
             >
-              <LogOut className="w-4 h-4 text-rose-500" />
+              <LogOut className="w-4 h-4 text-rose-600" />
               <span className="hidden sm:inline">Déconnexion</span>
             </button>
           </div>
