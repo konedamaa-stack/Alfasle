@@ -17,7 +17,7 @@ export function CreateClassModal({
   onClose,
   defaultEtablissementId,
 }: CreateClassModalProps) {
-  const { createClass, etablissements, createEtablissement } = useStore();
+  const { createClass, etablissements, createEtablissement, classes } = useStore();
   const { toast } = useToast();
 
   const [selectedEtabId, setSelectedEtabId] = useState<string>(
@@ -30,10 +30,30 @@ export function CreateClassModal({
   const [description, setDescription] = useState("");
   const [level, setLevel] = useState("Intermédiaire");
   const [category, setCategory] = useState("Informatique");
+  const [customCategory, setCustomCategory] = useState("");
   const [capacity, setCapacity] = useState(30);
   const [enrollmentMode, setEnrollmentMode] = useState<EnrollmentMode>("OPEN");
   const [coverImage, setCoverImage] = useState(
     "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80"
+  );
+
+  const defaultCategories = [
+    "Informatique",
+    "Mathématiques",
+    "Sciences",
+    "Langues",
+    "Design",
+    "Gestion & Économie",
+    "Lettres & Philosophie",
+    "Droit & Sciences Juridiques",
+    "Santé & Médecine",
+  ];
+
+  const availableCategories = Array.from(
+    new Set([
+      ...defaultCategories,
+      ...classes.map((c) => c.category).filter(Boolean),
+    ])
   );
 
   React.useEffect(() => {
@@ -94,9 +114,14 @@ export function CreateClassModal({
       targetEtabName = newEtab.name;
     }
 
+    const finalCategory =
+      category === "CUSTOM"
+        ? customCategory.trim() || "Général"
+        : category;
+
     const generatedCode =
       classCode.trim().toUpperCase() ||
-      `AF-${category.substring(0, 3).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
+      `AF-${finalCategory.substring(0, 3).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
 
     createClass({
       classCode: generatedCode,
@@ -105,7 +130,7 @@ export function CreateClassModal({
       title,
       description,
       level,
-      category,
+      category: finalCategory,
       capacity,
       enrollmentMode,
       status: "ACTIVE",
@@ -123,6 +148,7 @@ export function CreateClassModal({
     setClassCode("");
     setDescription("");
     setCustomEtabName("");
+    setCustomCategory("");
   };
 
   return (
@@ -267,18 +293,41 @@ export function CreateClassModal({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Catégorie</label>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
+                Catégorie / Filière
+              </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-3.5 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
               >
-                <option value="Informatique">Informatique & Dév</option>
-                <option value="Mathématiques">Mathématiques & Algèbre</option>
-                <option value="Sciences">Sciences & Physique</option>
-                <option value="Langues">Langues & Communication</option>
-                <option value="Design">Design & UI/UX</option>
+                <optgroup label="Catégories disponibles">
+                  {availableCategories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      📁 {cat}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Personnalisation libre">
+                  <option value="CUSTOM">➕ Créer une nouvelle catégorie...</option>
+                </optgroup>
               </select>
+
+              {category === "CUSTOM" && (
+                <div className="mt-2 p-2.5 bg-indigo-950/40 border border-indigo-500/40 rounded-xl space-y-1 animate-fadeIn">
+                  <label className="block text-[11px] font-semibold text-indigo-300">
+                    Nom de votre nouvelle catégorie *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ex: Finance & Comptabilité, Droit, Médecine..."
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs bg-slate-900 border border-indigo-500/40 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400"
+                  />
+                </div>
+              )}
             </div>
           </div>
 
