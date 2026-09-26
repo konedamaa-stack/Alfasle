@@ -114,7 +114,7 @@ interface StoreContextType {
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
-const STORAGE_PREFIX = "alfasle_v8_";
+const STORAGE_PREFIX = "alfasle_v9_";
 
 function cleanLegacyStorage() {
   // Safe: no aggressive deletion of user data
@@ -416,7 +416,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setAssignments(initialAssignments);
     setSubmissions(initialSubmissions);
     setNotifications(initialNotifications);
-    setCurrentUser(initialUsers[1]); // Dr. Mahamadou DIAWARA
+    setCurrentUser(initialUsers[0]); // KONE ADAMA (Super Admin Master)
     if (typeof window !== "undefined") {
       window.location.reload();
     }
