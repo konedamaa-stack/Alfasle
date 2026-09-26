@@ -1948,7 +1948,7 @@ export function SuperAdminDashboard({
                   required
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  placeholder="Ex: Prof. Sarah Mansouri, Yasmine Khelifi..."
+                  placeholder="Ex: Prof. Sarah Mansouri, Nom de l'élève..."
                   className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
                 />
               </div>
@@ -1963,7 +1963,7 @@ export function SuperAdminDashboard({
                     required
                     value={editUsername}
                     onChange={(e) => setEditUsername(e.target.value)}
-                    placeholder="Ex: kone, sarah, yasmine..."
+                    placeholder="Ex: kone, sarah, prenom..."
                     className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-amber-300 font-mono focus:outline-none focus:border-amber-500"
                   />
                   <span className="text-[10px] text-slate-500 mt-1 block">
