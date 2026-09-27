@@ -365,7 +365,7 @@ export function SchoolSubdomainPortal({
           <Globe className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
           <span className="text-slate-500">Sous-Domaine :</span>
           <span className="text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 text-[11px] truncate max-w-[220px] sm:max-w-none">
-            https://{etablissement.subdomain}.alfasle.edu
+            https://{etablissement.subdomain}.alfasle.xyz
           </span>
         </div>
 

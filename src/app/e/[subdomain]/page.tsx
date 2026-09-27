@@ -68,6 +68,30 @@ export default function SubdomainSchoolPage() {
 
   const targetEtab = localEtab || cloudEtab;
 
+  const handleLoginSuccess = () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("alfasle_session_active", "true");
+    }
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("alfasle_session_active");
+    }
+    setIsAuthenticated(false);
+  };
+
+  // While checking Supabase cloud in background
+  if (isCheckingCloud) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 space-y-4">
+        <Loader2 className="w-9 h-9 text-blue-400 animate-spin" />
+        <p className="text-xs text-slate-400 font-mono">Connexion au campus AlFasle ({subdomain})...</p>
+      </div>
+    );
+  }
+
   // If establishment does NOT exist, show a clean 404 error page
   if (!targetEtab) {
     return (
