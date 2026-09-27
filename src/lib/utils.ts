@@ -98,3 +98,100 @@ export function getVideoEmbedInfo(rawUrl: string): VideoEmbedInfo {
     isIframe: false,
   };
 }
+
+export interface PdfEmbedInfo {
+  embedUrl: string;
+  downloadUrl: string;
+  isGoogleDrive: boolean;
+  isDataUrl: boolean;
+}
+
+export function getPdfEmbedInfo(rawUrl: string): PdfEmbedInfo {
+  if (!rawUrl || typeof rawUrl !== "string") {
+    return { embedUrl: "", downloadUrl: "", isGoogleDrive: false, isDataUrl: false };
+  }
+
+  const url = rawUrl.trim();
+
+  // Data URL (Base64 uploaded document)
+  if (url.startsWith("data:")) {
+    return {
+      embedUrl: url,
+      downloadUrl: url,
+      isGoogleDrive: false,
+      isDataUrl: true,
+    };
+  }
+
+  // Google Drive File Match:
+  // e.g., https://drive.google.com/file/d/FILE_ID/view?usp=sharing
+  // e.g., https://drive.google.com/file/d/FILE_ID/edit
+  // e.g., https://drive.google.com/open?id=FILE_ID
+  // e.g., https://drive.google.com/uc?id=FILE_ID
+  const driveFileMatch = url.match(
+    /(?:drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:.*&)?id=))([a-zA-Z0-9_-]+)/i
+  );
+
+  if (driveFileMatch && driveFileMatch[1]) {
+    const fileId = driveFileMatch[1];
+    return {
+      embedUrl: `https://drive.google.com/file/d/${fileId}/preview`,
+      downloadUrl: `https://drive.google.com/uc?export=download&id=${fileId}`,
+      isGoogleDrive: true,
+      isDataUrl: false,
+    };
+  }
+
+  // Google Docs Document Match:
+  const docsMatch = url.match(/docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/i);
+  if (docsMatch && docsMatch[1]) {
+    const docId = docsMatch[1];
+    return {
+      embedUrl: `https://docs.google.com/document/d/${docId}/preview`,
+      downloadUrl: `https://docs.google.com/document/d/${docId}/export?format=pdf`,
+      isGoogleDrive: true,
+      isDataUrl: false,
+    };
+  }
+
+  // Google Slides Presentation Match:
+  const slidesMatch = url.match(/docs\.google\.com\/presentation\/d\/([a-zA-Z0-9_-]+)/i);
+  if (slidesMatch && slidesMatch[1]) {
+    const slideId = slidesMatch[1];
+    return {
+      embedUrl: `https://docs.google.com/presentation/d/${slideId}/embed`,
+      downloadUrl: `https://docs.google.com/presentation/d/${slideId}/export/pdf`,
+      isGoogleDrive: true,
+      isDataUrl: false,
+    };
+  }
+
+  // Google Sheets Match:
+  const sheetsMatch = url.match(/docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/i);
+  if (sheetsMatch && sheetsMatch[1]) {
+    const sheetId = sheetsMatch[1];
+    return {
+      embedUrl: `https://docs.google.com/spreadsheets/d/${sheetId}/preview`,
+      downloadUrl: `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=pdf`,
+      isGoogleDrive: true,
+      isDataUrl: false,
+    };
+  }
+
+  // Dropbox Direct link transform if needed
+  if (url.includes("dropbox.com") && url.includes("dl=0")) {
+    return {
+      embedUrl: url.replace("dl=0", "raw=1"),
+      downloadUrl: url.replace("dl=0", "dl=1"),
+      isGoogleDrive: false,
+      isDataUrl: false,
+    };
+  }
+
+  return {
+    embedUrl: url,
+    downloadUrl: url,
+    isGoogleDrive: false,
+    isDataUrl: false,
+  };
+}

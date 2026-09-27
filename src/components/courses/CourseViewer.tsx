@@ -23,7 +23,7 @@ import {
   File,
   Eye,
 } from "lucide-react";
-import { getVideoEmbedInfo } from "@/lib/utils";
+import { getVideoEmbedInfo, getPdfEmbedInfo } from "@/lib/utils";
 import { ConfirmModal, ConfirmVariant } from "@/components/common/ConfirmModal";
 
 interface CourseViewerProps {
@@ -231,8 +231,11 @@ export function CourseViewer({
                 {/* Media Switcher Header if course has both Video and PDF */}
                 {(() => {
                   const hasVideo = Boolean(activeCourse.video?.streamUrl);
-                  const hasPdf = Boolean(activeCourse.pdfUrl || (activeCourse.resources && activeCourse.resources.length > 0));
-                  const effectivePdfUrl = activeCourse.pdfUrl || activeCourse.resources?.[0]?.url;
+                  const rawPdfUrl = activeCourse.pdfUrl || activeCourse.resources?.[0]?.url;
+                  const hasPdf = Boolean(rawPdfUrl || (activeCourse.resources && activeCourse.resources.length > 0));
+                  const pdfInfo = getPdfEmbedInfo(rawPdfUrl || "");
+                  const effectivePdfUrl = pdfInfo.embedUrl;
+                  const downloadPdfUrl = pdfInfo.downloadUrl;
                   const effectivePdfName = activeCourse.pdfName || activeCourse.resources?.[0]?.name || "Document_du_cours.pdf";
 
                   const currentTab =
@@ -273,9 +276,11 @@ export function CourseViewer({
                               <span>Support PDF</span>
                             </button>
                           </div>
-                          {effectivePdfUrl && (
+                          {downloadPdfUrl && (
                             <a
-                              href={effectivePdfUrl}
+                              href={downloadPdfUrl}
+                              target="_blank"
+                              rel="noreferrer"
                               download={effectivePdfName}
                               className="px-3 py-1 rounded-xl bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
                             >
@@ -328,17 +333,19 @@ export function CourseViewer({
                             </div>
                             <div className="flex items-center gap-2">
                               <a
-                                href={effectivePdfUrl}
+                                href={downloadPdfUrl || effectivePdfUrl}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-colors"
-                                title="Ouvrir dans un nouvel onglet"
+                                title="Ouvrir en plein écran"
                               >
                                 <ExternalLink className="w-3.5 h-3.5" />
                                 <span className="hidden sm:inline">Plein écran</span>
                               </a>
                               <a
-                                href={effectivePdfUrl}
+                                href={downloadPdfUrl || effectivePdfUrl}
+                                target="_blank"
+                                rel="noreferrer"
                                 download={effectivePdfName}
                                 className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
                               >
@@ -353,6 +360,7 @@ export function CourseViewer({
                             src={effectivePdfUrl}
                             title={effectivePdfName}
                             className="w-full h-[580px] sm:h-[680px] bg-slate-900 border-0"
+                            allow="autoplay"
                           />
                         </div>
                       )}
