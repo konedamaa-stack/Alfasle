@@ -689,42 +689,6 @@ export function AuthLandingView({
                   </button>
                 </div>
               </form>
-
-              {/* Quick 1-Click Demo Profiles */}
-              <div className="pt-4 border-t border-slate-100">
-                <p className="text-[11px] text-slate-500 font-semibold mb-2">
-                  ⚡ Connexion Rapide Démo (1 Clic) :
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  {users.map((u) => {
-                    return (
-                      <button
-                        key={u.id}
-                        type="button"
-                        onClick={() => handleDirectDemoLogin(u)}
-                        className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 text-left transition-all text-xs group cursor-pointer"
-                      >
-                        <img
-                          src={
-                            u.avatarUrl ||
-                            "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100"
-                          }
-                          alt={u.name}
-                          className="w-6 h-6 rounded-full object-cover border border-slate-200"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[11px] font-semibold text-slate-800 truncate group-hover:text-blue-600">
-                            {u.name}
-                          </p>
-                          <p className="text-[9px] text-slate-500 truncate capitalize">
-                            {u.role.toLowerCase()}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
             </div>
 
             {/* Bottom footer links */}
