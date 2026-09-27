@@ -353,6 +353,9 @@ export function DirecteurDashboard({
       description: newClassDesc.trim() || `Classe officielle dispensée au sein de ${currentEtab?.name}.`,
       level: newClassLevel,
       category: newClassCategory,
+      disciplines: newClassCategory
+        ? newClassCategory.split(",").map((s) => s.trim()).filter(Boolean)
+        : ["Général"],
       capacity: newClassCapacity || 35,
       enrollmentMode: "OPEN",
       status: "ACTIVE",
@@ -464,11 +467,16 @@ export function DirecteurDashboard({
     e.preventDefault();
     if (!editingClass) return;
     const assignedTeacher = users.find((u) => u.id === editClassTeacherId);
+    const updatedDisciplines = editClassCategory
+      ? editClassCategory.split(",").map((s) => s.trim()).filter(Boolean)
+      : (editingClass.disciplines || [editingClass.category || "Général"]);
+
     updateClass(editingClass.id, {
       title: editClassTitle.trim(),
       classCode: editClassCode.trim().toUpperCase(),
       level: editClassLevel,
       category: editClassCategory,
+      disciplines: updatedDisciplines,
       capacity: editClassCapacity,
       description: editClassDesc.trim(),
       teacherId: assignedTeacher?.id || editingClass.teacherId,

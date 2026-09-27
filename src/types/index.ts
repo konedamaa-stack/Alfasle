@@ -53,6 +53,7 @@ export interface Classe {
   description: string;
   level: string; // e.g., "Débutant", "Intermédiaire", "Avancé", "Terminale", "Licence 1"
   category: string; // e.g., "Mathématiques", "Informatique", "Langues", "Sciences"
+  disciplines?: string[]; // Multiple subjects/disciplines taught in this class: e.g. ["Mathématiques", "Physique", "Informatique", "Anglais"]
   capacity: number;
   enrollmentMode: EnrollmentMode;
   status: ClassStatus;
@@ -109,6 +110,8 @@ export interface VideoData {
 export interface Cours {
   id: string;
   classeId: string;
+  discipline?: string; // Matière / Discipline (ex: "Mathématiques", "Informatique", etc.)
+  teacherName?: string;
   chapterTitle?: string;
   title: string;
   summary: string;
@@ -123,6 +126,7 @@ export interface Cours {
 export interface Devoir {
   id: string;
   classeId: string;
+  discipline?: string; // Matière / Discipline du devoir
   coursId?: string;
   coursTitle?: string;
   title: string;

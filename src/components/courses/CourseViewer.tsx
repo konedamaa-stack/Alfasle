@@ -36,15 +36,26 @@ export function CourseViewer({
   const [activeClassId, setActiveClassId] = useState<string>(
     selectedClassId || (classes[0]?.id || "")
   );
+  const [selectedDisciplineFilter, setSelectedDisciplineFilter] = useState<string>("ALL");
 
-  const classCourses = courses.filter((c) => c.classeId === activeClassId);
+  const activeClass = classes.find((c) => c.id === activeClassId);
+  const classDisciplines = activeClass?.disciplines || (activeClass?.category ? [activeClass.category] : []);
+
+  const classCourses = courses.filter((c) => {
+    const matchesClass = c.classeId === activeClassId;
+    const matchesDiscipline =
+      selectedDisciplineFilter === "ALL" ||
+      !c.discipline ||
+      c.discipline.toLowerCase() === selectedDisciplineFilter.toLowerCase();
+    return matchesClass && matchesDiscipline;
+  });
+
   const [selectedCourseId, setSelectedCourseId] = useState<string>(
     classCourses[0]?.id || ""
   );
 
   const activeCourse =
     classCourses.find((c) => c.id === selectedCourseId) || classCourses[0];
-  const activeClass = classes.find((c) => c.id === activeClassId);
 
   const canEditCourse =
     currentUser.role === "TEACHER" ||
@@ -227,6 +238,11 @@ export function CourseViewer({
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="flex flex-wrap items-center gap-2">
+                        {activeCourse.discipline && (
+                          <span className="px-2.5 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold">
+                            📚 {activeCourse.discipline}
+                          </span>
+                        )}
                         <span className="px-2.5 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-bold">
                           {activeCourse.chapterTitle || "Chapitre"}
                         </span>
@@ -315,6 +331,47 @@ export function CourseViewer({
               </span>
             </div>
 
+            {/* Discipline Filter Tabs if multiple disciplines exist */}
+            {classDisciplines.length > 1 && (
+              <div className="space-y-1.5 pb-2 border-b border-slate-800/80">
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                  Matières / Disciplines :
+                </span>
+                <div className="flex flex-wrap gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDisciplineFilter("ALL")}
+                    className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold transition-all ${
+                      selectedDisciplineFilter === "ALL"
+                        ? "bg-indigo-600 text-white shadow-sm"
+                        : "bg-slate-800 text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    Toutes ({courses.filter((c) => c.classeId === activeClassId).length})
+                  </button>
+                  {classDisciplines.map((d) => {
+                    const count = courses.filter(
+                      (c) => c.classeId === activeClassId && c.discipline?.toLowerCase() === d.toLowerCase()
+                    ).length;
+                    return (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => setSelectedDisciplineFilter(d)}
+                        className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold transition-all ${
+                          selectedDisciplineFilter.toLowerCase() === d.toLowerCase()
+                            ? "bg-indigo-600 text-white shadow-sm"
+                            : "bg-slate-800 text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        {d} ({count})
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
               {classCourses.map((c, index) => {
                 const isCurrent = c.id === activeCourse?.id;
@@ -339,7 +396,14 @@ export function CourseViewer({
                     </span>
 
                     <div className="space-y-1 flex-1">
-                      <p className="text-xs font-bold leading-snug line-clamp-2">{c.title}</p>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {c.discipline && (
+                          <span className="px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 text-[9px] font-semibold">
+                            {c.discipline}
+                          </span>
+                        )}
+                        <p className="text-xs font-bold leading-snug line-clamp-2">{c.title}</p>
+                      </div>
                       <div className="flex items-center gap-2 text-[10px] text-slate-400">
                         {c.video ? (
                           <span className="flex items-center gap-1 text-purple-400">

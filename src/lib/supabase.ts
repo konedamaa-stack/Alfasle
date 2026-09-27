@@ -18,6 +18,19 @@ export const isSupabaseConfigured = () => {
 };
 
 export function mapRowToClasse(row: any): Classe {
+  let disciplinesList: string[] = [];
+  if (Array.isArray(row.disciplines)) {
+    disciplinesList = row.disciplines;
+  } else if (typeof row.disciplines === "string" && row.disciplines.trim()) {
+    try {
+      disciplinesList = JSON.parse(row.disciplines);
+    } catch (_) {
+      disciplinesList = row.disciplines.split(",").map((s: string) => s.trim()).filter(Boolean);
+    }
+  } else if (row.category) {
+    disciplinesList = [row.category];
+  }
+
   return {
     id: row.id,
     classCode: row.class_code || row.classCode || "AF-101",
@@ -26,7 +39,8 @@ export function mapRowToClasse(row: any): Classe {
     title: row.title,
     description: row.description || "",
     level: row.level || "Intermédiaire",
-    category: row.category || "Général",
+    category: row.category || (disciplinesList[0] || "Général"),
+    disciplines: disciplinesList,
     capacity: row.capacity || 30,
     enrollmentMode: row.enrollment_mode || row.enrollmentMode || "OPEN",
     status: row.status || "ACTIVE",
@@ -52,7 +66,8 @@ export function mapClasseToRow(c: Classe): any {
     title: c.title,
     description: c.description,
     level: c.level,
-    category: c.category,
+    category: c.category || (c.disciplines && c.disciplines[0]) || "Général",
+    disciplines: c.disciplines && c.disciplines.length > 0 ? c.disciplines : [c.category || "Général"],
     capacity: c.capacity,
     enrollment_mode: c.enrollmentMode,
     status: c.status,

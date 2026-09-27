@@ -260,6 +260,10 @@ export function SuperAdminDashboard({
       newClassCode.trim().toUpperCase() ||
       handleGenerateClassCode(targetEtab?.id || "", newClassLevel, newClassCategory);
 
+    const superDisciplines = newClassCategory
+      ? newClassCategory.split(",").map((s) => s.trim()).filter(Boolean)
+      : ["Tronc Commun"];
+
     createClass({
       title: newClassTitle.trim(),
       classCode: generatedCode,
@@ -269,6 +273,7 @@ export function SuperAdminDashboard({
       teacherName: targetTeacher?.name || currentUser.name,
       level: newClassLevel.trim() || "Général",
       category: newClassCategory.trim() || "Tronc Commun",
+      disciplines: superDisciplines.length > 0 ? superDisciplines : ["Tronc Commun"],
       capacity: newClassCapacity || 35,
       enrollmentMode: newClassEnrollmentMode,
       status: "ACTIVE",
@@ -305,6 +310,10 @@ export function SuperAdminDashboard({
       etablissements.find((et) => et.id === editingClass.etablissementId);
     const targetTeacher = users.find((u) => u.id === editClassTeacherId);
 
+    const superEditDisciplines = editClassCategory
+      ? editClassCategory.split(",").map((s) => s.trim()).filter(Boolean)
+      : (editingClass.disciplines || [editingClass.category || "Tronc Commun"]);
+
     updateClass(editingClass.id, {
       title: editClassTitle.trim(),
       classCode: editClassCode.trim().toUpperCase(),
@@ -314,6 +323,7 @@ export function SuperAdminDashboard({
       teacherName: targetTeacher ? targetTeacher.name : editingClass.teacherName,
       level: editClassLevel.trim(),
       category: editClassCategory.trim(),
+      disciplines: superEditDisciplines,
       capacity: editClassCapacity,
       enrollmentMode: editClassEnrollmentMode,
       status: editClassStatus,

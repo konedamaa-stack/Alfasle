@@ -58,6 +58,8 @@ export function ClassList({
   const [editCode, setEditCode] = useState("");
   const [editLevel, setEditLevel] = useState("");
   const [editCategory, setEditCategory] = useState("");
+  const [editDisciplines, setEditDisciplines] = useState<string[]>([]);
+  const [editNewDisciplineInput, setEditNewDisciplineInput] = useState("");
   const [editCapacity, setEditCapacity] = useState(35);
   const [editTeacherId, setEditTeacherId] = useState("");
   const [editDesc, setEditDesc] = useState("");
@@ -84,10 +86,30 @@ export function ClassList({
     setEditCode(c.classCode);
     setEditLevel(c.level);
     setEditCategory(c.category);
+    setEditDisciplines(
+      c.disciplines && c.disciplines.length > 0
+        ? [...c.disciplines]
+        : c.category
+        ? [c.category]
+        : []
+    );
     setEditCapacity(c.capacity || 35);
     setEditTeacherId(c.teacherId || "");
     setEditDesc(c.description || "");
     setIsEditModalOpen(true);
+  };
+
+  const handleAddEditDiscipline = () => {
+    const trimmed = editNewDisciplineInput.trim();
+    if (!trimmed) return;
+    if (!editDisciplines.includes(trimmed)) {
+      setEditDisciplines((prev) => [...prev, trimmed]);
+    }
+    setEditNewDisciplineInput("");
+  };
+
+  const handleRemoveEditDiscipline = (disc: string) => {
+    setEditDisciplines((prev) => prev.filter((d) => d !== disc));
   };
 
   const handleSaveEdit = (e: React.FormEvent) => {
@@ -99,6 +121,7 @@ export function ClassList({
       classCode: editCode.trim().toUpperCase(),
       level: editLevel,
       category: editCategory,
+      disciplines: editDisciplines.length > 0 ? editDisciplines : [editCategory || "Général"],
       capacity: editCapacity,
       description: editDesc.trim(),
       teacherId: assignedTeacher?.id || editingClass.teacherId,
@@ -296,6 +319,34 @@ export function ClassList({
                     <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
                       {cls.description}
                     </p>
+
+                    {/* Disciplines / Matières badges */}
+                    {(() => {
+                      const discList =
+                        cls.disciplines && cls.disciplines.length > 0
+                          ? cls.disciplines
+                          : cls.category
+                          ? [cls.category]
+                          : [];
+                      if (discList.length === 0) return null;
+                      return (
+                        <div className="flex flex-wrap gap-1 pt-1">
+                          {discList.slice(0, 3).map((d) => (
+                            <span
+                              key={d}
+                              className="px-2 py-0.5 rounded-md bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-[10px] font-semibold"
+                            >
+                              📚 {d}
+                            </span>
+                          ))}
+                          {discList.length > 3 && (
+                            <span className="px-1.5 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-bold">
+                              +{discList.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Teacher info */}
@@ -516,6 +567,62 @@ export function ClassList({
                     onChange={(e) => setEditCapacity(parseInt(e.target.value) || 35)}
                     className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
                   />
+                </div>
+              </div>
+
+              {/* Disciplines de la classe */}
+              <div className="p-4 bg-slate-950/80 border border-slate-800 rounded-2xl space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-amber-300">
+                    📚 Disciplines & Matières enseignées ({editDisciplines.length})
+                  </label>
+                  <span className="text-[10px] text-slate-400">Programme pluri-disciplinaire</span>
+                </div>
+
+                {editDisciplines.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5 p-2 bg-slate-900 rounded-xl border border-slate-800">
+                    {editDisciplines.map((d) => (
+                      <span
+                        key={d}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600/30 border border-indigo-500/40 text-indigo-200 shadow-sm"
+                      >
+                        <span>{d}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveEditDiscipline(d)}
+                          className="text-indigo-400 hover:text-rose-400 transition-colors"
+                          title="Supprimer la discipline"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-amber-400 italic">Aucune discipline configurée.</p>
+                )}
+
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="text"
+                    placeholder="Ajouter une matière (ex: Mathématiques, Physique, Anglais...)"
+                    value={editNewDisciplineInput}
+                    onChange={(e) => setEditNewDisciplineInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddEditDiscipline();
+                      }
+                    }}
+                    className="flex-1 px-3 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddEditDiscipline}
+                    className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-xl text-xs font-semibold border border-amber-500/30 transition-colors"
+                  >
+                    + Ajouter
+                  </button>
                 </div>
               </div>
 

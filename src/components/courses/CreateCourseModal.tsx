@@ -16,10 +16,15 @@ export function CreateCourseModal({
   onClose,
   defaultClassId,
 }: CreateCourseModalProps) {
-  const { classes, createCourse } = useStore();
+  const { classes, createCourse, currentUser } = useStore();
   const { toast } = useToast();
 
   const [classeId, setClasseId] = useState(defaultClassId || (classes[0]?.id || ""));
+  const selectedClass = classes.find((c) => c.id === classeId);
+  const classDisciplines = selectedClass?.disciplines || (selectedClass?.category ? [selectedClass.category] : []);
+
+  const [discipline, setDiscipline] = useState(classDisciplines[0] || "Informatique");
+  const [customDiscipline, setCustomDiscipline] = useState("");
   const [chapterTitle, setChapterTitle] = useState("Module 1 : Fondations");
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
@@ -30,14 +35,30 @@ export function CreateCourseModal({
   );
   const [durationMinutes, setDurationMinutes] = useState(25);
 
+  React.useEffect(() => {
+    if (selectedClass) {
+      const discs = selectedClass.disciplines || (selectedClass.category ? [selectedClass.category] : []);
+      if (discs.length > 0 && !discs.includes(discipline)) {
+        setDiscipline(discs[0]);
+      }
+    }
+  }, [classeId, selectedClass]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !classeId) return;
 
+    const finalDiscipline =
+      discipline === "CUSTOM"
+        ? customDiscipline.trim() || "Général"
+        : discipline || (classDisciplines[0] || "Général");
+
     createCourse({
       classeId,
+      discipline: finalDiscipline,
+      teacherName: currentUser.name || selectedClass?.teacherName,
       chapterTitle,
       title,
       summary,
@@ -60,13 +81,14 @@ export function CreateCourseModal({
 
     toast.success(
       "Enregistrement effectué avec succès",
-      `Le cours « ${title} » a été publié avec succès.`
+      `Le cours « ${title} » (${finalDiscipline}) a été publié avec succès.`
     );
 
     onClose();
     setTitle("");
     setSummary("");
     setContent("");
+    setCustomDiscipline("");
   };
 
   return (
@@ -80,7 +102,7 @@ export function CreateCourseModal({
             </div>
             <div>
               <h3 className="text-base font-bold text-white">Publier un Nouveau Cours / Vidéo</h3>
-              <p className="text-xs text-slate-400">Structurez votre leçon et attachez des ressources</p>
+              <p className="text-xs text-slate-400">Structurez votre leçon, assignez la matière et attachez des ressources</p>
             </div>
           </div>
           <button
@@ -93,7 +115,7 @@ export function CreateCourseModal({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">
                 Classe de destination *
@@ -101,13 +123,31 @@ export function CreateCourseModal({
               <select
                 value={classeId}
                 onChange={(e) => setClasseId(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-3 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"
               >
                 {classes.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.title}
+                    {c.title} ({c.classCode})
                   </option>
                 ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
+                Discipline / Matière *
+              </label>
+              <select
+                value={discipline}
+                onChange={(e) => setDiscipline(e.target.value)}
+                className="w-full px-3 py-2 text-xs bg-slate-900/80 border border-indigo-500/40 rounded-xl text-indigo-200 font-semibold focus:outline-none focus:border-indigo-500 cursor-pointer"
+              >
+                {classDisciplines.map((d) => (
+                  <option key={d} value={d}>
+                    📚 {d}
+                  </option>
+                ))}
+                <option value="CUSTOM">➕ Autre matière...</option>
               </select>
             </div>
 
@@ -117,13 +157,29 @@ export function CreateCourseModal({
               </label>
               <input
                 type="text"
-                placeholder="ex: Module 2 : Authentification & Sécurité"
+                placeholder="ex: Chapitre 2 : Lois de Newton"
                 value={chapterTitle}
                 onChange={(e) => setChapterTitle(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-3 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"
               />
             </div>
           </div>
+
+          {discipline === "CUSTOM" && (
+            <div className="p-3 bg-indigo-950/30 border border-indigo-500/30 rounded-xl animate-fadeIn">
+              <label className="block text-[11px] font-semibold text-indigo-300 mb-1">
+                Nom de la matière personnalisée *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="Ex: Électronique Numérique, Droit Commercial..."
+                value={customDiscipline}
+                onChange={(e) => setCustomDiscipline(e.target.value)}
+                className="w-full px-3 py-1.5 text-xs bg-slate-900 border border-indigo-500/40 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400"
+              />
+            </div>
+          )}
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1">
@@ -132,7 +188,7 @@ export function CreateCourseModal({
             <input
               type="text"
               required
-              placeholder="ex: 1. Gestion des Sessions avec NextAuth & Supabase"
+              placeholder="ex: 1. Application des Dérivées et Étude de Fonctions"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-3.5 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"

@@ -31,6 +31,12 @@ export function CreateClassModal({
   const [level, setLevel] = useState("Intermédiaire");
   const [category, setCategory] = useState("Informatique");
   const [customCategory, setCustomCategory] = useState("");
+  const [disciplines, setDisciplines] = useState<string[]>([
+    "Mathématiques",
+    "Physique-Chimie",
+    "Informatique",
+  ]);
+  const [customDisciplineInput, setCustomDisciplineInput] = useState("");
   const [capacity, setCapacity] = useState(30);
   const [enrollmentMode, setEnrollmentMode] = useState<EnrollmentMode>("OPEN");
   const [coverImage, setCoverImage] = useState(
@@ -48,6 +54,47 @@ export function CreateClassModal({
     "Droit & Sciences Juridiques",
     "Santé & Médecine",
   ];
+
+  const commonDisciplinesList = [
+    "Mathématiques",
+    "Physique-Chimie",
+    "SVT",
+    "Informatique & Algorithmique",
+    "Français / Lettres",
+    "Anglais",
+    "Philosophie",
+    "Histoire-Géographie",
+    "Économie & Gestion",
+    "Comptabilité",
+    "Droit",
+    "Arabe",
+    "Espagnol",
+    "Allemand",
+    "Éducation Civique",
+    "Éducation Physique & Sportive",
+    "Arts & Musique",
+  ];
+
+  const handleToggleDiscipline = (disc: string) => {
+    if (disciplines.includes(disc)) {
+      setDisciplines((prev) => prev.filter((d) => d !== disc));
+    } else {
+      setDisciplines((prev) => [...prev, disc]);
+    }
+  };
+
+  const handleAddCustomDiscipline = () => {
+    const trimmed = customDisciplineInput.trim();
+    if (!trimmed) return;
+    if (!disciplines.includes(trimmed)) {
+      setDisciplines((prev) => [...prev, trimmed]);
+    }
+    setCustomDisciplineInput("");
+  };
+
+  const handleRemoveDiscipline = (disc: string) => {
+    setDisciplines((prev) => prev.filter((d) => d !== disc));
+  };
 
   const availableCategories = Array.from(
     new Set([
@@ -119,6 +166,9 @@ export function CreateClassModal({
         ? customCategory.trim() || "Général"
         : category;
 
+    const finalDisciplines =
+      disciplines.length > 0 ? disciplines : [finalCategory];
+
     const generatedCode =
       classCode.trim().toUpperCase() ||
       `AF-${finalCategory.substring(0, 3).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
@@ -131,6 +181,7 @@ export function CreateClassModal({
       description,
       level,
       category: finalCategory,
+      disciplines: finalDisciplines,
       capacity,
       enrollmentMode,
       status: "ACTIVE",
@@ -139,7 +190,7 @@ export function CreateClassModal({
 
     toast.success(
       "Enregistrement effectué avec succès",
-      `La classe « ${title} » (${generatedCode}) a été créée pour « ${targetEtabName} » et activée.`
+      `La classe « ${title} » (${generatedCode}) avec ${finalDisciplines.length} discipline(s) a été créée pour « ${targetEtabName} » et activée.`
     );
 
     onClose();
@@ -149,6 +200,7 @@ export function CreateClassModal({
     setDescription("");
     setCustomEtabName("");
     setCustomCategory("");
+    setCustomDisciplineInput("");
   };
 
   return (
@@ -328,6 +380,100 @@ export function CreateClassModal({
                   />
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Section: Disciplines / Matières enseignées dans cette classe */}
+          <div className="p-4 bg-slate-900/60 border border-indigo-500/20 rounded-2xl space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="block text-xs font-bold text-white">
+                  📚 Disciplines & Matières enseignées ({disciplines.length})
+                </label>
+                <p className="text-[11px] text-slate-400">
+                  Sélectionnez les matières enseignées dans cette promotion ou ajoutez-en sur mesure.
+                </p>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">
+                Pluri-disciplinaire
+              </span>
+            </div>
+
+            {/* Selected Disciplines Badges */}
+            {disciplines.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5 p-2 bg-slate-950/50 rounded-xl border border-slate-800 min-h-[42px] items-center">
+                {disciplines.map((d) => (
+                  <span
+                    key={d}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600/30 border border-indigo-500/40 text-indigo-200 shadow-sm animate-fadeIn"
+                  >
+                    <span>{d}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveDiscipline(d)}
+                      className="text-indigo-400 hover:text-rose-400 transition-colors"
+                      title="Supprimer la matière"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-amber-400/90 italic p-2 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                ⚠️ Aucune discipline sélectionnée pour le moment. La classe doit comporter au moins 1 discipline.
+              </div>
+            )}
+
+            {/* Quick add suggestions */}
+            <div>
+              <span className="block text-[11px] font-medium text-slate-400 mb-1.5">
+                Suggestions rapides (cliquez pour ajouter / retirer) :
+              </span>
+              <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
+                {commonDisciplinesList.map((item) => {
+                  const isSelected = disciplines.includes(item);
+                  return (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => handleToggleDiscipline(item)}
+                      className={`text-[11px] px-2.5 py-1 rounded-lg font-medium transition-all ${
+                        isSelected
+                          ? "bg-indigo-600 text-white font-semibold border border-indigo-400 shadow-sm"
+                          : "bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 hover:text-white"
+                      }`}
+                    >
+                      {isSelected ? "✓ " : "+ "}
+                      {item}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Custom discipline input */}
+            <div className="flex items-center gap-2 pt-1">
+              <input
+                type="text"
+                placeholder="Ajouter une autre matière (ex: Génie Logiciel, Droit Fiscal...)"
+                value={customDisciplineInput}
+                onChange={(e) => setCustomDisciplineInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddCustomDiscipline();
+                  }
+                }}
+                className="flex-1 px-3 py-1.5 text-xs bg-slate-950 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400"
+              />
+              <button
+                type="button"
+                onClick={handleAddCustomDiscipline}
+                className="px-3 py-1.5 bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white rounded-xl text-xs font-semibold border border-slate-700 transition-colors"
+              >
+                + Ajouter
+              </button>
             </div>
           </div>
 
