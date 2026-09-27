@@ -373,9 +373,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     async function syncFromSupabase() {
       if (!isSupabaseConfigured()) return;
       try {
-        const [etabsRes, classesRes] = await Promise.all([
+        const [etabsRes, classesRes, coursesRes] = await Promise.all([
           supabase.from("etablissements").select("*"),
           supabase.from("classes").select("*"),
+          supabase.from("courses").select("*"),
         ]);
 
         if (etabsRes.data && etabsRes.data.length > 0) {
@@ -394,6 +395,37 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             const map = new Map<string, Classe>();
             prev.forEach((c) => map.set(c.id, c));
             fetchedClasses.forEach((c) => map.set(c.id, c));
+            return Array.from(map.values());
+          });
+        }
+
+        if (coursesRes.data && coursesRes.data.length > 0) {
+          const fetchedCourses: Cours[] = coursesRes.data.map((row: any) => ({
+            id: row.id,
+            classeId: row.classe_id || row.classeId,
+            chapterTitle: row.chapter_title || row.chapterTitle,
+            title: row.title,
+            summary: row.summary || "",
+            content: row.content || "",
+            order: row.order || 0,
+            status: row.status || "PUBLISHED",
+            discipline: row.discipline || "",
+            teacherName: row.teacher_name || row.teacherName || "",
+            pdfUrl: row.pdf_url || row.pdfUrl || "",
+            pdfName: row.pdf_name || row.pdfName || "",
+            video: row.video,
+            resources: Array.isArray(row.resources)
+              ? row.resources
+              : (typeof row.resources === "string" && row.resources.startsWith("[")
+                  ? JSON.parse(row.resources)
+                  : []),
+            publishedAt: row.published_at || row.publishedAt || new Date().toISOString(),
+          }));
+
+          setCourses((prev) => {
+            const map = new Map<string, Cours>();
+            prev.forEach((c) => map.set(c.id, c));
+            fetchedCourses.forEach((c) => map.set(c.id, c));
             return Array.from(map.values());
           });
         }
@@ -1238,14 +1270,64 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           : c
       )
     );
+
+    if (isSupabaseConfigured()) {
+      supabase
+        .from("courses")
+        .upsert({
+          id: newCourse.id,
+          classe_id: newCourse.classeId,
+          chapter_title: newCourse.chapterTitle || "",
+          title: newCourse.title,
+          summary: newCourse.summary || "",
+          content: newCourse.content || "",
+          order: newCourse.order,
+          status: newCourse.status || "PUBLISHED",
+          discipline: newCourse.discipline || "",
+          teacher_name: newCourse.teacherName || "",
+          pdf_url: newCourse.pdfUrl || "",
+          pdf_name: newCourse.pdfName || "",
+          resources: newCourse.resources || [],
+          published_at: newCourse.publishedAt,
+        })
+        .then();
+    }
   };
 
   const updateCourse = (id: string, data: Partial<Cours>) => {
-    setCourses((prev) => prev.map((crs) => (crs.id === id ? { ...crs, ...data } : crs)));
+    setCourses((prev) => {
+      const next = prev.map((crs) => (crs.id === id ? { ...crs, ...data } : crs));
+      const target = next.find((crs) => crs.id === id);
+      if (target && isSupabaseConfigured()) {
+        supabase
+          .from("courses")
+          .upsert({
+            id: target.id,
+            classe_id: target.classeId,
+            chapter_title: target.chapterTitle || "",
+            title: target.title,
+            summary: target.summary || "",
+            content: target.content || "",
+            order: target.order,
+            status: target.status || "PUBLISHED",
+            discipline: target.discipline || "",
+            teacher_name: target.teacherName || "",
+            pdf_url: target.pdfUrl || "",
+            pdf_name: target.pdfName || "",
+            resources: target.resources || [],
+            published_at: target.publishedAt,
+          })
+          .then();
+      }
+      return next;
+    });
   };
 
   const deleteCourse = (id: string) => {
     setCourses((prev) => prev.filter((crs) => crs.id !== id));
+    if (isSupabaseConfigured()) {
+      supabase.from("courses").delete().eq("id", id).then();
+    }
   };
 
   // Assignments

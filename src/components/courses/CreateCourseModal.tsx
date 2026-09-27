@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useStore } from "@/lib/store";
 import { useToast } from "@/lib/toast-context";
-import { X, Video, BookOpen, Plus, FileText } from "lucide-react";
+import { X, Video, BookOpen, Plus, FileText, FileUp, Trash2, CheckCircle2, File, Link2 } from "lucide-react";
 
 interface CreateCourseModalProps {
   isOpen: boolean;
@@ -18,6 +18,7 @@ export function CreateCourseModal({
 }: CreateCourseModalProps) {
   const { classes, createCourse, currentUser } = useStore();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [classeId, setClasseId] = useState(defaultClassId || (classes[0]?.id || ""));
   const selectedClass = classes.find((c) => c.id === classeId);
@@ -30,10 +31,13 @@ export function CreateCourseModal({
   const [summary, setSummary] = useState("");
   const [content, setContent] = useState("");
   const [videoTitle, setVideoTitle] = useState("");
-  const [streamUrl, setStreamUrl] = useState(
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-  );
+  const [streamUrl, setStreamUrl] = useState("");
   const [durationMinutes, setDurationMinutes] = useState(25);
+
+  // PDF Support states
+  const [pdfFile, setPdfFile] = useState<{ name: string; url: string; size: string } | null>(null);
+  const [pdfUrlInput, setPdfUrlInput] = useState("");
+  const [pdfInputMode, setPdfInputMode] = useState<"UPLOAD" | "LINK">("UPLOAD");
 
   React.useEffect(() => {
     if (selectedClass) {
@@ -46,6 +50,41 @@ export function CreateCourseModal({
 
   if (!isOpen) return null;
 
+  const handlePdfUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+      toast.error("Format invalide", "Veuillez sélectionner un document au format PDF (.pdf).");
+      return;
+    }
+
+    const sizeStr =
+      file.size > 1024 * 1024
+        ? `${(file.size / (1024 * 1024)).toFixed(1)} Mo`
+        : `${Math.round(file.size / 1024)} Ko`;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      setPdfFile({
+        name: file.name,
+        url: dataUrl,
+        size: sizeStr,
+      });
+      toast.success("Document PDF chargé", `« ${file.name} » (${sizeStr}) est prêt.`);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePdf = () => {
+    setPdfFile(null);
+    setPdfUrlInput("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !classeId) return;
@@ -54,6 +93,16 @@ export function CreateCourseModal({
       discipline === "CUSTOM"
         ? customDiscipline.trim() || "Général"
         : discipline || (classDisciplines[0] || "Général");
+
+    const effectivePdf =
+      pdfFile ||
+      (pdfUrlInput.trim()
+        ? {
+            name: pdfUrlInput.split("/").pop()?.split("?")[0] || "Support_de_cours.pdf",
+            url: pdfUrlInput.trim(),
+            size: "PDF Web",
+          }
+        : null);
 
     createCourse({
       classeId,
@@ -65,23 +114,31 @@ export function CreateCourseModal({
       content,
       order: Date.now(),
       status: "PUBLISHED",
-      video: streamUrl
+      pdfUrl: effectivePdf?.url,
+      pdfName: effectivePdf?.name,
+      video: streamUrl.trim()
         ? {
             id: `vid_${Date.now()}`,
             title: videoTitle || title,
-            streamUrl,
+            streamUrl: streamUrl.trim(),
             durationMinutes: durationMinutes || 20,
             status: "READY",
           }
         : undefined,
-      resources: [
-        { name: "Support_de_cours.pdf", url: "#", size: "1.8 Mo" },
-      ],
+      resources: effectivePdf
+        ? [
+            {
+              name: effectivePdf.name,
+              url: effectivePdf.url,
+              size: effectivePdf.size,
+            },
+          ]
+        : [],
     });
 
     toast.success(
       "Enregistrement effectué avec succès",
-      `Le cours « ${title} » (${finalDiscipline}) a été publié avec succès.`
+      `Le cours « ${title} » ${effectivePdf ? "avec support PDF" : ""} a été publié avec succès.`
     );
 
     onClose();
@@ -89,6 +146,9 @@ export function CreateCourseModal({
     setSummary("");
     setContent("");
     setCustomDiscipline("");
+    setStreamUrl("");
+    setPdfFile(null);
+    setPdfUrlInput("");
   };
 
   return (
@@ -208,11 +268,126 @@ export function CreateCourseModal({
             />
           </div>
 
+          {/* PDF Document Insertion Section */}
+          <div className="p-4 rounded-xl bg-slate-900/80 border border-rose-500/30 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold text-xs">
+                  PDF
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-rose-300 flex items-center gap-1.5">
+                    📄 Support de Cours & Polycopié PDF
+                  </h4>
+                  <p className="text-[10px] text-slate-400">
+                    Insérez le document PDF du cours pour lecture directe ou téléchargement par les élèves
+                  </p>
+                </div>
+              </div>
+
+              {/* Mode switch */}
+              <div className="flex items-center bg-slate-950 p-0.5 rounded-lg border border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setPdfInputMode("UPLOAD")}
+                  className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition-all flex items-center gap-1 ${
+                    pdfInputMode === "UPLOAD"
+                      ? "bg-rose-600 text-white shadow-sm"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <FileUp className="w-3 h-3" />
+                  <span>Fichier local</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPdfInputMode("LINK")}
+                  className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition-all flex items-center gap-1 ${
+                    pdfInputMode === "LINK"
+                      ? "bg-rose-600 text-white shadow-sm"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <Link2 className="w-3 h-3" />
+                  <span>Lien URL / Drive</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Mode 1: File Upload */}
+            {pdfInputMode === "UPLOAD" && (
+              <div className="space-y-2">
+                {!pdfFile ? (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-4 border-2 border-dashed border-rose-500/30 hover:border-rose-400/60 bg-rose-500/5 hover:bg-rose-500/10 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all group"
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,application/pdf"
+                      onChange={handlePdfUpload}
+                      className="hidden"
+                    />
+                    <FileUp className="w-7 h-7 text-rose-400 group-hover:scale-110 transition-transform mb-1" />
+                    <p className="text-xs font-semibold text-slate-200">
+                      Cliquez pour choisir un fichier <strong className="text-rose-400">PDF</strong>
+                    </p>
+                    <p className="text-[10px] text-slate-500 mt-0.5">
+                      Supporte les cours complets, diaporamas, fiches d'exercices ou TD (.pdf)
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-3 bg-slate-950 border border-emerald-500/30 rounded-xl flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                        <CheckCircle2 className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-white line-clamp-1">{pdfFile.name}</p>
+                        <span className="text-[10px] text-emerald-400 font-mono font-semibold">
+                          {pdfFile.size} • Prêt pour publication
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemovePdf}
+                      className="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 transition-colors"
+                      title="Supprimer ce PDF"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Mode 2: Link */}
+            {pdfInputMode === "LINK" && (
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-semibold text-slate-300">
+                  Lien Web direct vers le document PDF (Google Drive, Dropbox, Cloud) :
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://monsite.com/cours/mathematiques-ch1.pdf ou lien Google Drive..."
+                  value={pdfUrlInput}
+                  onChange={(e) => setPdfUrlInput(e.target.value)}
+                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-rose-500/40 rounded-lg text-white font-mono placeholder-slate-500 focus:outline-none focus:border-rose-400"
+                />
+                <p className="text-[10px] text-slate-500">
+                  💡 Pour Google Drive : assurez-vous que le lien de partage est configuré sur <em>« Tous les utilisateurs disposant du lien »</em>.
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Video integration section */}
           <div className="p-4 rounded-xl bg-slate-900/70 border border-purple-500/30 space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-bold text-purple-300 flex items-center gap-1.5">
-                <Video className="w-3.5 h-3.5 text-purple-400" /> Support Vidéo : Liens YouTube / Vimeo / MP4
+                <Video className="w-3.5 h-3.5 text-purple-400" /> Support Vidéo Optionnel : Liens YouTube / Vimeo / MP4
               </h4>
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 0 Mo sur la base de données
@@ -222,7 +397,7 @@ export function CreateCourseModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] text-slate-300 font-semibold mb-1">
-                  Lien Vidéo YouTube ou Stream
+                  Lien Vidéo YouTube ou Stream (Optionnel)
                 </label>
                 <input
                   type="url"

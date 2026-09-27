@@ -119,6 +119,8 @@ export interface Cours {
   order: number;
   status: CourseStatus;
   video?: VideoData;
+  pdfUrl?: string; // URL ou Data-URI du document PDF
+  pdfName?: string; // Nom du fichier PDF
   resources?: { name: string; url: string; size?: string }[];
   publishedAt: string;
 }

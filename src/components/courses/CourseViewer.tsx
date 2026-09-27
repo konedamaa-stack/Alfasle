@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useStore } from "@/lib/store";
 import { Cours } from "@/types";
 import {
@@ -18,6 +18,10 @@ import {
   Edit,
   Trash2,
   X,
+  ExternalLink,
+  FileUp,
+  File,
+  Eye,
 } from "lucide-react";
 import { getVideoEmbedInfo } from "@/lib/utils";
 import { ConfirmModal, ConfirmVariant } from "@/components/common/ConfirmModal";
@@ -62,22 +66,31 @@ export function CourseViewer({
     currentUser.role === "ADMIN" ||
     currentUser.role === "SUPER_ADMIN";
 
+  // Media Tab state ("VIDEO" or "PDF")
+  const [activeMediaTab, setActiveMediaTab] = useState<"AUTO" | "VIDEO" | "PDF">("AUTO");
+
   // Course Edit State
   const [isEditCourseOpen, setIsEditCourseOpen] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editChapterTitle, setEditChapterTitle] = useState("");
+  const [editDiscipline, setEditDiscipline] = useState("");
   const [editSummary, setEditSummary] = useState("");
   const [editContent, setEditContent] = useState("");
   const [editVideoUrl, setEditVideoUrl] = useState("");
   const [editVideoDuration, setEditVideoDuration] = useState<number>(15);
+  const [editPdfUrl, setEditPdfUrl] = useState("");
+  const [editPdfName, setEditPdfName] = useState("");
 
   const handleOpenEdit = (course: Cours) => {
     setEditTitle(course.title);
     setEditChapterTitle(course.chapterTitle || "Chapitre");
+    setEditDiscipline(course.discipline || "");
     setEditSummary(course.summary || "");
     setEditContent(course.content || "");
     setEditVideoUrl(course.video?.streamUrl || "");
     setEditVideoDuration(course.video?.durationMinutes || 15);
+    setEditPdfUrl(course.pdfUrl || course.resources?.[0]?.url || "");
+    setEditPdfName(course.pdfName || course.resources?.[0]?.name || "");
     setIsEditCourseOpen(true);
   };
 
@@ -85,11 +98,20 @@ export function CourseViewer({
     e.preventDefault();
     if (!activeCourse) return;
 
+    const updatedPdfUrl = editPdfUrl.trim();
+    const updatedPdfName = editPdfName.trim() || "Support_de_cours.pdf";
+
     updateCourse(activeCourse.id, {
       title: editTitle.trim(),
       chapterTitle: editChapterTitle.trim(),
+      discipline: editDiscipline.trim() || activeCourse.discipline,
       summary: editSummary.trim(),
       content: editContent.trim(),
+      pdfUrl: updatedPdfUrl || undefined,
+      pdfName: updatedPdfUrl ? updatedPdfName : undefined,
+      resources: updatedPdfUrl
+        ? [{ name: updatedPdfName, url: updatedPdfUrl, size: "PDF Document" }]
+        : [],
       video: editVideoUrl.trim()
         ? {
             id: activeCourse.video?.id || `vid_${Date.now()}`,
@@ -206,32 +228,137 @@ export function CourseViewer({
           <div className="lg:col-span-8 space-y-6">
             {activeCourse && (
               <div className="glass-panel rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
-                {/* Video Player Section with YouTube / Vimeo / MP4 support */}
-                {activeCourse.video && activeCourse.video.streamUrl && (
-                  <div className="relative bg-slate-950 aspect-video w-full border-b border-slate-800 flex items-center justify-center overflow-hidden">
-                    {(() => {
-                      const videoInfo = getVideoEmbedInfo(activeCourse.video.streamUrl);
-                      if (videoInfo.isIframe) {
-                        return (
+                {/* Media Switcher Header if course has both Video and PDF */}
+                {(() => {
+                  const hasVideo = Boolean(activeCourse.video?.streamUrl);
+                  const hasPdf = Boolean(activeCourse.pdfUrl || (activeCourse.resources && activeCourse.resources.length > 0));
+                  const effectivePdfUrl = activeCourse.pdfUrl || activeCourse.resources?.[0]?.url;
+                  const effectivePdfName = activeCourse.pdfName || activeCourse.resources?.[0]?.name || "Document_du_cours.pdf";
+
+                  const currentTab =
+                    activeMediaTab === "AUTO"
+                      ? hasPdf && !hasVideo
+                        ? "PDF"
+                        : "VIDEO"
+                      : activeMediaTab;
+
+                  return (
+                    <div>
+                      {/* Media selector pills if both exist */}
+                      {hasVideo && hasPdf && (
+                        <div className="p-3 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setActiveMediaTab("VIDEO")}
+                              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                                currentTab === "VIDEO"
+                                  ? "bg-purple-600 text-white shadow-md shadow-purple-600/20"
+                                  : "bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700"
+                              }`}
+                            >
+                              <Video className="w-3.5 h-3.5 text-purple-300" />
+                              <span>Vidéo du Cours</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setActiveMediaTab("PDF")}
+                              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                                currentTab === "PDF"
+                                  ? "bg-rose-600 text-white shadow-md shadow-rose-600/20"
+                                  : "bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700"
+                              }`}
+                            >
+                              <FileText className="w-3.5 h-3.5 text-rose-300" />
+                              <span>Support PDF</span>
+                            </button>
+                          </div>
+                          {effectivePdfUrl && (
+                            <a
+                              href={effectivePdfUrl}
+                              download={effectivePdfName}
+                              className="px-3 py-1 rounded-xl bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">Télécharger PDF</span>
+                            </a>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Video Player Display */}
+                      {hasVideo && currentTab === "VIDEO" && activeCourse.video && (
+                        <div className="relative bg-slate-950 aspect-video w-full border-b border-slate-800 flex items-center justify-center overflow-hidden">
+                          {(() => {
+                            const videoInfo = getVideoEmbedInfo(activeCourse.video.streamUrl);
+                            if (videoInfo.isIframe) {
+                              return (
+                                <iframe
+                                  src={videoInfo.embedUrl}
+                                  title={activeCourse.title}
+                                  className="w-full h-full border-0"
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                  allowFullScreen
+                                />
+                              );
+                            }
+                            return (
+                              <video
+                                controls
+                                src={activeCourse.video.streamUrl}
+                                className="w-full h-full object-contain"
+                              />
+                            );
+                          })()}
+                        </div>
+                      )}
+
+                      {/* Interactive PDF Viewer Display */}
+                      {hasPdf && (currentTab === "PDF" || !hasVideo) && effectivePdfUrl && (
+                        <div className="relative bg-slate-950 w-full border-b border-slate-800 flex flex-col">
+                          {/* Top PDF Controls Toolbar */}
+                          <div className="p-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                              <span className="px-2 py-0.5 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold text-xs">
+                                PDF
+                              </span>
+                              <span className="text-xs font-bold text-white truncate max-w-[220px] sm:max-w-md">
+                                {effectivePdfName}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <a
+                                href={effectivePdfUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                                title="Ouvrir dans un nouvel onglet"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                                <span className="hidden sm:inline">Plein écran</span>
+                              </a>
+                              <a
+                                href={effectivePdfUrl}
+                                download={effectivePdfName}
+                                className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
+                              >
+                                <Download className="w-3.5 h-3.5" />
+                                <span>Télécharger</span>
+                              </a>
+                            </div>
+                          </div>
+
+                          {/* PDF Embedded Frame */}
                           <iframe
-                            src={videoInfo.embedUrl}
-                            title={activeCourse.title}
-                            className="w-full h-full border-0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            allowFullScreen
+                            src={effectivePdfUrl}
+                            title={effectivePdfName}
+                            className="w-full h-[580px] sm:h-[680px] bg-slate-900 border-0"
                           />
-                        );
-                      }
-                      return (
-                        <video
-                          controls
-                          src={activeCourse.video.streamUrl}
-                          className="w-full h-full object-contain"
-                        />
-                      );
-                    })()}
-                  </div>
-                )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Course Header Details */}
                 <div className="p-6 sm:p-8 space-y-6">
@@ -498,7 +625,7 @@ export function CourseViewer({
 
               <div>
                 <label className="block text-slate-300 font-semibold mb-1">
-                  Lien Vidéo (Lien YouTube, Vimeo, MP4 ou WebM)
+                  Lien Vidéo (Lien YouTube, Vimeo, MP4 ou WebM - Optionnel)
                 </label>
                 <input
                   type="url"
@@ -508,8 +635,31 @@ export function CourseViewer({
                   className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-purple-300 font-mono focus:outline-none focus:border-purple-500"
                 />
                 <p className="text-[10px] text-slate-400 mt-1">
-                  💡 Collez simplement le lien de votre vidéo YouTube. Votre base de données reste ultra-légère.
+                  💡 Collez le lien YouTube ou vidéo en streaming.
                 </p>
+              </div>
+
+              {/* PDF Support Editor */}
+              <div className="p-3.5 bg-slate-950/80 border border-rose-500/30 rounded-xl space-y-2">
+                <label className="block text-rose-300 font-bold">
+                  📄 Document & Support PDF (URL Web ou Google Drive)
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    placeholder="Nom du fichier (ex: Cours_Complet.pdf)"
+                    value={editPdfName}
+                    onChange={(e) => setEditPdfName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-rose-400"
+                  />
+                  <input
+                    type="url"
+                    placeholder="URL du PDF (ex: https://.../cours.pdf)"
+                    value={editPdfUrl}
+                    onChange={(e) => setEditPdfUrl(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-rose-300 font-mono focus:outline-none focus:border-rose-400"
+                  />
+                </div>
               </div>
 
               <div>
