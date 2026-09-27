@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { SchoolSubdomainPortal } from "@/components/auth/SchoolSubdomainPortal";
 import { JoinClassModal } from "@/components/classes/JoinClassModal";
-import { School, ArrowLeft } from "lucide-react";
-
+import { School, ArrowLeft, Loader2 } from "lucide-react";
 import { MainAppLayout } from "@/components/layout/MainAppLayout";
+import { supabase, isSupabaseConfigured, mapRowToEtablissement } from "@/lib/supabase";
+import { Etablissement } from "@/types";
 
 export default function SubdomainSchoolPage() {
   const params = useParams();
@@ -20,31 +21,52 @@ export default function SubdomainSchoolPage() {
     return false;
   });
   const [isJoinClassOpen, setIsJoinClassOpen] = useState(false);
-
-  const handleLoginSuccess = () => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("alfasle_session_active", "true");
-    }
-    setIsAuthenticated(true);
-  };
-
-  const handleLogout = () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("alfasle_session_active");
-      localStorage.removeItem("alfasle_active_tab");
-    }
-    setIsAuthenticated(false);
-  };
+  const [cloudEtab, setCloudEtab] = useState<Etablissement | null>(null);
+  const [isCheckingCloud, setIsCheckingCloud] = useState(true);
 
   const subdomain = (params?.subdomain as string) || "";
 
-  // Find establishment strictly by subdomain, id, or code
-  const targetEtab = etablissements.find(
+  // 1. Check in local store
+  const localEtab = etablissements.find(
     (e) =>
       e.subdomain?.toLowerCase() === subdomain.toLowerCase() ||
       e.id.toLowerCase() === subdomain.toLowerCase() ||
       e.code.toLowerCase() === subdomain.toLowerCase()
   );
+
+  // 2. If not found in local store, fetch directly from Supabase by subdomain
+  useEffect(() => {
+    if (localEtab) {
+      setIsCheckingCloud(false);
+      return;
+    }
+
+    async function fetchFromSupabase() {
+      if (!isSupabaseConfigured() || !subdomain) {
+        setIsCheckingCloud(false);
+        return;
+      }
+      try {
+        const { data, error } = await supabase
+          .from("etablissements")
+          .select("*")
+          .or(`subdomain.ilike.${subdomain},id.ilike.${subdomain},code.ilike.${subdomain}`)
+          .maybeSingle();
+
+        if (data && !error) {
+          setCloudEtab(mapRowToEtablissement(data));
+        }
+      } catch (err) {
+        console.warn("Error looking up school by subdomain:", err);
+      } finally {
+        setIsCheckingCloud(false);
+      }
+    }
+
+    fetchFromSupabase();
+  }, [subdomain, localEtab]);
+
+  const targetEtab = localEtab || cloudEtab;
 
   // If establishment does NOT exist, show a clean 404 error page
   if (!targetEtab) {
