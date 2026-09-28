@@ -85,6 +85,8 @@ export function Sidebar({
           },
           { id: "dashboard", label: "Vue Pédagogique", icon: <LayoutDashboard className="w-4 h-4" /> },
           { id: "inscriptions", label: "Inscriptions Globales", icon: <Users className="w-4 h-4" /> },
+          { id: "courses", label: "Tous les Cours", icon: <Video className="w-4 h-4" /> },
+          { id: "assignments", label: "Devoirs & Évaluations", icon: <FileCheck2 className="w-4 h-4" /> },
           { id: "analytics", label: "Métriques & Rapports", icon: <BarChart3 className="w-4 h-4" /> },
           { id: "settings", label: "Paramètres Multi-Tenant", icon: <Settings className="w-4 h-4" /> },
         ];
@@ -135,14 +137,15 @@ export function Sidebar({
           { id: "grades", label: "Bulletins & Notes", icon: <Award className="w-4 h-4" /> },
         ];
 
+      case "DIRECTEUR":
       case "ADMIN":
         return [
           {
             id: "dashboard",
             label: "Direction & Inscriptions",
-            icon: <School className="w-4 h-4 text-emerald-400" />,
+            icon: <School className="w-4 h-4 text-emerald-600" />,
             badge: currentUser.etablissementName ? currentUser.etablissementName.slice(0, 14) : "Campus",
-            badgeColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+            badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
           },
           { id: "classes", label: "Classes du Campus", icon: <FolderKanban className="w-4 h-4" /> },
           {
@@ -150,7 +153,7 @@ export function Sidebar({
             label: "Préinscriptions",
             icon: <UserCheck className="w-4 h-4" />,
             badge: pendingInscriptionsCount > 0 ? `${pendingInscriptionsCount} en attente` : null,
-            badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+            badgeColor: "bg-amber-50 text-amber-700 border-amber-200",
           },
           { id: "courses", label: "Cours & Formations", icon: <BookOpen className="w-4 h-4" /> },
           { id: "assignments", label: "Devoirs & Évaluations", icon: <FileCheck2 className="w-4 h-4" /> },

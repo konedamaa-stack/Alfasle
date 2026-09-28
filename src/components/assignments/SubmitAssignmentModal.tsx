@@ -99,22 +99,22 @@ export function SubmitAssignmentModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
-      <div className="w-full max-w-lg glass-panel rounded-2xl border border-slate-700 shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
+      <div className="w-full max-w-lg bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-800">
+        <div className="flex items-center justify-between p-5 border-b border-slate-200">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
               <FileCheck2 className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Rendre un Devoir</h3>
-              <p className="text-xs text-slate-400">{assignment.title}</p>
+              <h3 className="text-base font-bold text-slate-900">Rendre un Devoir</h3>
+              <p className="text-xs text-slate-500">{assignment.title}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -122,28 +122,28 @@ export function SubmitAssignmentModal({
 
         {submitted ? (
           <div className="p-8 text-center space-y-3">
-            <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto animate-bounce" />
-            <h4 className="text-base font-bold text-white">Devoir transmis au professeur !</h4>
-            <p className="text-xs text-slate-300">
+            <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto animate-bounce" />
+            <h4 className="text-base font-bold text-slate-900">Devoir transmis au professeur !</h4>
+            <p className="text-xs text-slate-600">
               Votre travail et fichier PDF ont bien été enregistrés. Vous recevrez une notification dès que la note sera
               publiée.
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-5 space-y-4">
-            <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs space-y-1">
-              <div className="flex justify-between text-slate-400">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
+              <div className="flex justify-between text-slate-600">
                 <span>Date limite :</span>
-                <span className="font-semibold text-amber-300">{formatDate(assignment.dueDate)}</span>
+                <span className="font-semibold text-amber-700">{formatDate(assignment.dueDate)}</span>
               </div>
-              <div className="flex justify-between text-slate-400">
+              <div className="flex justify-between text-slate-600">
                 <span>Barème :</span>
-                <span className="font-semibold text-slate-200">/{assignment.maxScore} points</span>
+                <span className="font-semibold text-slate-900">/{assignment.maxScore} points</span>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
                 Commentaires / Liens (ex: GitHub, Figma, explications) *
               </label>
               <textarea
@@ -152,15 +152,15 @@ export function SubmitAssignmentModal({
                 placeholder="Décrivez votre solution, ajoutez vos remarques ou explications pour le professeur..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
               />
             </div>
 
             {/* Interactive File Upload Area */}
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
                 <span>Fichier joint (Rapport PDF / Word / Archive)</span>
-                <span className="text-[10px] text-slate-400">Formats : PDF, DOCX, ZIP, PNG</span>
+                <span className="text-[10px] text-slate-500">Formats : PDF, DOCX, ZIP, PNG</span>
               </label>
 
               {/* Hidden file input */}
@@ -181,34 +181,34 @@ export function SubmitAssignmentModal({
                   onClick={() => fileInputRef.current?.click()}
                   className={`p-5 rounded-2xl border-2 border-dashed text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 ${
                     isDragging
-                      ? "border-emerald-400 bg-emerald-500/10 text-emerald-300"
-                      : "border-slate-700 hover:border-emerald-500/60 bg-slate-900/50 hover:bg-slate-900/80 text-slate-400 hover:text-slate-200"
+                      ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                      : "border-slate-300 hover:border-emerald-500 bg-slate-50 hover:bg-slate-100 text-slate-600"
                   }`}
                 >
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-sm">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-700 shadow-sm">
                     <Upload className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-white">
-                      Cliquez pour choisir votre fichier <span className="text-emerald-400">PDF</span>
+                    <p className="text-xs font-bold text-slate-900">
+                      Cliquez pour choisir votre fichier <span className="text-emerald-700">PDF</span>
                     </p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">
+                    <p className="text-[11px] text-slate-500 mt-0.5">
                       ou glissez-déposez votre document ici
                     </p>
                   </div>
                 </div>
               ) : (
                 /* Selected File Card */
-                <div className="p-3.5 rounded-2xl bg-slate-900 border border-emerald-500/40 flex items-center justify-between gap-3 shadow-md">
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-emerald-300 flex items-center justify-between gap-3 shadow-sm">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0 font-black text-xs">
+                    <div className="w-10 h-10 rounded-xl bg-rose-100 border border-rose-200 flex items-center justify-center text-rose-700 shrink-0 font-black text-xs">
                       PDF
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-white truncate">
+                      <p className="text-xs font-bold text-slate-900 truncate">
                         {attachmentName || selectedFile?.name}
                       </p>
-                      <p className="text-[11px] text-emerald-400 flex items-center gap-1 font-medium mt-0.5">
+                      <p className="text-[11px] text-emerald-700 flex items-center gap-1 font-medium mt-0.5">
                         <CheckCircle2 className="w-3 h-3" />
                         {fileSizeText || "Fichier prêt"} • Document prêt à être envoyé
                       </p>
@@ -219,7 +219,7 @@ export function SubmitAssignmentModal({
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold transition-colors"
+                      className="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-[11px] font-semibold transition-colors"
                       title="Changer de fichier"
                     >
                       Modifier
@@ -227,7 +227,7 @@ export function SubmitAssignmentModal({
                     <button
                       type="button"
                       onClick={handleRemoveFile}
-                      className="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 transition-colors"
+                      className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors"
                       title="Supprimer ce fichier"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -237,17 +237,17 @@ export function SubmitAssignmentModal({
               )}
             </div>
 
-            <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-3">
+            <div className="pt-3 border-t border-slate-200 flex items-center justify-end gap-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition-colors"
               >
                 Annuler
               </button>
               <button
                 type="submit"
-                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 flex items-center gap-1.5 transition-all transform hover:-translate-y-0.5"
+                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 flex items-center gap-1.5 transition-all transform hover:-translate-y-0.5"
               >
                 <Send className="w-3.5 h-3.5" />
                 Valider et Soumettre
