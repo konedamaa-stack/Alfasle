@@ -19,6 +19,7 @@ import {
   Check,
 } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
+import { triggerDownload } from "@/lib/download";
 
 interface GradingModalProps {
   submission: Soumission | null;
@@ -183,43 +184,77 @@ export function GradingModal({ submission, isOpen, onClose }: GradingModalProps)
                   {/* Actions directes pour le professeur */}
                   <div className="flex items-center gap-2 shrink-0">
                     {/* Bouton Visualiser / Ouvrir */}
-                    <a
-                      href={submission.attachmentUrl && submission.attachmentUrl !== "#" ? submission.attachmentUrl : "#"}
-                      target="_blank"
-                      rel="noreferrer"
-                      onClick={(e) => {
-                        if (!submission.attachmentUrl || submission.attachmentUrl === "#") {
-                          e.preventDefault();
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (
+                          submission.attachmentUrl &&
+                          submission.attachmentUrl !== "#" &&
+                          (submission.attachmentUrl.startsWith("data:") ||
+                            submission.attachmentUrl.startsWith("blob:") ||
+                            submission.attachmentUrl.startsWith("http"))
+                        ) {
+                          window.open(submission.attachmentUrl, "_blank");
+                        } else {
                           setShowIntegratedViewer((prev) => !prev);
                         }
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-sm transition-all"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-sm transition-all cursor-pointer"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       Visualiser la Copie
-                    </a>
+                    </button>
 
                     {/* Bouton Télécharger */}
-                    <a
-                      href={submission.attachmentUrl && submission.attachmentUrl !== "#" ? submission.attachmentUrl : "#"}
-                      download={submission.attachmentName}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs border border-slate-200 transition-colors"
-                      title="Télécharger sur votre ordinateur"
+                    <button
+                      type="button"
+                      onClick={() => {
+                        triggerDownload({
+                          url: submission.attachmentUrl,
+                          filename: submission.attachmentName || "copie_eleve.pdf",
+                          fallbackContent: submission.content,
+                          studentName: submission.studentName,
+                          assignmentTitle: submission.devoirTitle,
+                          classeTitle: submission.classeTitle,
+                          submittedAt: submission.submittedAt,
+                        });
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs border border-slate-200 transition-colors cursor-pointer"
+                      title="Télécharger la copie sur votre ordinateur"
                     >
                       <Download className="w-3.5 h-3.5 text-slate-600" />
                       Télécharger
-                    </a>
+                    </button>
                   </div>
                 </div>
               ) : (
-                <div className="p-3 bg-white rounded-xl border border-slate-200 text-xs text-slate-500 italic">
-                  Aucun fichier joint déposé. L&apos;élève a soumis sa réponse par écrit ci-dessous.
+                <div className="p-3 bg-white rounded-xl border border-slate-200 text-xs text-slate-500 italic flex items-center justify-between">
+                  <span>Aucun fichier joint déposé. L&apos;élève a soumis sa réponse par écrit ci-dessous.</span>
+                  {submission.content && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        triggerDownload({
+                          filename: `Copie_${submission.studentName.replace(/\s+/g, "_")}.txt`,
+                          fallbackContent: submission.content,
+                          studentName: submission.studentName,
+                          assignmentTitle: submission.devoirTitle,
+                          classeTitle: submission.classeTitle,
+                          submittedAt: submission.submittedAt,
+                        });
+                      }}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 transition-colors cursor-pointer shrink-0"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      Télécharger le texte
+                    </button>
+                  )}
                 </div>
               )}
 
               {/* In-Modal Document Viewer Preview (if toggled) */}
               {showIntegratedViewer && (
-                <div className="p-4 rounded-xl bg-white border border-indigo-200 space-y-2 shadow-inner">
+                <div className="p-4 rounded-xl bg-white border border-indigo-200 space-y-3 shadow-inner">
                   <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                     <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
                       <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
@@ -228,17 +263,37 @@ export function GradingModal({ submission, isOpen, onClose }: GradingModalProps)
                     <button
                       type="button"
                       onClick={() => setShowIntegratedViewer(false)}
-                      className="text-slate-400 hover:text-slate-700 text-xs"
+                      className="text-slate-400 hover:text-slate-700 text-xs font-medium cursor-pointer"
                     >
-                      Fermer l&apos;aperçu
+                      Fermer l&apos;aperçu ✕
                     </button>
                   </div>
-                  <div className="p-6 bg-slate-50 rounded-lg text-center space-y-2 border border-slate-200">
+                  <div className="p-5 bg-slate-50 rounded-xl text-center space-y-3 border border-slate-200">
                     <FileText className="w-10 h-10 text-indigo-500 mx-auto" />
-                    <p className="text-xs font-bold text-slate-800">{submission.attachmentName}</p>
-                    <p className="text-[11px] text-slate-500 max-w-md mx-auto">
-                      Document bureautique prêt pour consultation. Vous pouvez également cliquer sur « Télécharger » pour l&apos;ouvrir dans Word ou votre lecteur PDF favori.
-                    </p>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800">{submission.attachmentName}</p>
+                      <p className="text-[11px] text-slate-500 max-w-md mx-auto mt-0.5">
+                        Copie certifiée soumise par {submission.studentName}. Vous pouvez télécharger le document pour le conserver ou le corriger localement.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        triggerDownload({
+                          url: submission.attachmentUrl,
+                          filename: submission.attachmentName || "copie_eleve.pdf",
+                          fallbackContent: submission.content,
+                          studentName: submission.studentName,
+                          assignmentTitle: submission.devoirTitle,
+                          classeTitle: submission.classeTitle,
+                          submittedAt: submission.submittedAt,
+                        });
+                      }}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      Télécharger la Copie ({isWord ? "Word" : "PDF"})
+                    </button>
                   </div>
                 </div>
               )}

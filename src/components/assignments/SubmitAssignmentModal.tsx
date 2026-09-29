@@ -87,21 +87,46 @@ export function SubmitAssignmentModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const finalAttachment = attachmentName.trim() || (selectedFile ? selectedFile.name : "Devoir_Rendu.pdf");
-    let fileUrl = "#";
+    const finalAttachment =
+      attachmentName.trim() || (selectedFile ? selectedFile.name : "Devoir_Rendu.pdf");
+
+    const doSubmit = (fileUrl: string) => {
+      submitAssignment(assignment.id, content, finalAttachment, fileUrl);
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        onClose();
+        setContent("");
+        handleRemoveFile();
+      }, 1200);
+    };
+
     if (selectedFile) {
-      try {
-        fileUrl = URL.createObjectURL(selectedFile);
-      } catch (_) {}
+      if (selectedFile.size < 6 * 1024 * 1024) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          doSubmit((reader.result as string) || "#");
+        };
+        reader.onerror = () => {
+          let fallbackUrl = "#";
+          try {
+            fallbackUrl = URL.createObjectURL(selectedFile);
+          } catch (_) {}
+          doSubmit(fallbackUrl);
+        };
+        reader.readAsDataURL(selectedFile);
+        return;
+      } else {
+        let fallbackUrl = "#";
+        try {
+          fallbackUrl = URL.createObjectURL(selectedFile);
+        } catch (_) {}
+        doSubmit(fallbackUrl);
+        return;
+      }
     }
-    submitAssignment(assignment.id, content, finalAttachment, fileUrl);
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      onClose();
-      setContent("");
-      handleRemoveFile();
-    }, 1200);
+
+    doSubmit("#");
   };
 
   return (

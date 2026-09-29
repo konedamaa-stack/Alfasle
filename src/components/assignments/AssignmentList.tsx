@@ -20,6 +20,7 @@ import {
   Download,
 } from "lucide-react";
 import { formatDate, formatDateTime } from "@/lib/utils";
+import { triggerDownload } from "@/lib/download";
 import { GradingModal } from "./GradingModal";
 import { SubmitAssignmentModal } from "./SubmitAssignmentModal";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
@@ -246,13 +247,20 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
                           att.name.toLowerCase().endsWith(".doc") ||
                           att.name.toLowerCase().endsWith(".docx");
                         return (
-                          <a
+                          <button
                             key={idx}
-                            href={att.url}
-                            download={att.name}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-800 transition-colors shadow-sm group"
+                            type="button"
+                            onClick={() => {
+                              triggerDownload({
+                                url: att.url,
+                                filename: att.name,
+                                fallbackContent: assignment.instructions,
+                                assignmentTitle: assignment.title,
+                                classeTitle: assignmentClass?.title,
+                              });
+                            }}
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-800 transition-colors shadow-sm group cursor-pointer"
+                            title="Télécharger le document sujet"
                           >
                             <span
                               className={`px-1.5 py-0.5 rounded text-[10px] font-black ${
@@ -269,7 +277,8 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
                             <span className="text-[10px] text-slate-400 font-normal">
                               ({att.size})
                             </span>
-                          </a>
+                            <Download className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+                          </button>
                         );
                       })}
                     </div>
@@ -341,19 +350,25 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
                                   <span className="truncate max-w-[120px]" title={sub.attachmentName}>
                                     {sub.attachmentName}
                                   </span>
-                                  {sub.attachmentUrl && sub.attachmentUrl !== "#" && (
-                                    <a
-                                      href={sub.attachmentUrl}
-                                      download={sub.attachmentName}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="text-indigo-600 hover:text-indigo-800 p-0.5"
-                                      title="Télécharger la copie de l'élève"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      <Download className="w-3.5 h-3.5" />
-                                    </a>
-                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      triggerDownload({
+                                        url: sub.attachmentUrl,
+                                        filename: sub.attachmentName || "copie_eleve.pdf",
+                                        fallbackContent: sub.content,
+                                        studentName: sub.studentName,
+                                        assignmentTitle: assignment.title,
+                                        classeTitle: assignmentClass?.title,
+                                        submittedAt: sub.submittedAt,
+                                      });
+                                    }}
+                                    className="text-indigo-600 hover:text-indigo-800 p-0.5 cursor-pointer transition-colors"
+                                    title="Télécharger la copie de l'élève"
+                                  >
+                                    <Download className="w-3.5 h-3.5" />
+                                  </button>
                                 </div>
                               )}
                               {sub.status === "GRADED" ? (

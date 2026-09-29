@@ -55,10 +55,24 @@ export function CreateAssignmentModal({
     } else {
       setFileSizeText(`${(file.size / 1024).toFixed(0)} Ko`);
     }
-    try {
-      const url = URL.createObjectURL(file);
-      setFileUrl(url);
-    } catch (_) {}
+
+    if (file.size < 6 * 1024 * 1024) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setFileUrl((reader.result as string) || "");
+      };
+      reader.onerror = () => {
+        try {
+          setFileUrl(URL.createObjectURL(file));
+        } catch (_) {}
+      };
+      reader.readAsDataURL(file);
+    } else {
+      try {
+        const url = URL.createObjectURL(file);
+        setFileUrl(url);
+      } catch (_) {}
+    }
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

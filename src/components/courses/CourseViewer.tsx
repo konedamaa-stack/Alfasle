@@ -24,6 +24,7 @@ import {
   Eye,
 } from "lucide-react";
 import { getVideoEmbedInfo, getPdfEmbedInfo } from "@/lib/utils";
+import { triggerDownload } from "@/lib/download";
 import { ConfirmModal, ConfirmVariant } from "@/components/common/ConfirmModal";
 
 interface CourseViewerProps {
@@ -277,16 +278,21 @@ export function CourseViewer({
                             </button>
                           </div>
                           {downloadPdfUrl && (
-                            <a
-                              href={downloadPdfUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              download={effectivePdfName}
-                              className="px-3 py-1 rounded-xl bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                            <button
+                              type="button"
+                              onClick={() => {
+                                triggerDownload({
+                                  url: downloadPdfUrl || effectivePdfUrl,
+                                  filename: effectivePdfName,
+                                  fallbackContent: activeCourse.content || activeCourse.summary,
+                                  assignmentTitle: activeCourse.title,
+                                });
+                              }}
+                              className="px-3 py-1 rounded-xl bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
                             >
                               <Download className="w-3.5 h-3.5" />
                               <span className="hidden sm:inline">Télécharger PDF</span>
-                            </a>
+                            </button>
                           )}
                         </div>
                       )}
@@ -342,16 +348,21 @@ export function CourseViewer({
                                 <ExternalLink className="w-3.5 h-3.5" />
                                 <span className="hidden sm:inline">Plein écran</span>
                               </a>
-                              <a
-                                href={downloadPdfUrl || effectivePdfUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                download={effectivePdfName}
-                                className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  triggerDownload({
+                                    url: downloadPdfUrl || effectivePdfUrl,
+                                    filename: effectivePdfName,
+                                    fallbackContent: activeCourse.content || activeCourse.summary,
+                                    assignmentTitle: activeCourse.title,
+                                  });
+                                }}
+                                className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 <span>Télécharger</span>
-                              </a>
+                              </button>
                             </div>
                           </div>
 
@@ -429,10 +440,18 @@ export function CourseViewer({
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {activeCourse.resources.map((res, i) => (
-                          <a
+                          <button
                             key={i}
-                            href={res.url}
-                            className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-indigo-500/40 transition-all flex items-center justify-between group"
+                            type="button"
+                            onClick={() => {
+                              triggerDownload({
+                                url: res.url,
+                                filename: res.name,
+                                fallbackContent: activeCourse.content || activeCourse.summary,
+                                assignmentTitle: activeCourse.title,
+                              });
+                            }}
+                            className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-indigo-500/40 transition-all flex items-center justify-between group cursor-pointer text-left w-full"
                           >
                             <div className="flex items-center gap-2.5">
                               <FileText className="w-4 h-4 text-indigo-400 group-hover:text-indigo-300" />
@@ -444,7 +463,7 @@ export function CourseViewer({
                               </div>
                             </div>
                             <Download className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-400" />
-                          </a>
+                          </button>
                         ))}
                       </div>
                     </div>
