@@ -15,17 +15,19 @@ import {
   Users,
   Search,
   ChevronRight,
+  Trash2,
 } from "lucide-react";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import { GradingModal } from "./GradingModal";
 import { SubmitAssignmentModal } from "./SubmitAssignmentModal";
+import { ConfirmModal } from "@/components/common/ConfirmModal";
 
 interface AssignmentListProps {
   onOpenCreateAssignment: () => void;
 }
 
 export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) {
-  const { currentUser, assignments, submissions, classes } = useStore();
+  const { currentUser, assignments, submissions, classes, deleteAssignment } = useStore();
 
   const isEducator =
     currentUser.role === "TEACHER" ||
@@ -41,6 +43,32 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
     useState<Soumission | null>(null);
   const [selectedAssignmentForSubmit, setSelectedAssignmentForSubmit] =
     useState<Devoir | null>(null);
+
+  // Delete confirmation modal state
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean;
+    assignmentId: string;
+    assignmentTitle: string;
+  }>({
+    isOpen: false,
+    assignmentId: "",
+    assignmentTitle: "",
+  });
+
+  const handleDeleteClick = (assignment: Devoir) => {
+    setDeleteConfirm({
+      isOpen: true,
+      assignmentId: assignment.id,
+      assignmentTitle: assignment.title,
+    });
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteConfirm.assignmentId) {
+      deleteAssignment(deleteConfirm.assignmentId);
+    }
+    setDeleteConfirm({ isOpen: false, assignmentId: "", assignmentTitle: "" });
+  };
 
   const filteredAssignments = assignments.filter((a) => {
     const matchesSearch =
@@ -159,30 +187,44 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
                     </h3>
                   </div>
 
-                  {/* Student Submission Button if student */}
-                  {currentUser.role === "STUDENT" && (
-                    <div className="shrink-0 self-end sm:self-start">
-                      {mySubmission ? (
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                          Devoir Rendu
-                          {mySubmission.correction && (
-                            <span className="ml-1 px-2 py-0.5 rounded bg-emerald-100 font-black">
-                              {mySubmission.correction.score}/20
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setSelectedAssignmentForSubmit(assignment)}
-                          className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 flex items-center gap-1.5 transition-all"
-                        >
-                          <Send className="w-3.5 h-3.5" />
-                          Rendre mon Devoir
-                        </button>
-                      )}
-                    </div>
-                  )}
+                  {/* Actions buttons */}
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-start">
+                    {/* Educator Delete Button */}
+                    {isEducator && (
+                      <button
+                        onClick={() => handleDeleteClick(assignment)}
+                        className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors cursor-pointer"
+                        title="Supprimer définitivement ce devoir"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+
+                    {/* Student Submission Button if student */}
+                    {currentUser.role === "STUDENT" && (
+                      <div>
+                        {mySubmission ? (
+                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                            Devoir Rendu
+                            {mySubmission.correction && (
+                              <span className="ml-1 px-2 py-0.5 rounded bg-emerald-100 font-black">
+                                {mySubmission.correction.score}/20
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setSelectedAssignmentForSubmit(assignment)}
+                            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 flex items-center gap-1.5 transition-all"
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                            Rendre mon Devoir
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Instructions */}
@@ -322,6 +364,18 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
         assignment={selectedAssignmentForSubmit}
         isOpen={!!selectedAssignmentForSubmit}
         onClose={() => setSelectedAssignmentForSubmit(null)}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteConfirm.isOpen}
+        title="Supprimer le Devoir"
+        message={`Êtes-vous certain de vouloir supprimer définitivement le devoir « ${deleteConfirm.assignmentTitle} » ? Cette action effacera également les copies remises associées.`}
+        confirmLabel="Supprimer définitivement"
+        cancelLabel="Annuler"
+        variant="danger"
+        onConfirm={handleConfirmDelete}
+        onClose={() => setDeleteConfirm({ isOpen: false, assignmentId: "", assignmentTitle: "" })}
       />
     </div>
   );
