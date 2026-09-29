@@ -88,7 +88,13 @@ export function SubmitAssignmentModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const finalAttachment = attachmentName.trim() || (selectedFile ? selectedFile.name : "Devoir_Rendu.pdf");
-    submitAssignment(assignment.id, content, finalAttachment);
+    let fileUrl = "#";
+    if (selectedFile) {
+      try {
+        fileUrl = URL.createObjectURL(selectedFile);
+      } catch (_) {}
+    }
+    submitAssignment(assignment.id, content, finalAttachment, fileUrl);
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);

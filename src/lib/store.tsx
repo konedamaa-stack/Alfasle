@@ -86,7 +86,7 @@ interface StoreContextType {
 
   // Submissions & Corrections
   submissions: Soumission[];
-  submitAssignment: (devoirId: string, content: string, attachmentName?: string) => void;
+  submitAssignment: (devoirId: string, content: string, attachmentName?: string, attachmentUrl?: string) => void;
   gradeSubmission: (submissionId: string, score: number, feedback: string) => void;
 
   // Theme Mode (Dark / Light)
@@ -1355,7 +1355,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Submissions & Grading
-  const submitAssignment = (devoirId: string, content: string, attachmentName?: string) => {
+  const submitAssignment = (devoirId: string, content: string, attachmentName?: string, attachmentUrl?: string) => {
     const assignment = assignments.find((a) => a.id === devoirId);
     if (!assignment) return;
 
@@ -1375,7 +1375,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       studentAvatar: currentUser.avatarUrl,
       content,
       attachmentName: attachmentName || "devoir_rendu.pdf",
-      attachmentUrl: "#",
+      attachmentUrl: attachmentUrl || "#",
       submittedAt: new Date().toISOString(),
       status: isLate ? "LATE" : "SUBMITTED",
     };
