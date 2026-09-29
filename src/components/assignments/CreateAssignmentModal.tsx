@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useStore } from "@/lib/store";
-import { X, FileCheck2, Calendar, Award } from "lucide-react";
+import { X, FileCheck2, Calendar, Award, Upload, Trash2, CheckCircle2, FileText, Paperclip } from "lucide-react";
 
 interface CreateAssignmentModalProps {
   isOpen: boolean;
@@ -31,7 +31,50 @@ export function CreateAssignmentModal({
   });
   const [maxScore, setMaxScore] = useState(20);
 
+  // File import state (Word or PDF)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileSizeText, setFileSizeText] = useState("");
+  const [fileType, setFileType] = useState<"PDF" | "WORD">("PDF");
+  const [fileUrl, setFileUrl] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   if (!isOpen) return null;
+
+  const handleFileSelect = (file: File) => {
+    setSelectedFile(file);
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    if (ext === "doc" || ext === "docx") {
+      setFileType("WORD");
+    } else {
+      setFileType("PDF");
+    }
+    const sizeInMb = file.size / (1024 * 1024);
+    if (sizeInMb >= 1) {
+      setFileSizeText(`${sizeInMb.toFixed(2)} Mo`);
+    } else {
+      setFileSizeText(`${(file.size / 1024).toFixed(0)} Ko`);
+    }
+    try {
+      const url = URL.createObjectURL(file);
+      setFileUrl(url);
+    } catch (_) {}
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFileSelect(e.target.files[0]);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setFileSizeText("");
+    setFileUrl("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +82,16 @@ export function CreateAssignmentModal({
     if (!title.trim() || !targetClassId) return;
 
     const selectedCourse = courses.find((c) => c.id === coursId);
+
+    const attachments = selectedFile
+      ? [
+          {
+            name: selectedFile.name,
+            url: fileUrl || "#",
+            size: fileSizeText || (fileType === "WORD" ? "Fichier Word" : "Fichier PDF"),
+          },
+        ]
+      : [];
 
     createAssignment({
       classeId: targetClassId,
@@ -48,12 +101,13 @@ export function CreateAssignmentModal({
       instructions,
       dueDate: new Date(dueDate).toISOString(),
       maxScore: maxScore || 20,
-      attachments: [{ name: "Sujet_du_devoir.pdf", url: "#", size: "900 Ko" }],
+      attachments,
     });
 
     onClose();
     setTitle("");
     setInstructions("");
+    handleRemoveFile();
   };
 
   return (
@@ -175,18 +229,109 @@ export function CreateAssignmentModal({
             />
           </div>
 
+          {/* File Upload Zone (Word or PDF) */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Fichier Sujet / Énoncé PDF (optionnel)
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
+              <span>Sujet ou Énoncé joint (Word ou PDF)</span>
+              <span className="text-[10px] text-slate-500 font-normal">Formats acceptés : PDF, Word (.docx, .doc)</span>
             </label>
-            <div className="flex items-center gap-2 p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-              <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-700 font-bold text-[10px]">PDF</span>
-              <input
-                type="text"
-                placeholder="Ex: Sujet_Devoir_Maths.pdf"
-                className="w-full bg-transparent text-slate-900 text-xs focus:outline-none placeholder-slate-400"
-              />
-            </div>
+
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.doc,.docx"
+              onChange={handleFileInputChange}
+              className="hidden"
+            />
+
+            {!selectedFile ? (
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragging(true);
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  setIsDragging(false);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDragging(false);
+                  if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    handleFileSelect(e.dataTransfer.files[0]);
+                  }
+                }}
+                onClick={() => fileInputRef.current?.click()}
+                className={`p-5 rounded-2xl border-2 border-dashed text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 ${
+                  isDragging
+                    ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                    : "border-slate-300 hover:border-indigo-400 bg-slate-50 hover:bg-slate-100 text-slate-600"
+                }`}
+              >
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 shadow-sm">
+                  <Upload className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-900">
+                    Cliquez pour choisir un fichier <span className="text-indigo-600 font-extrabold">Word ou PDF</span>
+                  </p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    ou glissez-déposez votre énoncé ici (.pdf, .docx, .doc)
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-700 text-[10px] font-bold">
+                    PDF
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold">
+                    WORD (.DOCX)
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-indigo-200 flex items-center justify-between gap-3 shadow-sm">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className={`w-10 h-10 rounded-xl border flex items-center justify-center font-black text-xs shrink-0 ${
+                      fileType === "WORD"
+                        ? "bg-blue-100 border-blue-200 text-blue-700"
+                        : "bg-rose-100 border-rose-200 text-rose-700"
+                    }`}
+                  >
+                    {fileType}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-slate-900 truncate">
+                      {selectedFile.name}
+                    </p>
+                    <p className="text-[11px] text-emerald-700 flex items-center gap-1 font-medium mt-0.5">
+                      <CheckCircle2 className="w-3 h-3" />
+                      {fileSizeText} • Document prêt à être attaché
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-[11px] font-semibold transition-colors"
+                    title="Changer de fichier"
+                  >
+                    Changer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRemoveFile}
+                    className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors"
+                    title="Supprimer ce fichier"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Actions */}

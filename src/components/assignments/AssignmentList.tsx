@@ -190,6 +190,48 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
                   {assignment.instructions}
                 </div>
 
+                {/* Attached Files (Word or PDF) */}
+                {assignment.attachments && assignment.attachments.length > 0 && (
+                  <div className="space-y-1.5 pt-1">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                      Document sujet joint :
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {assignment.attachments.map((att, idx) => {
+                        const isWord =
+                          att.name.toLowerCase().endsWith(".doc") ||
+                          att.name.toLowerCase().endsWith(".docx");
+                        return (
+                          <a
+                            key={idx}
+                            href={att.url}
+                            download={att.name}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-800 transition-colors shadow-sm group"
+                          >
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-[10px] font-black ${
+                                isWord
+                                  ? "bg-blue-100 text-blue-700 border border-blue-200"
+                                  : "bg-rose-100 text-rose-700 border border-rose-200"
+                              }`}
+                            >
+                              {isWord ? "WORD" : "PDF"}
+                            </span>
+                            <span className="group-hover:underline truncate max-w-[200px] sm:max-w-xs">
+                              {att.name}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-normal">
+                              ({att.size})
+                            </span>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {/* Educator view: list of student submissions for this assignment */}
                 {isEducator && (
                   <div className="pt-4 border-t border-slate-200 space-y-3">
