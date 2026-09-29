@@ -29,7 +29,8 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
 
   const isEducator =
     currentUser.role === "TEACHER" ||
-    currentUser.role === "DIRECTEUR" ||
+    currentUser.role === "ADMIN" ||
+    (currentUser.role as string) === "DIRECTEUR" ||
     currentUser.role === "SUPER_ADMIN";
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -66,15 +67,13 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
           </p>
         </div>
 
-        {isEducator && (
-          <button
-            onClick={onOpenCreateAssignment}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all self-start sm:self-auto"
-          >
-            <PlusCircle className="w-4 h-4" />
-            Nouveau Devoir
-          </button>
-        )}
+        <button
+          onClick={onOpenCreateAssignment}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all self-start sm:self-auto cursor-pointer"
+        >
+          <PlusCircle className="w-4 h-4" />
+          + Nouveau Devoir
+        </button>
       </div>
 
       {/* Filter Bar */}
@@ -116,15 +115,13 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
             <p className="text-xs text-slate-500 mt-1">
               Les devoirs et travaux pratiques apparaîtront ici.
             </p>
-            {isEducator && (
-              <button
-                onClick={onOpenCreateAssignment}
-                className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition-all"
-              >
-                <PlusCircle className="w-4 h-4" />
-                Créer un Premier Devoir
-              </button>
-            )}
+            <button
+              onClick={onOpenCreateAssignment}
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer"
+            >
+              <PlusCircle className="w-4 h-4" />
+              + Nouveau Devoir
+            </button>
           </div>
         ) : (
           filteredAssignments.map((assignment) => {

@@ -105,7 +105,7 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#070b14] text-slate-100 selection:bg-blue-500 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-blue-500 selection:text-white">
       {/* Top Navbar with quick logout/switch to landing page */}
       <Navbar
         onLogoutToLanding={onLogout}

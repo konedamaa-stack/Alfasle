@@ -18,24 +18,30 @@ export function CreateAssignmentModal({
   const { classes, courses, createAssignment } = useStore();
 
   const [classeId, setClasseId] = useState(defaultClassId || (classes[0]?.id || ""));
-  const classCourses = courses.filter((c) => c.classeId === classeId);
+  const effectiveClasseId = classeId || defaultClassId || (classes[0]?.id || "");
+  const classCourses = courses.filter((c) => c.classeId === effectiveClasseId);
   const [coursId, setCoursId] = useState(classCourses[0]?.id || "");
 
   const [title, setTitle] = useState("");
   const [instructions, setInstructions] = useState("");
-  const [dueDate, setDueDate] = useState("2026-09-30T23:59");
+  const [dueDate, setDueDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().slice(0, 16);
+  });
   const [maxScore, setMaxScore] = useState(20);
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !classeId) return;
+    const targetClassId = classeId || defaultClassId || (classes[0]?.id || "");
+    if (!title.trim() || !targetClassId) return;
 
     const selectedCourse = courses.find((c) => c.id === coursId);
 
     createAssignment({
-      classeId,
+      classeId: targetClassId,
       coursId: coursId || undefined,
       coursTitle: selectedCourse?.title,
       title,
