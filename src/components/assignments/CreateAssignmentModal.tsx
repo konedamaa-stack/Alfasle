@@ -31,10 +31,10 @@ export function CreateAssignmentModal({
   });
   const [maxScore, setMaxScore] = useState(20);
 
-  // File import state (Word or PDF)
+  // File import state (Excel, Word or PDF)
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileSizeText, setFileSizeText] = useState("");
-  const [fileType, setFileType] = useState<"PDF" | "WORD">("PDF");
+  const [fileType, setFileType] = useState<"PDF" | "WORD" | "EXCEL">("PDF");
   const [fileUrl, setFileUrl] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -46,6 +46,8 @@ export function CreateAssignmentModal({
     const ext = file.name.split(".").pop()?.toLowerCase();
     if (ext === "doc" || ext === "docx") {
       setFileType("WORD");
+    } else if (ext === "xls" || ext === "xlsx" || ext === "csv") {
+      setFileType("EXCEL");
     } else {
       setFileType("PDF");
     }
@@ -102,7 +104,13 @@ export function CreateAssignmentModal({
           {
             name: selectedFile.name,
             url: fileUrl || "#",
-            size: fileSizeText || (fileType === "WORD" ? "Fichier Word" : "Fichier PDF"),
+            size:
+              fileSizeText ||
+              (fileType === "EXCEL"
+                ? "Fichier Excel"
+                : fileType === "WORD"
+                ? "Fichier Word"
+                : "Fichier PDF"),
           },
         ]
       : [];
@@ -243,18 +251,18 @@ export function CreateAssignmentModal({
             />
           </div>
 
-          {/* File Upload Zone (Word or PDF) */}
+          {/* File Upload Zone (Excel, Word or PDF) */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
-              <span>Sujet ou Énoncé joint (Word ou PDF)</span>
-              <span className="text-[10px] text-slate-500 font-normal">Formats acceptés : PDF, Word (.docx, .doc)</span>
+              <span>Sujet ou Document joint (Excel, Word ou PDF)</span>
+              <span className="text-[10px] text-slate-500 font-normal">Formats acceptés : Excel (.xlsx, .xls), Word (.docx, .doc), PDF (.pdf)</span>
             </label>
 
             {/* Hidden file input */}
             <input
               ref={fileInputRef}
               type="file"
-              accept=".pdf,.doc,.docx"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
               onChange={handleFileInputChange}
               className="hidden"
             />
@@ -279,27 +287,30 @@ export function CreateAssignmentModal({
                 onClick={() => fileInputRef.current?.click()}
                 className={`p-5 rounded-2xl border-2 border-dashed text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 ${
                   isDragging
-                    ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                    : "border-slate-300 hover:border-indigo-400 bg-slate-50 hover:bg-slate-100 text-slate-600"
+                    ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                    : "border-slate-300 hover:border-emerald-500 bg-slate-50 hover:bg-slate-100 text-slate-600"
                 }`}
               >
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 shadow-sm">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shadow-sm">
                   <Upload className="w-5 h-5" />
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-900">
-                    Cliquez pour choisir un fichier <span className="text-indigo-600 font-extrabold">Word ou PDF</span>
+                    Cliquez pour choisir un fichier <span className="text-emerald-700 font-extrabold">Excel, Word ou PDF</span>
                   </p>
                   <p className="text-[11px] text-slate-500 mt-0.5">
-                    ou glissez-déposez votre énoncé ici (.pdf, .docx, .doc)
+                    ou glissez-déposez votre énoncé ici (.xlsx, .xls, .docx, .pdf)
                   </p>
                 </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-700 text-[10px] font-bold">
-                    PDF
+                <div className="flex flex-wrap items-center justify-center gap-2 mt-1">
+                  <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-bold">
+                    📊 EXCEL (.XLSX)
                   </span>
-                  <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold">
-                    WORD (.DOCX)
+                  <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700 border border-blue-200 text-[10px] font-bold">
+                    📝 WORD (.DOCX)
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-700 border border-rose-200 text-[10px] font-bold">
+                    📄 PDF
                   </span>
                 </div>
               </div>
@@ -308,12 +319,14 @@ export function CreateAssignmentModal({
                 <div className="flex items-center gap-3 min-w-0">
                   <div
                     className={`w-10 h-10 rounded-xl border flex items-center justify-center font-black text-xs shrink-0 ${
-                      fileType === "WORD"
+                      fileType === "EXCEL"
+                        ? "bg-emerald-100 border-emerald-300 text-emerald-800"
+                        : fileType === "WORD"
                         ? "bg-blue-100 border-blue-200 text-blue-700"
                         : "bg-rose-100 border-rose-200 text-rose-700"
                     }`}
                   >
-                    {fileType}
+                    {fileType === "EXCEL" ? "XLSX" : fileType}
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-slate-900 truncate">

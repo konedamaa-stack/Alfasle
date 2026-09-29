@@ -52,14 +52,55 @@ export function triggerDownload(options: DownloadFileOptions) {
   }
 
   // 2. Si pas d'URL ou URL fictive "#", générer un document réel à télécharger
-  const isWord =
-    filename.toLowerCase().endsWith(".doc") || filename.toLowerCase().endsWith(".docx");
-  const isPdf = filename.toLowerCase().endsWith(".pdf");
+  const ext = filename.toLowerCase().split(".").pop() || "";
+  const isExcel = ext === "xlsx" || ext === "xls" || ext === "csv";
+  const isWord = ext === "doc" || ext === "docx";
+  const isPdf = ext === "pdf";
 
   const titleHeader = assignmentTitle || "Devoir & Travail Académique";
   const author = studentName || "Élève";
   const dateStr = submittedAt ? new Date(submittedAt).toLocaleString("fr-FR") : new Date().toLocaleString("fr-FR");
   const classeStr = classeTitle || "Classe";
+
+  if (isExcel) {
+    // Génère un fichier Excel HTML Table MIME type que Microsoft Excel ouvre parfaitement avec toutes les colonnes
+    const excelContent = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta charset="utf-8">
+        <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Copie Devoir</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+        <style>
+          th { background-color: #107c41; color: #ffffff; font-weight: bold; padding: 10px; border: 1px solid #d4d4d4; text-align: left; }
+          td { padding: 8px; border: 1px solid #e5e7eb; font-family: Calibri, sans-serif; font-size: 11pt; }
+        </style>
+      </head>
+      <body>
+        <table>
+          <tr>
+            <th colspan="2" style="font-size: 14pt; background-color: #047857;">GROUPE SCOLAIRE ALFASLE - DONNÉES DU DEVOIR</th>
+          </tr>
+          <tr><td style="font-weight:bold; background-color:#f0fdf4;">Établissement</td><td>Groupe Scolaire AlFasle</td></tr>
+          <tr><td style="font-weight:bold; background-color:#f0fdf4;">Classe</td><td>${classeStr}</td></tr>
+          <tr><td style="font-weight:bold; background-color:#f0fdf4;">Devoir</td><td>${titleHeader}</td></tr>
+          <tr><td style="font-weight:bold; background-color:#f0fdf4;">Élève / Auteur</td><td>${author}</td></tr>
+          <tr><td style="font-weight:bold; background-color:#f0fdf4;">Date de remise</td><td>${dateStr}</td></tr>
+          <tr><td style="font-weight:bold; background-color:#f0fdf4;">Fichier source</td><td>${filename}</td></tr>
+          <tr><td colspan="2" style="height: 15px;"></td></tr>
+          <tr>
+            <th colspan="2" style="background-color: #059669;">CONTENU & RÉSULTATS DU TRAVAIL</th>
+          </tr>
+          <tr>
+            <td colspan="2" style="white-space: pre-wrap; vertical-align: top;">${fallbackContent || "Tableau de données et réponses numériques validées pour cette évaluation."}</td>
+          </tr>
+        </table>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([excelContent], { type: "application/vnd.ms-excel;charset=utf-8" });
+    downloadBlob(blob, filename.endsWith(".xls") || filename.endsWith(".xlsx") ? filename : `${filename}.xls`);
+    return;
+  }
 
   if (isWord) {
     // Génère un fichier compatible Word (.doc HTML MIME type) que Word / LibreOffice ouvrent parfaitement

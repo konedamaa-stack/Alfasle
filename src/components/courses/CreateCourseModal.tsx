@@ -304,7 +304,7 @@ export function CreateCourseModal({
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept=".pdf,application/pdf"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
                     onChange={handlePdfUpload}
                     className="hidden"
                   />
@@ -313,10 +313,10 @@ export function CreateCourseModal({
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-200 group-hover:text-rose-300 transition-colors">
-                      Cliquez pour choisir votre fichier <strong className="text-rose-400">.PDF</strong>
+                      Cliquez pour choisir votre document <strong className="text-rose-400">PDF, Excel ou Word</strong>
                     </p>
                     <p className="text-[10px] text-slate-400">
-                      Cours, TD, exercices, résumés de formules...
+                      Cours, TD, exercices, tableurs Excel, résumés de formules...
                     </p>
                   </div>
                 </div>

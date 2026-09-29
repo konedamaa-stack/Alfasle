@@ -59,9 +59,9 @@ export function GradingModal({ submission, isOpen, onClose }: GradingModalProps)
     }, 1000);
   };
 
-  const isWord =
-    submission.attachmentName?.toLowerCase().endsWith(".doc") ||
-    submission.attachmentName?.toLowerCase().endsWith(".docx");
+  const subExt = submission.attachmentName?.toLowerCase().split(".").pop() || "";
+  const isExcel = subExt === "xlsx" || subExt === "xls" || subExt === "csv";
+  const isWord = subExt === "doc" || subExt === "docx";
 
   // Determine qualitative appreciation badge
   const getAppreciation = (s: number) => {
@@ -164,12 +164,14 @@ export function GradingModal({ submission, isOpen, onClose }: GradingModalProps)
                   <div className="flex items-center gap-3 min-w-0">
                     <div
                       className={`w-10 h-10 rounded-xl border flex items-center justify-center font-black text-xs shrink-0 ${
-                        isWord
+                        isExcel
+                          ? "bg-emerald-100 border-emerald-300 text-emerald-800"
+                          : isWord
                           ? "bg-blue-100 border-blue-200 text-blue-700"
                           : "bg-rose-100 border-rose-200 text-rose-700"
                       }`}
                     >
-                      {isWord ? "WORD" : "PDF"}
+                      {isExcel ? "XLSX" : isWord ? "WORD" : "PDF"}
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs font-bold text-slate-900 truncate">
@@ -292,7 +294,7 @@ export function GradingModal({ submission, isOpen, onClose }: GradingModalProps)
                       className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
                     >
                       <Download className="w-3.5 h-3.5" />
-                      Télécharger la Copie ({isWord ? "Word" : "PDF"})
+                      Télécharger la Copie ({isExcel ? "Excel" : isWord ? "Word" : "PDF"})
                     </button>
                   </div>
                 </div>
