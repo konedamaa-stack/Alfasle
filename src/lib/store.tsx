@@ -206,6 +206,42 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
             }) as unknown as T[];
           }
 
+          if (suffix === "classes") {
+            const demoIds = new Set([
+              "cls_nextjs_mastery",
+              "cls_algo_data",
+              "cls_reseaux_telecoms",
+              "cls_cloud_distrib",
+            ]);
+            merged = (merged as unknown as Classe[]).filter(
+              (c) =>
+                !demoIds.has(c.id) &&
+                !c.id.includes("nextjs") &&
+                !c.title?.toLowerCase().includes("next.js") &&
+                !c.title?.toLowerCase().includes("docker")
+            ) as unknown as T[];
+          }
+
+          if (suffix === "courses") {
+            const demoCourseIds = new Set([
+              "crs_nextjs_01",
+              "crs_nextjs_02",
+              "crs_algo_01",
+              "crs_algo_02",
+              "crs_reseaux_01",
+              "crs_reseaux_02",
+              "crs_cloud_01",
+              "crs_cloud_02",
+            ]);
+            merged = (merged as unknown as Cours[]).filter(
+              (crs) =>
+                !demoCourseIds.has(crs.id) &&
+                !crs.id.includes("nextjs") &&
+                !crs.classeId?.includes("nextjs") &&
+                !crs.title?.toLowerCase().includes("next.js")
+            ) as unknown as T[];
+          }
+
           return merged;
         }
       }
@@ -314,7 +350,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           const fetchedClasses = classesRes.data.map(mapRowToClasse);
           setClasses((prev) => {
             const map = new Map<string, Classe>();
-            prev.forEach((c) => map.set(c.id, c));
+            prev.forEach((c) => {
+              if (
+                !c.id.includes("nextjs") &&
+                !c.id.includes("algo_data") &&
+                !c.id.includes("reseaux_telecoms") &&
+                !c.id.includes("cloud_distrib")
+              ) {
+                map.set(c.id, c);
+              }
+            });
             fetchedClasses.forEach((c) => map.set(c.id, c));
             return Array.from(map.values());
           });
@@ -324,17 +369,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           const fetchedCourses: Cours[] = coursesRes.data.map((row: any) => ({
             id: row.id,
             classeId: row.classe_id || row.classeId,
-            chapterTitle: row.chapter_title || row.chapterTitle,
+            chapterTitle: row.chapter_title || row.chapterTitle || "Module Général",
             title: row.title,
             summary: row.summary || "",
             content: row.content || "",
-            order: row.order || 0,
+            order: row.display_order ?? row.order ?? 1,
             status: row.status || "PUBLISHED",
             discipline: row.discipline || "",
             teacherName: row.teacher_name || row.teacherName || "",
             pdfUrl: row.pdf_url || row.pdfUrl || "",
             pdfName: row.pdf_name || row.pdfName || "",
-            video: row.video,
+            video: row.video_url
+              ? {
+                  id: `vid_${row.id}`,
+                  title: row.title,
+                  streamUrl: row.video_url,
+                  durationMinutes: row.video_duration || 30,
+                  status: "READY" as const,
+                }
+              : row.video,
             resources: Array.isArray(row.resources)
               ? row.resources
               : (typeof row.resources === "string" && row.resources.startsWith("[")
@@ -345,7 +398,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
           setCourses((prev) => {
             const map = new Map<string, Cours>();
-            prev.forEach((c) => map.set(c.id, c));
+            prev.forEach((c) => {
+              if (!c.id.includes("nextjs") && !c.classeId?.includes("nextjs")) {
+                map.set(c.id, c);
+              }
+            });
             fetchedCourses.forEach((c) => map.set(c.id, c));
             return Array.from(map.values());
           });
@@ -705,10 +762,42 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       "cls_cloud_distrib",
     ]);
 
-    setClasses((prev) => prev.filter((c) => !demoClassIds.has(c.id)));
-    setInscriptions((prev) => prev.filter((i) => !demoClassIds.has(i.classeId)));
-    setCourses((prev) => prev.filter((crs) => !demoClassIds.has(crs.classeId)));
-    setAssignments((prev) => prev.filter((a) => !demoClassIds.has(a.classeId)));
+    setClasses((prev) => {
+      const next = prev.filter((c) => !demoClassIds.has(c.id) && !c.id.includes("nextjs") && !c.title?.toLowerCase().includes("next.js"));
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(`${STORAGE_PREFIX}classes`, JSON.stringify(next));
+        } catch (_) {}
+      }
+      return next;
+    });
+    setInscriptions((prev) => {
+      const next = prev.filter((i) => !demoClassIds.has(i.classeId) && !i.classeId?.includes("nextjs"));
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(`${STORAGE_PREFIX}inscriptions`, JSON.stringify(next));
+        } catch (_) {}
+      }
+      return next;
+    });
+    setCourses((prev) => {
+      const next = prev.filter((crs) => !demoClassIds.has(crs.classeId) && !crs.id.includes("nextjs"));
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(`${STORAGE_PREFIX}courses`, JSON.stringify(next));
+        } catch (_) {}
+      }
+      return next;
+    });
+    setAssignments((prev) => {
+      const next = prev.filter((a) => !demoClassIds.has(a.classeId));
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(`${STORAGE_PREFIX}assignments`, JSON.stringify(next));
+        } catch (_) {}
+      }
+      return next;
+    });
   };
 
   // Inscriptions
@@ -1229,16 +1318,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         .upsert({
           id: newCourse.id,
           classe_id: newCourse.classeId,
-          chapter_title: newCourse.chapterTitle || "",
+          chapter_title: newCourse.chapterTitle || "Module Général",
           title: newCourse.title,
           summary: newCourse.summary || "",
           content: newCourse.content || "",
-          order: newCourse.order,
+          display_order: newCourse.order || 1,
           status: newCourse.status || "PUBLISHED",
           discipline: newCourse.discipline || "",
           teacher_name: newCourse.teacherName || "",
           pdf_url: newCourse.pdfUrl || "",
           pdf_name: newCourse.pdfName || "",
+          video_url: newCourse.video?.streamUrl || "",
+          video_duration: newCourse.video?.durationMinutes || 0,
           resources: newCourse.resources || [],
           published_at: newCourse.publishedAt,
         })
@@ -1256,16 +1347,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           .upsert({
             id: target.id,
             classe_id: target.classeId,
-            chapter_title: target.chapterTitle || "",
+            chapter_title: target.chapterTitle || "Module Général",
             title: target.title,
             summary: target.summary || "",
             content: target.content || "",
-            order: target.order,
+            display_order: target.order || 1,
             status: target.status || "PUBLISHED",
             discipline: target.discipline || "",
             teacher_name: target.teacherName || "",
             pdf_url: target.pdfUrl || "",
             pdf_name: target.pdfName || "",
+            video_url: target.video?.streamUrl || "",
+            video_duration: target.video?.durationMinutes || 0,
             resources: target.resources || [],
             published_at: target.publishedAt,
           })

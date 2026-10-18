@@ -108,16 +108,16 @@ export function PreRegistrationModal({
   // Selected class
   const selectedClass = classes.find((c) => c.id === classeId);
 
-  // Auto-select first class when changing establishment or if invalid
+  // Auto-select first class when changing establishment or reset if none available
   React.useEffect(() => {
     if (availableClasses.length > 0) {
       if (!classeId || !availableClasses.some((c) => c.id === classeId)) {
         setClasseId(availableClasses[0].id);
       }
-    } else if (classes.length > 0 && !classeId) {
-      setClasseId(classes[0].id);
+    } else {
+      setClasseId("");
     }
-  }, [establishmentId, availableClasses, classes]);
+  }, [establishmentId, availableClasses]);
 
   // Courses associated with the selected class
   const classCourses = courses.filter((crs) => crs.classeId === classeId);
