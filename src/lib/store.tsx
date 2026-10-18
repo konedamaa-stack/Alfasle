@@ -115,7 +115,7 @@ interface StoreContextType {
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
-const STORAGE_PREFIX = "alfasle_v20_";
+const STORAGE_PREFIX = "alfasle_v100_purged_";
 
 function cleanLegacyStorage() {
   if (typeof window !== "undefined") {
@@ -123,8 +123,17 @@ function cleanLegacyStorage() {
       const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && k.startsWith("alfasle_") && !k.startsWith(STORAGE_PREFIX)) {
-          keysToRemove.push(k);
+        if (
+          k &&
+          (k.startsWith("alfasle_") ||
+            k.includes("active_tab") ||
+            k.includes("classes") ||
+            k.includes("courses") ||
+            k.includes("inscriptions"))
+        ) {
+          if (!k.startsWith(STORAGE_PREFIX)) {
+            keysToRemove.push(k);
+          }
         }
       }
       keysToRemove.forEach((k) => localStorage.removeItem(k));
@@ -158,13 +167,22 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
               "cls_algo_data",
               "cls_reseaux_telecoms",
               "cls_cloud_distrib",
+              "cls_physique_chimie",
+              "cls_litterature_philo",
+              "cls_kouliyat_tc",
+              "cls_islam_tc",
+              "cls_gs_tle_d",
+              "cls_gs_2nde_c",
             ]);
             merged = (merged as unknown as Classe[]).filter(
               (c) =>
                 !demoIds.has(c.id) &&
                 !c.id.includes("nextjs") &&
+                !c.id.includes("kouliyat") &&
+                !c.id.includes("islam") &&
                 !c.title?.toLowerCase().includes("next.js") &&
-                !c.title?.toLowerCase().includes("docker")
+                !c.title?.toLowerCase().includes("docker") &&
+                !c.title?.toLowerCase().includes("tronc commun")
             ) as unknown as T[];
           }
 
@@ -178,13 +196,23 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
               "crs_reseaux_02",
               "crs_cloud_01",
               "crs_cloud_02",
+              "crs_physique_01",
+              "crs_chimie_01",
+              "crs_philo_01",
+              "crs_kouliyat_intro",
+              "crs_islam_intro",
+              "crs_math_tle_d",
+              "crs_phys_2nde_c",
             ]);
             merged = (merged as unknown as Cours[]).filter(
               (crs) =>
                 !demoCourseIds.has(crs.id) &&
                 !crs.id.includes("nextjs") &&
+                !crs.id.includes("kouliyat") &&
+                !crs.id.includes("islam") &&
                 !crs.classeId?.includes("nextjs") &&
-                !crs.title?.toLowerCase().includes("next.js")
+                !crs.title?.toLowerCase().includes("next.js") &&
+                !crs.title?.toLowerCase().includes("introduction")
             ) as unknown as T[];
           }
 
@@ -290,6 +318,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           "cls_litterature_philo",
           "cls_reseaux_telecoms",
           "cls_cloud_distrib",
+          "cls_kouliyat_tc",
+          "cls_islam_tc",
+          "cls_gs_tle_d",
+          "cls_gs_2nde_c",
         ]);
         const demoCourseBlacklist = new Set([
           "crs_nextjs_01",
@@ -301,6 +333,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           "crs_philo_01",
           "crs_reseaux_01",
           "crs_cloud_01",
+          "crs_kouliyat_intro",
+          "crs_islam_intro",
+          "crs_math_tle_d",
+          "crs_phys_2nde_c",
         ]);
 
         if (etabsRes.data && etabsRes.data.length > 0) {
@@ -322,12 +358,30 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           setClasses((prev) => {
             const map = new Map<string, Classe>();
             prev.forEach((c) => {
-              if (!demoClassBlacklist.has(c.id) && !c.id.includes("nextjs") && !demoEtabBlacklist.has(c.etablissementId)) {
+              if (
+                !demoClassBlacklist.has(c.id) &&
+                !c.id.includes("nextjs") &&
+                !c.id.includes("kouliyat") &&
+                !c.id.includes("islam") &&
+                !c.title?.toLowerCase().includes("next.js") &&
+                !c.title?.toLowerCase().includes("docker") &&
+                !c.title?.toLowerCase().includes("tronc commun") &&
+                !demoEtabBlacklist.has(c.etablissementId)
+              ) {
                 map.set(c.id, c);
               }
             });
             fetchedClasses.forEach((c) => {
-              if (!demoClassBlacklist.has(c.id) && !c.id.includes("nextjs") && !demoEtabBlacklist.has(c.etablissementId)) {
+              if (
+                !demoClassBlacklist.has(c.id) &&
+                !c.id.includes("nextjs") &&
+                !c.id.includes("kouliyat") &&
+                !c.id.includes("islam") &&
+                !c.title?.toLowerCase().includes("next.js") &&
+                !c.title?.toLowerCase().includes("docker") &&
+                !c.title?.toLowerCase().includes("tronc commun") &&
+                !demoEtabBlacklist.has(c.etablissementId)
+              ) {
                 map.set(c.id, c);
               }
             });
@@ -523,7 +577,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         id: `notif_${Date.now()}`,
         userId: currentUser.id,
         title: "Nouvel établissement déployé 🏫",
-        message: `L'établissement « ${newEtab.name} » (.${newEtab.subdomain}.alfasle.xyz) est maintenant actif avec sa classe inaugurale.`,
+        message: `L'établissement « ${newEtab.name} » (.${newEtab.subdomain}.alfasle.xyz) est maintenant actif.`,
         type: "SYSTEM",
         isRead: false,
         createdAt: new Date().toISOString(),
@@ -533,23 +587,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     if (isSupabaseConfigured()) {
       supabase.from("etablissements").upsert(mapEtablissementToRow(newEtab)).then();
-      supabase.from("classes").upsert(mapClasseToRow(starterClass)).then();
-      supabase
-        .from("courses")
-        .upsert({
-          id: starterCourse.id,
-          classe_id: starterCourse.classeId,
-          chapter_title: starterCourse.chapterTitle || "Module 1 : Accueil & Présentation",
-          title: starterCourse.title,
-          summary: starterCourse.summary || "",
-          content: starterCourse.content || "",
-          display_order: 1,
-          status: "PUBLISHED",
-          discipline: starterCourse.discipline || "Général",
-          teacher_name: starterCourse.teacherName || "Direction",
-          published_at: starterCourse.publishedAt,
-        })
-        .then();
     }
 
     return newEtab;
@@ -733,53 +770,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       return next;
     });
 
-    setClasses((prev) => {
-      const next = prev.filter(
-        (c) =>
-          !demoClassIds.has(c.id) &&
-          !c.id.includes("nextjs") &&
-          !c.title?.toLowerCase().includes("next.js") &&
-          !demoEtabIds.has(c.etablissementId)
-      );
-      if (typeof window !== "undefined") {
-        try {
-          localStorage.setItem(`${STORAGE_PREFIX}classes`, JSON.stringify(next));
-        } catch (_) {}
-      }
-      return next;
-    });
+    setClasses([]);
+    setCourses([]);
+    setInscriptions([]);
+    setAssignments([]);
+    setSubmissions([]);
+    setUsers((prev) => prev.filter((u) => u.role === "ADMIN" || u.role === "SUPER_ADMIN"));
 
-    setInscriptions((prev) => {
-      const next = prev.filter(
-        (i) => !demoClassIds.has(i.classeId) && !i.classeId?.includes("nextjs") && !demoEtabIds.has(i.etablissementId || "")
-      );
-      if (typeof window !== "undefined") {
-        try {
-          localStorage.setItem(`${STORAGE_PREFIX}inscriptions`, JSON.stringify(next));
-        } catch (_) {}
-      }
-      return next;
-    });
-
-    setCourses((prev) => {
-      const next = prev.filter((crs) => !demoClassIds.has(crs.classeId) && !crs.id.includes("nextjs"));
-      if (typeof window !== "undefined") {
-        try {
-          localStorage.setItem(`${STORAGE_PREFIX}courses`, JSON.stringify(next));
-        } catch (_) {}
-      }
-      return next;
-    });
-
-    setAssignments((prev) => {
-      const next = prev.filter((a) => !demoClassIds.has(a.classeId));
-      if (typeof window !== "undefined") {
-        try {
-          localStorage.setItem(`${STORAGE_PREFIX}assignments`, JSON.stringify(next));
-        } catch (_) {}
-      }
-      return next;
-    });
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(`${STORAGE_PREFIX}classes`);
+        localStorage.removeItem(`${STORAGE_PREFIX}courses`);
+        localStorage.removeItem(`${STORAGE_PREFIX}inscriptions`);
+        localStorage.removeItem(`${STORAGE_PREFIX}assignments`);
+        localStorage.removeItem(`${STORAGE_PREFIX}submissions`);
+      } catch (_) {}
+    }
   };
 
   // Inscriptions

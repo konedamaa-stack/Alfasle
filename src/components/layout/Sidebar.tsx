@@ -265,27 +265,7 @@ export function Sidebar({
           </nav>
         </div>
 
-        {/* Admin Multi-Campus Banner */}
-        {currentUser.role === "ADMIN" && (
-          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 space-y-2.5 shadow-sm">
-            <div className="flex items-center gap-2 text-rose-800 text-xs font-bold font-mono">
-              <School className="w-3.5 h-3.5 text-rose-600" />
-              <span>Réseau d'Établissements</span>
-            </div>
-            <p className="text-[10px] text-slate-600 leading-relaxed">
-              Consultez vos différents campus ou créez un nouvel établissement scolaire.
-            </p>
-            <button
-              onClick={() => {
-                setActiveTab("etablissements");
-                if (isMobile && onCloseMobile) onCloseMobile();
-              }}
-              className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white font-extrabold text-[11px] flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
-            >
-              <span>Établissements Scolaires &rarr;</span>
-            </button>
-          </div>
-        )}
+
 
         {/* Super Admin Access Banner (uniquement pour le rôle SUPER_ADMIN) */}
         {currentUser.role === "SUPER_ADMIN" && (
