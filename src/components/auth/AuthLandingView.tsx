@@ -89,8 +89,8 @@ export function AuthLandingView({
       espaceDesc: "Direction du Groupe Scolaire AlFasle (Abidjan) & Supervision Pédagogique",
       defaultLogin: "konedamaa@gmail.com",
       defaultPass: "Madouu1966",
-      cardBg: "from-[#8B4513] via-[#7B3F00] to-[#3D1A04]",
-      gradient: "from-[#8B4513] to-[#5C2D0A]",
+      cardBg: "from-rose-500 via-pink-600 to-rose-900",
+      gradient: "from-rose-500 to-pink-600",
     },
     TEACHER: {
       badgeIcon: "👨‍🏫",
@@ -528,11 +528,11 @@ export function AuthLandingView({
                   onClick={() => handleRoleSelect("ADMIN")}
                   className={`p-3 rounded-2xl flex flex-col items-center justify-center gap-2 border transition-all text-center cursor-pointer ${
                     selectedRole === "ADMIN"
-                      ? "bg-[#7B3F00]/10 border-[#8B4513] text-[#7B3F00] shadow-md ring-2 ring-[#8B4513]/30"
+                      ? "bg-rose-50 border-rose-500 text-rose-800 shadow-md ring-2 ring-rose-500/30"
                       : "bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-300"
                   }`}
                 >
-                  <div className="w-9 h-9 rounded-xl bg-[#8B4513]/15 border border-[#8B4513]/30 flex items-center justify-center text-lg">
+                  <div className="w-9 h-9 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-lg">
                     👑
                   </div>
                   <span className="text-[11px] font-bold">Directeur</span>
@@ -672,7 +672,7 @@ export function AuthLandingView({
                     type="submit"
                     className={`flex-1 py-3 px-6 rounded-2xl ${
                       selectedRole === "ADMIN"
-                        ? "bg-gradient-to-r from-[#8B4513] via-[#7B3F00] to-[#5C2D0A] hover:opacity-95 shadow-[#7B3F00]/30"
+                        ? "bg-gradient-to-r from-rose-500 via-pink-600 to-rose-700 hover:opacity-95 shadow-rose-500/30"
                         : "bg-blue-600 hover:bg-blue-500 shadow-blue-600/30"
                     } text-white font-bold text-xs shadow-lg flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 cursor-pointer`}
                   >
@@ -828,3 +828,4 @@ export function AuthLandingView({
     </div>
   );
 }
+
