@@ -6,6 +6,7 @@ import { Devoir } from "@/types";
 import {
   X,
   Send,
+  File,
   FileCheck2,
   Upload,
   Paperclip,

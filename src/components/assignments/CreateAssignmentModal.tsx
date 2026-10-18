@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { useStore } from "@/lib/store";
-import { X, FileCheck2, Calendar, Award, Upload, Trash2, CheckCircle2, FileText, Paperclip } from "lucide-react";
+import { X, File, FileCheck2, Calendar, Award, Upload, Trash2, CheckCircle2, FileText, Paperclip } from "lucide-react";
 
 interface CreateAssignmentModalProps {
   isOpen: boolean;

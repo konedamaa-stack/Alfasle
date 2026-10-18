@@ -22,6 +22,7 @@ import { GradingModal } from "@/components/assignments/GradingModal";
 import { GradebookView } from "@/components/grades/GradebookView";
 import { Soumission, Devoir } from "@/types";
 import {
+  School,
   LayoutDashboard,
   FolderKanban,
   BookOpen,

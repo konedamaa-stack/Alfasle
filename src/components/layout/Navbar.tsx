@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useStore } from "@/lib/store";
 import { UserRole } from "@/types";
 import {
+  School,
   Bell,
   GraduationCap,
   Sparkles,
