@@ -38,12 +38,34 @@ export function CourseViewer({
 }: CourseViewerProps) {
   const { courses, classes, currentUser, updateCourse, deleteCourse } = useStore();
 
+  const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
+  const userEtabId = currentUser.etablissementId;
+
+  // Classes accessibles pour l'établissement de l'utilisateur
+  const accessibleClasses = classes.filter((c) => {
+    if (isSuperAdmin) return true;
+    if (userEtabId) {
+      return (
+        c.etablissementId === userEtabId ||
+        (currentUser.etablissementName && c.etablissementName === currentUser.etablissementName)
+      );
+    }
+    return true;
+  });
+
   const [activeClassId, setActiveClassId] = useState<string>(
-    selectedClassId || (classes[0]?.id || "")
+    selectedClassId || (accessibleClasses[0]?.id || "")
   );
+
+  React.useEffect(() => {
+    if (accessibleClasses.length > 0 && (!activeClassId || !accessibleClasses.some((c) => c.id === activeClassId))) {
+      setActiveClassId(accessibleClasses[0].id);
+    }
+  }, [accessibleClasses, activeClassId]);
+
   const [selectedDisciplineFilter, setSelectedDisciplineFilter] = useState<string>("ALL");
 
-  const activeClass = classes.find((c) => c.id === activeClassId);
+  const activeClass = accessibleClasses.find((c) => c.id === activeClassId);
   const classDisciplines = activeClass?.disciplines || (activeClass?.category ? [activeClass.category] : []);
 
   const classCourses = courses.filter((c) => {
@@ -185,11 +207,17 @@ export function CourseViewer({
               }}
               className="px-3.5 py-2.5 text-xs bg-slate-900 border border-slate-700 rounded-xl text-white font-bold focus:outline-none focus:border-purple-500 shadow-sm cursor-pointer"
             >
-              {classes.map((c) => (
-                <option key={c.id} value={c.id}>
-                  🏫 {c.title}
+              {accessibleClasses.length === 0 ? (
+                <option value="" disabled>
+                  ⚠️ Aucune classe pour cet établissement
                 </option>
-              ))}
+              ) : (
+                accessibleClasses.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    🏫 {c.title} ({c.classCode || c.level})
+                  </option>
+                ))
+              )}
             </select>
           </div>
 

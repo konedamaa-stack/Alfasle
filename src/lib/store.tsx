@@ -115,34 +115,29 @@ interface StoreContextType {
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
-const STORAGE_PREFIX = "alfasle_v18_";
+const STORAGE_PREFIX = "alfasle_v19_";
 
 function cleanLegacyStorage() {
-  // Safe: no aggressive deletion of user data
+  if (typeof window !== "undefined") {
+    try {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith("alfasle_") && !k.startsWith(STORAGE_PREFIX)) {
+          keysToRemove.push(k);
+        }
+      }
+      keysToRemove.forEach((k) => localStorage.removeItem(k));
+    } catch (_) {}
+  }
 }
 
 function loadInitialData<T extends { id: string }>(suffix: string, initialData: T[]): T[] {
   const key = `${STORAGE_PREFIX}${suffix}`;
   if (typeof window !== "undefined") {
+    cleanLegacyStorage();
     try {
-      let saved = localStorage.getItem(key);
-
-      // Fallback: check if older versions exist
-      if (!saved) {
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && k.startsWith("alfasle_") && k.endsWith(`_${suffix}`)) {
-            const legacyData = localStorage.getItem(k);
-            if (legacyData && legacyData !== "null" && legacyData !== "undefined") {
-              saved = legacyData;
-              try {
-                localStorage.setItem(key, legacyData);
-              } catch (_) {}
-              break;
-            }
-          }
-        }
-      }
+      const saved = localStorage.getItem(key);
 
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -336,12 +331,37 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           supabase.from("courses").select("*"),
         ]);
 
+        const demoEtabBlacklist = new Set(["etab_lycee_excellence", "etab_polytech_kone"]);
+        const demoClassBlacklist = new Set([
+          "cls_nextjs_mastery",
+          "cls_algo_data",
+          "cls_physique_chimie",
+          "cls_litterature_philo",
+          "cls_reseaux_telecoms",
+          "cls_cloud_distrib",
+        ]);
+        const demoCourseBlacklist = new Set([
+          "crs_nextjs_01",
+          "crs_nextjs_02",
+          "crs_algo_01",
+          "crs_algo_02",
+          "crs_physique_01",
+          "crs_chimie_01",
+          "crs_philo_01",
+          "crs_reseaux_01",
+          "crs_cloud_01",
+        ]);
+
         if (etabsRes.data && etabsRes.data.length > 0) {
           const fetchedEtabs = etabsRes.data.map(mapRowToEtablissement);
           setEtablissements((prev) => {
             const map = new Map<string, Etablissement>();
-            prev.forEach((e) => map.set(e.id, e));
-            fetchedEtabs.forEach((e) => map.set(e.id, e));
+            prev.forEach((e) => {
+              if (!demoEtabBlacklist.has(e.id)) map.set(e.id, e);
+            });
+            fetchedEtabs.forEach((e) => {
+              if (!demoEtabBlacklist.has(e.id)) map.set(e.id, e);
+            });
             return Array.from(map.values());
           });
         }
@@ -351,16 +371,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           setClasses((prev) => {
             const map = new Map<string, Classe>();
             prev.forEach((c) => {
-              if (
-                !c.id.includes("nextjs") &&
-                !c.id.includes("algo_data") &&
-                !c.id.includes("reseaux_telecoms") &&
-                !c.id.includes("cloud_distrib")
-              ) {
+              if (!demoClassBlacklist.has(c.id) && !c.id.includes("nextjs") && !demoEtabBlacklist.has(c.etablissementId)) {
                 map.set(c.id, c);
               }
             });
-            fetchedClasses.forEach((c) => map.set(c.id, c));
+            fetchedClasses.forEach((c) => {
+              if (!demoClassBlacklist.has(c.id) && !c.id.includes("nextjs") && !demoEtabBlacklist.has(c.etablissementId)) {
+                map.set(c.id, c);
+              }
+            });
             return Array.from(map.values());
           });
         }
@@ -399,11 +418,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           setCourses((prev) => {
             const map = new Map<string, Cours>();
             prev.forEach((c) => {
-              if (!c.id.includes("nextjs") && !c.classeId?.includes("nextjs")) {
+              if (!demoCourseBlacklist.has(c.id) && !c.id.includes("nextjs") && !demoClassBlacklist.has(c.classeId)) {
                 map.set(c.id, c);
               }
             });
-            fetchedCourses.forEach((c) => map.set(c.id, c));
+            fetchedCourses.forEach((c) => {
+              if (!demoCourseBlacklist.has(c.id) && !c.id.includes("nextjs") && !demoClassBlacklist.has(c.classeId)) {
+                map.set(c.id, c);
+              }
+            });
             return Array.from(map.values());
           });
         }
@@ -777,9 +800,36 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       "cls_reseaux_telecoms",
       "cls_cloud_distrib",
     ]);
+    const demoEtabIds = new Set(["etab_lycee_excellence", "etab_polytech_kone"]);
+
+    setEtablissements((prev) => {
+      const next = prev.filter((e) => !demoEtabIds.has(e.id));
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(`${STORAGE_PREFIX}etablissements`, JSON.stringify(next));
+        } catch (_) {}
+      }
+      return next;
+    });
+
+    setUsers((prev) => {
+      const next = prev.filter((u) => u.role === "SUPER_ADMIN" || (!demoEtabIds.has(u.etablissementId || "")));
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(`${STORAGE_PREFIX}users`, JSON.stringify(next));
+        } catch (_) {}
+      }
+      return next;
+    });
 
     setClasses((prev) => {
-      const next = prev.filter((c) => !demoClassIds.has(c.id) && !c.id.includes("nextjs") && !c.title?.toLowerCase().includes("next.js"));
+      const next = prev.filter(
+        (c) =>
+          !demoClassIds.has(c.id) &&
+          !c.id.includes("nextjs") &&
+          !c.title?.toLowerCase().includes("next.js") &&
+          !demoEtabIds.has(c.etablissementId)
+      );
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem(`${STORAGE_PREFIX}classes`, JSON.stringify(next));
@@ -787,8 +837,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       }
       return next;
     });
+
     setInscriptions((prev) => {
-      const next = prev.filter((i) => !demoClassIds.has(i.classeId) && !i.classeId?.includes("nextjs"));
+      const next = prev.filter(
+        (i) => !demoClassIds.has(i.classeId) && !i.classeId?.includes("nextjs") && !demoEtabIds.has(i.etablissementId || "")
+      );
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem(`${STORAGE_PREFIX}inscriptions`, JSON.stringify(next));
@@ -796,6 +849,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       }
       return next;
     });
+
     setCourses((prev) => {
       const next = prev.filter((crs) => !demoClassIds.has(crs.classeId) && !crs.id.includes("nextjs"));
       if (typeof window !== "undefined") {
@@ -805,6 +859,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       }
       return next;
     });
+
     setAssignments((prev) => {
       const next = prev.filter((a) => !demoClassIds.has(a.classeId));
       if (typeof window !== "undefined") {

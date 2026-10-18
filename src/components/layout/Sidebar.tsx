@@ -56,7 +56,34 @@ export function Sidebar({
   const { currentUser, classes, inscriptions, submissions, assignments, etablissements } = useStore();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = React.useState(false);
 
-  const pendingInscriptionsCount = inscriptions.filter((i) => i.status === "PENDING").length;
+  const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
+  const userEtabId = currentUser.etablissementId;
+
+  const schoolClasses = classes.filter((c) => {
+    if (isSuperAdmin) return true;
+    if (userEtabId) {
+      return (
+        c.etablissementId === userEtabId ||
+        (currentUser.etablissementName && c.etablissementName === currentUser.etablissementName)
+      );
+    }
+    return true;
+  });
+  const schoolClassIds = new Set(schoolClasses.map((c) => c.id));
+
+  const schoolInscriptions = inscriptions.filter((i) => {
+    if (isSuperAdmin) return true;
+    if (userEtabId) {
+      return (
+        i.etablissementId === userEtabId ||
+        (currentUser.etablissementName && i.etablissementName === currentUser.etablissementName) ||
+        schoolClassIds.has(i.classeId)
+      );
+    }
+    return true;
+  });
+
+  const pendingInscriptionsCount = schoolInscriptions.filter((i) => i.status === "PENDING").length;
   const pendingGradingCount = submissions.filter((s) => s.status === "SUBMITTED").length;
   const pendingAssignmentsCount = assignments.filter((a) => new Date() <= new Date(a.dueDate)).length;
 
@@ -141,19 +168,12 @@ export function Sidebar({
         return [
           {
             id: "dashboard",
-            label: "Direction & Inscriptions",
+            label: "Direction & Administration",
             icon: <School className="w-4 h-4 text-emerald-600" />,
-            badge: currentUser.etablissementName ? currentUser.etablissementName.slice(0, 14) : "Campus",
+            badge: currentUser.etablissementName ? currentUser.etablissementName.slice(0, 16) : "Mon Établissement",
             badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
           },
-          {
-            id: "etablissements",
-            label: "Établissements Scolaires",
-            icon: <School className="w-4 h-4 text-rose-500" />,
-            badge: `${etablissements.length} Écoles`,
-            badgeColor: "bg-rose-50 text-rose-700 border-rose-200",
-          },
-          { id: "classes", label: "Classes du Campus", icon: <FolderKanban className="w-4 h-4" /> },
+          { id: "classes", label: "Classes de l'Établissement", icon: <FolderKanban className="w-4 h-4" /> },
           {
             id: "inscriptions",
             label: "Préinscriptions",
@@ -164,7 +184,7 @@ export function Sidebar({
           { id: "courses", label: "Cours & Formations", icon: <BookOpen className="w-4 h-4" /> },
           { id: "assignments", label: "Devoirs & Évaluations", icon: <FileCheck2 className="w-4 h-4" /> },
           { id: "grades", label: "Notes & Relevés", icon: <Award className="w-4 h-4" /> },
-          { id: "analytics", label: "Statistiques Campus", icon: <BarChart3 className="w-4 h-4" /> },
+          { id: "analytics", label: "Statistiques Établissement", icon: <BarChart3 className="w-4 h-4" /> },
         ];
 
       default:

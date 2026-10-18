@@ -161,7 +161,16 @@ export function ClassList({
       c.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.teacherName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (c.classCode && c.classCode.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesEtab = selectedEtablissement === "ALL" || c.etablissementId === selectedEtablissement;
+
+    const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
+    const userEtabId = currentUser.etablissementId;
+
+    const matchesEtab = isSuperAdmin
+      ? selectedEtablissement === "ALL" || c.etablissementId === selectedEtablissement
+      : userEtabId
+      ? c.etablissementId === userEtabId || (currentUser.etablissementName && c.etablissementName === currentUser.etablissementName)
+      : true;
+
     const matchesCat = selectedCategory === "ALL" || c.category.includes(selectedCategory);
     const matchesLevel = selectedLevel === "ALL" || c.level === selectedLevel;
     return matchesSearch && matchesEtab && matchesCat && matchesLevel;
@@ -250,22 +259,29 @@ export function ClassList({
           />
         </div>
 
-        {/* Établissement Filter */}
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <label className="text-xs text-slate-400 whitespace-nowrap hidden sm:inline">Établissement :</label>
-          <select
-            value={selectedEtablissement}
-            onChange={(e) => setSelectedEtablissement(e.target.value)}
-            className="w-full sm:w-auto px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-blue-500"
-          >
-            <option value="ALL">Tous les campus ({etablissements.length})</option>
-            {etablissements.map((etab) => (
-              <option key={etab.id} value={etab.id}>
-                🏫 {etab.name} ({etab.city})
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Établissement Filter - Accessible uniquement pour Super Admin */}
+        {currentUser.role === "SUPER_ADMIN" ? (
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <label className="text-xs text-slate-400 whitespace-nowrap hidden sm:inline">Établissement :</label>
+            <select
+              value={selectedEtablissement}
+              onChange={(e) => setSelectedEtablissement(e.target.value)}
+              className="w-full sm:w-auto px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-blue-500 cursor-pointer"
+            >
+              <option value="ALL">Tous les campus ({etablissements.length})</option>
+              {etablissements.map((etab) => (
+                <option key={etab.id} value={etab.id}>
+                  🏫 {etab.name} ({etab.city})
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs font-bold">
+            <span>🏫</span>
+            <span>{currentUser.etablissementName || "Établissement"}</span>
+          </div>
+        )}
 
         {/* Category & Level pills */}
         <div className="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto no-scrollbar whitespace-nowrap pb-1 md:pb-0">

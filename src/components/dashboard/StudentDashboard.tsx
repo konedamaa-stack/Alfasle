@@ -34,6 +34,7 @@ export function StudentDashboard({
   );
   const myApprovedClassIds = myApprovedInscriptions.map((i) => i.classeId);
   const myClasses = classes.filter((c) => myApprovedClassIds.includes(c.id));
+  const myCourses = courses.filter((c) => myApprovedClassIds.includes(c.classeId));
 
   // My pending assignments
   const mySubmissions = submissions.filter((s) => s.studentId === currentUser.id);
@@ -150,7 +151,7 @@ export function StudentDashboard({
         >
           <div className="space-y-1">
             <p className="text-xs font-medium text-slate-400">Cours Disponibles</p>
-            <p className="text-2xl font-bold text-purple-300">{courses.length}</p>
+            <p className="text-2xl font-bold text-purple-300">{myCourses.length}</p>
             <p className="text-[11px] text-purple-400/80">Leçons & Vidéos</p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">

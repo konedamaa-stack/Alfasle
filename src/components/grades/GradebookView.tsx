@@ -9,9 +9,22 @@ export function GradebookView() {
   const { currentUser, submissions, assignments, classes, users } = useStore();
 
   const isTeacher = currentUser.role === "TEACHER" || currentUser.role === "ADMIN";
+  const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
+
+  const userSchoolClasses = isSuperAdmin
+    ? classes
+    : classes.filter(
+        (c) =>
+          c.etablissementId === currentUser.etablissementId ||
+          (currentUser.etablissementName && c.etablissementName === currentUser.etablissementName)
+      );
+  const schoolClassIds = new Set(userSchoolClasses.map((c) => c.id));
 
   const allGradedSubmissions = submissions.filter(
-    (s) => s.status === "GRADED" && s.correction
+    (s) =>
+      s.status === "GRADED" &&
+      s.correction &&
+      (isSuperAdmin || schoolClassIds.has(s.classeId))
   );
   const myGradedSubmissions = isTeacher
     ? allGradedSubmissions

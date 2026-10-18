@@ -109,11 +109,34 @@ export function JoinClassModal({
     toast.success("Enregistrement effectué avec succès", successMsg);
   };
 
-  const currentSelectedEtab = etablissements.find(
+  const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
+  const userEtabId = currentUser.etablissementId || defaultEtablissementId;
+  const userEtabName = currentUser.etablissementName;
+
+  const accessibleEtabs = isSuperAdmin
+    ? etablissements
+    : etablissements.filter(
+        (e) =>
+          e.id === userEtabId ||
+          e.subdomain === userEtabId ||
+          (userEtabName && e.name.toLowerCase() === userEtabName.toLowerCase())
+      );
+
+  const accessibleClasses = isSuperAdmin
+    ? classes
+    : classes.filter((c) => {
+        if (c.etablissementId === userEtabId) return true;
+        if (userEtabName && c.etablissementName?.toLowerCase() === userEtabName.toLowerCase()) return true;
+        return accessibleEtabs.some(
+          (e) => e.id === c.etablissementId || e.subdomain === c.etablissementId
+        );
+      });
+
+  const currentSelectedEtab = accessibleEtabs.find(
     (e) => e.id === selectedEtabId || e.subdomain === selectedEtabId
   );
 
-  const filteredClasses = classes.filter((c) => {
+  const filteredClasses = accessibleClasses.filter((c) => {
     if (selectedEtabId === "ALL") return true;
     if (c.etablissementId === selectedEtabId) return true;
     if (currentSelectedEtab) {
@@ -264,10 +287,10 @@ export function JoinClassModal({
               {/* Codes rapides d'exemples */}
               <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
                 <p className="text-[11px] font-bold text-blue-400 uppercase tracking-wider mb-2">
-                  💡 Exemples de codes disponibles pour tester :
+                  💡 Exemples de codes disponibles pour votre établissement :
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {classes.map((c) => (
+                  {accessibleClasses.map((c) => (
                     <button
                       key={c.id}
                       type="button"
@@ -311,20 +334,31 @@ export function JoinClassModal({
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Filtrer par Établissement Scolaire
+                  Établissement Scolaire
                 </label>
-                <select
-                  value={selectedEtabId}
-                  onChange={(e) => setSelectedEtabId(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-2xl bg-[#080d1a] border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
-                >
-                  <option value="ALL">Tous les établissements ({etablissements.length})</option>
-                  {etablissements.map((etab) => (
-                    <option key={etab.id} value={etab.id}>
-                      🏫 {etab.name} — {etab.city} ({etab.type})
-                    </option>
-                  ))}
-                </select>
+                {!isSuperAdmin ? (
+                  <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl bg-[#080d1a] border border-blue-500/30 text-white text-xs">
+                    <span className="font-semibold text-blue-300">
+                      🏫 {currentUser.etablissementName || accessibleEtabs[0]?.name || "Mon Établissement"}
+                    </span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                      Votre Campus
+                    </span>
+                  </div>
+                ) : (
+                  <select
+                    value={selectedEtabId}
+                    onChange={(e) => setSelectedEtabId(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-2xl bg-[#080d1a] border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="ALL">Tous les établissements ({etablissements.length})</option>
+                    {accessibleEtabs.map((etab) => (
+                      <option key={etab.id} value={etab.id}>
+                        🏫 {etab.name} — {etab.city} ({etab.type})
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               {/* Class Cards List */}

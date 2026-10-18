@@ -44,9 +44,19 @@ export function TeacherDashboard({
     rejectInscription,
   } = useStore();
 
-  const myClasses = classes.filter((c) => c.teacherId === currentUser.id);
+  const schoolClasses = classes.filter(
+    (c) =>
+      c.etablissementId === currentUser.etablissementId ||
+      (currentUser.etablissementName && c.etablissementName === currentUser.etablissementName)
+  );
+  const myClasses = classes.filter(
+    (c) =>
+      c.teacherId === currentUser.id ||
+      (schoolClasses.some((sc) => sc.id === c.id) && (c.teacherId === currentUser.id || !c.teacherId))
+  );
   const totalEnrolled = myClasses.reduce((acc, c) => acc + (c.enrolledCount || 0), 0);
   const myClassIds = myClasses.map((c) => c.id);
+  const myCourses = courses.filter((c) => myClassIds.includes(c.classeId));
   const pendingInscriptions = inscriptions.filter((i) => i.status === "PENDING" && myClassIds.includes(i.classeId));
   const uncorrectedSubmissions = submissions.filter((s) => s.status === "SUBMITTED" && assignments.some((a) => a.id === s.devoirId && myClassIds.includes(a.classeId)));
 
@@ -104,7 +114,7 @@ export function TeacherDashboard({
           <div className="space-y-1">
             <p className="text-xs font-medium text-slate-400">Classes Actives</p>
             <p className="text-2xl font-bold text-white">{myClasses.length}</p>
-            <p className="text-[11px] text-indigo-400">{courses.length} cours publiés</p>
+            <p className="text-[11px] text-indigo-400">{myCourses.length} cours publiés</p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
             <FolderKanban className="w-6 h-6" />

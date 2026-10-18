@@ -17,11 +17,14 @@ export function CreateClassModal({
   onClose,
   defaultEtablissementId,
 }: CreateClassModalProps) {
-  const { createClass, etablissements, createEtablissement, classes } = useStore();
+  const { createClass, etablissements, createEtablissement, classes, currentUser } = useStore();
   const { toast } = useToast();
 
+  const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
+  const userEtabId = currentUser.etablissementId || defaultEtablissementId;
+
   const [selectedEtabId, setSelectedEtabId] = useState<string>(
-    defaultEtablissementId || etablissements[0]?.id || "CUSTOM"
+    (!isSuperAdmin && userEtabId) ? userEtabId : (defaultEtablissementId || etablissements[0]?.id || "CUSTOM")
   );
   const [customEtabName, setCustomEtabName] = useState("");
   const [customEtabCity, setCustomEtabCity] = useState("Bamako");
@@ -104,12 +107,14 @@ export function CreateClassModal({
   );
 
   React.useEffect(() => {
-    if (defaultEtablissementId) {
+    if (!isSuperAdmin && (currentUser.etablissementId || defaultEtablissementId)) {
+      setSelectedEtabId(currentUser.etablissementId || defaultEtablissementId || "");
+    } else if (defaultEtablissementId) {
       setSelectedEtabId(defaultEtablissementId);
     } else if (etablissements.length > 0 && !selectedEtabId) {
       setSelectedEtabId(etablissements[0].id);
     }
-  }, [defaultEtablissementId, isOpen, etablissements]);
+  }, [defaultEtablissementId, isOpen, etablissements, isSuperAdmin, currentUser.etablissementId]);
 
   if (!isOpen) return null;
 
@@ -119,7 +124,8 @@ export function CreateClassModal({
           (e) =>
             e.id === selectedEtabId ||
             e.subdomain === selectedEtabId ||
-            (selectedEtabId && e.id.toLowerCase().includes(selectedEtabId.toLowerCase()))
+            (selectedEtabId && e.id.toLowerCase().includes(selectedEtabId.toLowerCase())) ||
+            (currentUser.etablissementName && e.name.toLowerCase() === currentUser.etablissementName.toLowerCase())
         ) || etablissements[0]
       : null;
 
@@ -127,8 +133,12 @@ export function CreateClassModal({
     e.preventDefault();
     if (!title.trim()) return;
 
-    let targetEtabId = selectedEtab?.id || selectedEtabId;
-    let targetEtabName = selectedEtab?.name;
+    let targetEtabId = (!isSuperAdmin && currentUser.etablissementId)
+      ? currentUser.etablissementId
+      : (selectedEtab?.id || selectedEtabId);
+    let targetEtabName = (!isSuperAdmin && currentUser.etablissementName)
+      ? currentUser.etablissementName
+      : (selectedEtab?.name || currentUser.etablissementName);
 
     // Handle custom user-provided establishment
     if (selectedEtabId === "CUSTOM" || !targetEtabId) {
@@ -232,26 +242,45 @@ export function CreateClassModal({
               <label className="block text-xs font-semibold text-slate-300 mb-1">
                 Établissement de rattachement *
               </label>
-              <select
-                value={selectedEtabId}
-                onChange={(e) => setSelectedEtabId(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
-              >
-                <optgroup label="Établissements enregistrés">
-                  {etablissements.map((etab) => (
-                    <option key={etab.id} value={etab.id}>
-                      🏫 {etab.name} ({etab.city})
-                    </option>
-                  ))}
-                </optgroup>
-                <optgroup label="Personnalisation libre">
-                  <option value="CUSTOM">➕ Saisir un nouvel établissement personnalisé...</option>
-                </optgroup>
-              </select>
+              {!isSuperAdmin ? (
+                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 border border-indigo-500/30 text-white text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">🏫</span>
+                    <div>
+                      <span className="font-bold text-indigo-300">
+                        {currentUser.etablissementName || selectedEtab?.name || "Mon Établissement"}
+                      </span>
+                      {selectedEtab?.city && (
+                        <span className="text-[10px] text-slate-400 ml-1.5">({selectedEtab.city})</span>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold">
+                    Campus assigné
+                  </span>
+                </div>
+              ) : (
+                <select
+                  value={selectedEtabId}
+                  onChange={(e) => setSelectedEtabId(e.target.value)}
+                  className="w-full px-3.5 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+                >
+                  <optgroup label="Établissements enregistrés">
+                    {etablissements.map((etab) => (
+                      <option key={etab.id} value={etab.id}>
+                        🏫 {etab.name} ({etab.city})
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Personnalisation libre">
+                    <option value="CUSTOM">➕ Saisir un nouvel établissement personnalisé...</option>
+                  </optgroup>
+                </select>
+              )}
             </div>
 
-            {/* Custom establishment input if user chooses CUSTOM */}
-            {selectedEtabId === "CUSTOM" && (
+            {/* Custom establishment input if user chooses CUSTOM (Super Admin only) */}
+            {isSuperAdmin && selectedEtabId === "CUSTOM" && (
               <div className="p-3.5 bg-indigo-950/30 border border-indigo-500/30 rounded-xl space-y-2.5 animate-fadeIn">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-300">
                   <Sparkles className="w-3.5 h-3.5 text-indigo-400" />

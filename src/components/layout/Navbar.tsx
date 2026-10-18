@@ -122,15 +122,17 @@ export function Navbar({
         </div>
         <div>
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <span className="font-extrabold text-lg sm:text-xl tracking-tight text-slate-900">
-              ALFASLE
+            <span className="font-extrabold text-lg sm:text-xl tracking-tight text-slate-900 truncate max-w-[200px] sm:max-w-xs">
+              {currentUser.role === "SUPER_ADMIN" ? "ALFASLE" : (currentUser.etablissementName || "ALFASLE")}
             </span>
             <span className="text-[9px] sm:text-[10px] font-semibold px-1.5 sm:px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200 uppercase tracking-wider">
-              LMS Pro
+              {currentUser.role === "SUPER_ADMIN" ? "Super Admin" : "Campus"}
             </span>
           </div>
           <p className="text-[10px] sm:text-[11px] text-slate-500 hidden sm:block">
-            Plateforme de Gestion de Classes & Cours
+            {currentUser.role === "SUPER_ADMIN"
+              ? "Console d'Administration Globale Multi-Campus"
+              : `Espace Dédié • ${currentUser.etablissementName || "Établissement"}`}
           </p>
         </div>
       </div>
@@ -162,8 +164,8 @@ export function Navbar({
           </button>
         )}
 
-        {/* Shortcut to Établissements Scolaires */}
-        {onOpenEtablissements && (currentUser.role === "ADMIN" || currentUser.role === "SUPER_ADMIN") && (
+        {/* Shortcut to Établissements Scolaires (Strictly Super Admin) */}
+        {onOpenEtablissements && currentUser.role === "SUPER_ADMIN" && (
           <button
             onClick={onOpenEtablissements}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 text-xs font-bold transition-all shadow-sm cursor-pointer"
@@ -198,7 +200,15 @@ export function Navbar({
                 </p>
               </div>
               <div className="space-y-1">
-                {users.map((u) => {
+                {(currentUser.role === "SUPER_ADMIN"
+                  ? users
+                  : users.filter(
+                      (u) =>
+                        u.etablissementId === currentUser.etablissementId ||
+                        (currentUser.etablissementName &&
+                          u.etablissementName === currentUser.etablissementName)
+                    )
+                ).map((u) => {
                   const uBadge = getRoleBadge(u.role);
                   const isSelected = u.id === currentUser.id;
                   return (

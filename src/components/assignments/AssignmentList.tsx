@@ -73,7 +73,24 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
     setDeleteConfirm({ isOpen: false, assignmentId: "", assignmentTitle: "" });
   };
 
+  const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
+  const userEtabId = currentUser.etablissementId;
+
+  const accessibleClasses = classes.filter((c) => {
+    if (isSuperAdmin) return true;
+    if (userEtabId) {
+      return (
+        c.etablissementId === userEtabId ||
+        (currentUser.etablissementName && c.etablissementName === currentUser.etablissementName)
+      );
+    }
+    return true;
+  });
+
+  const accessibleClassIds = new Set(accessibleClasses.map((c) => c.id));
+
   const filteredAssignments = assignments.filter((a) => {
+    if (!isSuperAdmin && !accessibleClassIds.has(a.classeId)) return false;
     const matchesSearch =
       a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       a.instructions.toLowerCase().includes(searchQuery.toLowerCase());
@@ -127,8 +144,8 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
             onChange={(e) => setSelectedClassId(e.target.value)}
             className="px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-500"
           >
-            <option value="ALL">Toutes les classes</option>
-            {classes.map((c) => (
+            <option value="ALL">Toutes les classes ({accessibleClasses.length})</option>
+            {accessibleClasses.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.title}
               </option>

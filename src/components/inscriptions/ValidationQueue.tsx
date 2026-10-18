@@ -25,15 +25,30 @@ import { formatDateTime } from "@/lib/utils";
 import { AccountActivationModal } from "./AccountActivationModal";
 
 export function ValidationQueue() {
-  const { inscriptions, classes, etablissements, approveInscription, rejectInscription } = useStore();
+  const { currentUser, inscriptions, classes, etablissements, approveInscription, rejectInscription } = useStore();
   const { toast } = useToast();
+
+  const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
+  const userEtabId = currentUser.etablissementId;
+
+  // Filtrer strictement les préinscriptions de cet établissement
+  const schoolInscriptions = inscriptions.filter((ins) => {
+    if (isSuperAdmin) return true;
+    if (userEtabId) {
+      return (
+        ins.etablissementId === userEtabId ||
+        (currentUser.etablissementName && ins.etablissementName === currentUser.etablissementName)
+      );
+    }
+    return true;
+  });
 
   const [filterStatus, setFilterStatus] = useState<"ALL" | InscriptionStatus>("PENDING");
   const [filterRole, setFilterRole] = useState<"ALL" | InscriptionRole>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedActivationIns, setSelectedActivationIns] = useState<any | null>(null);
 
-  const filteredInscriptions = inscriptions.filter((ins) => {
+  const filteredInscriptions = schoolInscriptions.filter((ins) => {
     const matchesStatus = filterStatus === "ALL" || ins.status === filterStatus;
     const matchesRole = filterRole === "ALL" || (ins.role || "STUDENT") === filterRole;
     const matchesSearch =
@@ -46,14 +61,14 @@ export function ValidationQueue() {
     return matchesStatus && matchesRole && matchesSearch;
   });
 
-  const pendingCount = inscriptions.filter((i) => i.status === "PENDING").length;
-  const approvedCount = inscriptions.filter((i) => i.status === "APPROVED").length;
-  const rejectedCount = inscriptions.filter((i) => i.status === "REJECTED").length;
+  const pendingCount = schoolInscriptions.filter((i) => i.status === "PENDING").length;
+  const approvedCount = schoolInscriptions.filter((i) => i.status === "APPROVED").length;
+  const rejectedCount = schoolInscriptions.filter((i) => i.status === "REJECTED").length;
 
-  const studentPendingCount = inscriptions.filter(
+  const studentPendingCount = schoolInscriptions.filter(
     (i) => i.status === "PENDING" && (i.role === "STUDENT" || !i.role)
   ).length;
-  const teacherPendingCount = inscriptions.filter(
+  const teacherPendingCount = schoolInscriptions.filter(
     (i) => i.status === "PENDING" && i.role === "TEACHER"
   ).length;
 

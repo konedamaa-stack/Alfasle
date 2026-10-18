@@ -101,6 +101,9 @@ export function DirecteurDashboard({
   }, [currentUser.etablissementId]);
 
   const currentEtab =
+    (currentUser.role !== "SUPER_ADMIN" && currentUser.etablissementId
+      ? etablissements.find((e) => e.id === currentUser.etablissementId || (currentUser.etablissementName && e.name === currentUser.etablissementName))
+      : null) ||
     etablissements.find((e) => e.id === selectedEtabId) ||
     etablissements.find((e) => e.id === currentUser.etablissementId) ||
     etablissements[0];
@@ -579,8 +582,8 @@ export function DirecteurDashboard({
           </div>
 
           <div className="shrink-0 flex flex-wrap items-center gap-2.5">
-            {/* Sélecteur de Campus Multi-Établissements */}
-            {etablissements.length > 1 && (
+            {/* Sélecteur de Campus réservé au Super Admin */}
+            {currentUser.role === "SUPER_ADMIN" && etablissements.length > 1 && (
               <div className="flex items-center gap-2 bg-slate-900/95 border border-blue-400/40 px-3.5 py-2 rounded-2xl shadow-xl backdrop-blur-md">
                 <Building2 className="w-4 h-4 text-blue-400 shrink-0" />
                 <span className="text-[11px] font-bold text-slate-300 shrink-0">Campus :</span>
@@ -607,14 +610,16 @@ export function DirecteurDashboard({
               <span>Modifier Campus</span>
             </button>
 
-            <button
-              onClick={() => onNavigate && onNavigate("etablissements")}
-              className="px-4 py-2.5 rounded-2xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-bold text-xs flex items-center gap-2 transition-all shadow-md hover:border-rose-400 cursor-pointer"
-              title="Ouvrir la gestion des établissements et campus"
-            >
-              <School className="w-4 h-4 text-rose-400" />
-              <span>Établissements Scolaires</span>
-            </button>
+            {currentUser.role === "SUPER_ADMIN" && (
+              <button
+                onClick={() => onNavigate && onNavigate("etablissements")}
+                className="px-4 py-2.5 rounded-2xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-bold text-xs flex items-center gap-2 transition-all shadow-md hover:border-rose-400 cursor-pointer"
+                title="Ouvrir la gestion des établissements et campus"
+              >
+                <School className="w-4 h-4 text-rose-400" />
+                <span>Tous les Campus</span>
+              </button>
+            )}
           </div>
         </div>
 

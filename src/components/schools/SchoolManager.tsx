@@ -90,7 +90,16 @@ export function SchoolManager({
     setNewDesc("");
   };
 
-  const filteredEtabs = etablissements.filter((e) => {
+  const accessibleEtabs = currentUser.role === "SUPER_ADMIN"
+    ? etablissements
+    : etablissements.filter(
+        (e) =>
+          e.id === currentUser.etablissementId ||
+          e.subdomain === currentUser.etablissementId ||
+          (currentUser.etablissementName && e.name.toLowerCase() === currentUser.etablissementName.toLowerCase())
+      );
+
+  const filteredEtabs = accessibleEtabs.filter((e) => {
     const matchesSearch =
       e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       e.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -119,9 +128,9 @@ export function SchoolManager({
           </div>
         </div>
 
-        {(currentUser.role === "SUPER_ADMIN" || currentUser.role === "ADMIN") && (
+        {currentUser.role === "SUPER_ADMIN" && (
           <div className="flex items-center gap-2.5 self-start sm:self-auto">
-            {currentUser.role === "SUPER_ADMIN" && onOpenSuperAdmin && (
+            {onOpenSuperAdmin && (
               <button
                 onClick={onOpenSuperAdmin}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-600/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold font-mono shadow-md transition-all transform hover:-translate-y-0.5"
@@ -131,15 +140,13 @@ export function SchoolManager({
               </button>
             )}
 
-            {(currentUser.role === "SUPER_ADMIN" || currentUser.role === "ADMIN") && (
-              <button
-                onClick={() => setIsCreateModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white text-xs font-bold shadow-lg shadow-rose-600/30 transition-all cursor-pointer"
-              >
-                <PlusCircle className="w-4 h-4" />
-                <span>+ Nouvel Établissement</span>
-              </button>
-            )}
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white text-xs font-bold shadow-lg shadow-rose-600/30 transition-all cursor-pointer"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>+ Nouvel Établissement</span>
+            </button>
           </div>
         )}
       </div>

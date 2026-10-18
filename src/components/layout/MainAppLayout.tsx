@@ -43,7 +43,7 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("alfasle_active_tab") as NavTab;
       if (saved) {
-        if (saved === "superadmin" && currentUser.role !== "SUPER_ADMIN") {
+        if ((saved === "superadmin" || saved === "etablissements") && currentUser.role !== "SUPER_ADMIN") {
           return "dashboard";
         }
         return saved;
@@ -53,7 +53,7 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
   });
 
   React.useEffect(() => {
-    if (currentUser.role !== "SUPER_ADMIN" && activeTab === "superadmin") {
+    if (currentUser.role !== "SUPER_ADMIN" && (activeTab === "superadmin" || activeTab === "etablissements")) {
       setActiveTabState("dashboard");
       if (typeof window !== "undefined") {
         localStorage.setItem("alfasle_active_tab", "dashboard");
@@ -62,7 +62,10 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
   }, [currentUser.role, activeTab]);
 
   const setActiveTab = (tab: NavTab) => {
-    const validTab = tab === "superadmin" && currentUser.role !== "SUPER_ADMIN" ? "dashboard" : tab;
+    let validTab = tab;
+    if (currentUser.role !== "SUPER_ADMIN" && (tab === "superadmin" || tab === "etablissements")) {
+      validTab = "dashboard";
+    }
     if (typeof window !== "undefined") {
       localStorage.setItem("alfasle_active_tab", validTab);
     }
@@ -200,22 +203,12 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
             </>
           )}
 
-          {/* MULTI-ETABLISSEMENTS & CAMPUS VIEW */}
-          {activeTab === "etablissements" && (
-            <>
-              {currentUser.role === "SUPER_ADMIN" ? (
-                <SuperAdminDashboard
-                  onOpenCreateClassForSchool={handleOpenCreateClassForSchool}
-                  onSelectClassForCourses={handleSelectClassForCourses}
-                />
-              ) : (
-                <SchoolManager
-                  onOpenCreateClassForSchool={handleOpenCreateClassForSchool}
-                  onSelectClassForCourses={handleSelectClassForCourses}
-                  onOpenSuperAdmin={() => setActiveTab("superadmin")}
-                />
-              )}
-            </>
+          {/* MULTI-ETABLISSEMENTS & CAMPUS VIEW (SUPER ADMIN ONLY) */}
+          {activeTab === "etablissements" && currentUser.role === "SUPER_ADMIN" && (
+            <SuperAdminDashboard
+              onOpenCreateClassForSchool={handleOpenCreateClassForSchool}
+              onSelectClassForCourses={handleSelectClassForCourses}
+            />
           )}
 
           {/* CLASSES VIEW */}
