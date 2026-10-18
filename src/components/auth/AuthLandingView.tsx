@@ -209,6 +209,48 @@ export function AuthLandingView({
         return;
       }
 
+            const isDirectorDiawara =
+        cleanId === "diawara@gmail.com" ||
+        cleanId === "diawara";
+
+      if (isDirectorDiawara) {
+        let dirUser = users.find(
+          (u) =>
+            u.email.toLowerCase() === "diawara@gmail.com" ||
+            (u.username && u.username.toLowerCase() === "diawara")
+        );
+
+        if (!dirUser) {
+          dirUser = {
+            id: "u_admin_diawara",
+            name: "Dr. Mahamadou DIAWARA",
+            username: "diawara",
+            email: "diawara@gmail.com",
+            password: inputPass || "Madouu1966",
+            role: "ADMIN",
+            bio: "Directeur Général du Lycée d'Excellence AlFasle (Yamoussoukro).",
+            avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+            etablissementId: "etab_lycee_excellence",
+            etablissementName: "Lycée d'Excellence AlFasle",
+            createdAt: new Date().toISOString(),
+          };
+        } else {
+          dirUser = {
+            ...dirUser,
+            etablissementId: "etab_lycee_excellence",
+            etablissementName: "Lycée d'Excellence AlFasle",
+          };
+        }
+
+        if (typeof window !== "undefined") {
+          localStorage.setItem("alfasle_active_tab", "dashboard");
+          localStorage.setItem("alfasle_user_role", "ADMIN");
+        }
+        setCurrentUser(dirUser);
+        onLoginSuccess();
+        return;
+      }
+
       const isDirectorSanogo =
         cleanId === "sanogo@gmail.com" ||
         cleanId === "sanogo";

@@ -79,14 +79,30 @@ export function DirecteurDashboard({
   } = useStore();
   const { toast } = useToast();
 
-  // Find the Director's establishment
+  // Campus sélectionné avec possibilité de bascule immédiate entre campus
+  const [selectedEtabId, setSelectedEtabId] = useState<string>(() => {
+    return (
+      currentUser.etablissementId ||
+      etablissements.find(
+        (e) =>
+          (currentUser.etablissementName && e.name === currentUser.etablissementName) ||
+          (currentUser.username && e.directorName?.toLowerCase().includes(currentUser.username.toLowerCase()))
+      )?.id ||
+      etablissements[0]?.id ||
+      ""
+    );
+  });
+
+  React.useEffect(() => {
+    if (currentUser.etablissementId) {
+      setSelectedEtabId(currentUser.etablissementId);
+    }
+  }, [currentUser.etablissementId]);
+
   const currentEtab =
-    etablissements.find(
-      (e) =>
-        e.id === currentUser.etablissementId ||
-        (currentUser.etablissementName && e.name === currentUser.etablissementName) ||
-        (currentUser.username && e.directorName?.toLowerCase().includes(currentUser.username.toLowerCase()))
-    ) || etablissements[0];
+    etablissements.find((e) => e.id === selectedEtabId) ||
+    etablissements.find((e) => e.id === currentUser.etablissementId) ||
+    etablissements[0];
 
   // Active Sub-Tab
   const [activeTab, setActiveTab] = useState<"STUDENTS" | "TEACHERS" | "CLASSES" | "INSCRIPTIONS">("STUDENTS");
@@ -561,10 +577,29 @@ export function DirecteurDashboard({
             </p>
           </div>
 
-          <div className="shrink-0 flex items-center gap-2">
+          <div className="shrink-0 flex flex-wrap items-center gap-2.5">
+            {/* Sélecteur de Campus Multi-Établissements */}
+            {etablissements.length > 1 && (
+              <div className="flex items-center gap-2 bg-slate-900/95 border border-blue-400/40 px-3.5 py-2 rounded-2xl shadow-xl backdrop-blur-md">
+                <Building2 className="w-4 h-4 text-blue-400 shrink-0" />
+                <span className="text-[11px] font-bold text-slate-300 shrink-0">Campus :</span>
+                <select
+                  value={currentEtab?.id || ""}
+                  onChange={(e) => setSelectedEtabId(e.target.value)}
+                  className="bg-transparent text-white font-extrabold text-xs focus:outline-none cursor-pointer pr-1"
+                >
+                  {etablissements.map((etab) => (
+                    <option key={etab.id} value={etab.id} className="bg-slate-900 text-white font-medium">
+                      {etab.name} ({etab.city})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <button
               onClick={handleOpenEditCampus}
-              className="px-4 py-2.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold text-xs flex items-center gap-2 transition-all shadow-md hover:border-amber-400"
+              className="px-4 py-2.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold text-xs flex items-center gap-2 transition-all shadow-md hover:border-amber-400 cursor-pointer"
               title="Modifier les informations et mot de passe du campus"
             >
               <Edit className="w-4 h-4 text-amber-400" />

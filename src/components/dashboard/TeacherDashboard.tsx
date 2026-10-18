@@ -46,8 +46,9 @@ export function TeacherDashboard({
 
   const myClasses = classes.filter((c) => c.teacherId === currentUser.id);
   const totalEnrolled = myClasses.reduce((acc, c) => acc + (c.enrolledCount || 0), 0);
-  const pendingInscriptions = inscriptions.filter((i) => i.status === "PENDING");
-  const uncorrectedSubmissions = submissions.filter((s) => s.status === "SUBMITTED");
+  const myClassIds = myClasses.map((c) => c.id);
+  const pendingInscriptions = inscriptions.filter((i) => i.status === "PENDING" && myClassIds.includes(i.classeId));
+  const uncorrectedSubmissions = submissions.filter((s) => s.status === "SUBMITTED" && assignments.some((a) => a.id === s.devoirId && myClassIds.includes(a.classeId)));
 
   return (
     <div className="space-y-8 animate-fadeIn">
