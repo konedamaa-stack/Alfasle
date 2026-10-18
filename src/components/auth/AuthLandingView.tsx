@@ -89,8 +89,8 @@ export function AuthLandingView({
       espaceDesc: "Direction du Groupe Scolaire AlFasle (Abidjan) & Supervision Pédagogique",
       defaultLogin: "konedamaa@gmail.com",
       defaultPass: "Madouu1966",
-      cardBg: "from-rose-500 via-pink-600 to-rose-900",
-      gradient: "from-rose-500 to-pink-600",
+      cardBg: "from-sky-400 via-sky-500 to-blue-600",
+      gradient: "from-sky-400 to-sky-500",
     },
     TEACHER: {
       badgeIcon: "👨‍🏫",
@@ -623,11 +623,11 @@ export function AuthLandingView({
                   onClick={() => handleRoleSelect("ADMIN")}
                   className={`p-3 rounded-2xl flex flex-col items-center justify-center gap-2 border transition-all text-center cursor-pointer ${
                     selectedRole === "ADMIN"
-                      ? "bg-rose-50 border-rose-500 text-rose-800 shadow-md ring-2 ring-rose-500/30"
+                      ? "bg-sky-50 border-sky-400 text-sky-800 shadow-md ring-2 ring-sky-400/30"
                       : "bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-300"
                   }`}
                 >
-                  <div className="w-9 h-9 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-lg">
+                  <div className="w-9 h-9 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-lg">
                     👑
                   </div>
                   <span className="text-[11px] font-bold">Directeur</span>
@@ -762,13 +762,13 @@ export function AuthLandingView({
                 </div>
 
                                 {/* Bouton d'accès direct 1-Clic KONE ADAMA */}
-                <div className="p-3 rounded-2xl bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200 space-y-2">
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-200 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-extrabold text-rose-900 flex items-center gap-1.5">
+                    <span className="text-[11px] font-extrabold text-sky-900 flex items-center gap-1.5">
                       <span>👑</span>
                       <span>Connexion Directe 1-Clic :</span>
                     </span>
-                    <span className="text-[10px] font-bold text-rose-600 bg-white px-2 py-0.5 rounded-full border border-rose-200">
+                    <span className="text-[10px] font-bold text-sky-600 bg-white px-2 py-0.5 rounded-full border border-sky-200">
                       Sans mot de passe
                     </span>
                   </div>
@@ -776,7 +776,7 @@ export function AuthLandingView({
                     <button
                       type="button"
                       onClick={() => handleFastLogin("konedamaa@gmail.com", "Madouu1966", "ADMIN")}
-                      className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-extrabold text-[11px] flex items-center justify-between shadow-md shadow-rose-600/20 transition-all cursor-pointer"
+                      className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-extrabold text-[11px] flex items-center justify-between shadow-md shadow-sky-500/20 transition-all cursor-pointer"
                     >
                       <span>Entrer : KONE ADAMA</span>
                       <span>&rarr;</span>
@@ -798,7 +798,7 @@ export function AuthLandingView({
                     type="submit"
                     className={`flex-1 py-3 px-6 rounded-2xl ${
                       selectedRole === "ADMIN"
-                        ? "bg-gradient-to-r from-rose-500 via-pink-600 to-rose-700 hover:opacity-95 shadow-rose-500/30"
+                        ? "bg-gradient-to-r from-sky-400 via-sky-500 to-blue-600 hover:opacity-95 shadow-sky-400/30"
                         : "bg-blue-600 hover:bg-blue-500 shadow-blue-600/30"
                     } text-white font-bold text-xs shadow-lg flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 cursor-pointer`}
                   >
