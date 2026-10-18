@@ -40,8 +40,8 @@ export function AuthLandingView({
   const { users, currentUser, setCurrentUser, etablissements, classes, resetStoreToDefaults } = useStore();
 
   const [selectedRole, setSelectedRole] = useState<UserRole>("ADMIN");
-  const [identifier, setIdentifier] = useState("diawara@gmail.com");
-  const [password, setPassword] = useState("Madouu1966@");
+  const [identifier, setIdentifier] = useState("konedamaa@gmail.com");
+  const [password, setPassword] = useState("Madouu1966");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
@@ -134,6 +134,57 @@ export function AuthLandingView({
   };
 
   const currentConfig = roleConfig[selectedRole];
+
+  const handleFastLogin = (loginEmail: string, pass: string, role: UserRole) => {
+    let target = users.find(
+      (u) =>
+        u.email.toLowerCase() === loginEmail.toLowerCase() ||
+        (u.username && u.username.toLowerCase() === loginEmail.toLowerCase())
+    );
+
+    if (!target) {
+      if (loginEmail.includes("kone")) {
+        target = {
+          id: "u_admin_kone",
+          name: "KONE ADAMA (Directeur)",
+          username: "konedamaa",
+          email: "konedamaa@gmail.com",
+          password: "Madouu1966",
+          role: "ADMIN",
+          bio: "Directeur & Administrateur Principal du Groupe Scolaire AlFasle.",
+          avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
+          etablissementId: "etab_gs_alfasle",
+          etablissementName: "Groupe Scolaire AlFasle",
+          createdAt: new Date().toISOString(),
+        };
+      } else {
+        target = {
+          id: "u_admin_diawara",
+          name: "Dr. Mahamadou DIAWARA",
+          username: "diawara",
+          email: "diawara@gmail.com",
+          password: "Madouu1966",
+          role: "ADMIN",
+          bio: "Directeur du Lycée d'Excellence AlFasle.",
+          avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+          etablissementId: "etab_lycee_excellence",
+          etablissementName: "Lycée d'Excellence AlFasle",
+          createdAt: new Date().toISOString(),
+        };
+      }
+    }
+
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("alfasle_session_active", "true");
+        localStorage.setItem("alfasle_active_tab", "dashboard");
+        localStorage.setItem("alfasle_user_role", target.role);
+      } catch (_) {}
+    }
+
+    setCurrentUser(target);
+    onLoginSuccess();
+  };
 
   const handleRoleSelect = (role: UserRole) => {
     setSelectedRole(role);
@@ -334,11 +385,12 @@ export function AuthLandingView({
 
       setCurrentUser(superUser);
 
-      if (onOpenSuperAdmin) {
-        onOpenSuperAdmin();
-        return;
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("alfasle_session_active", "true");
+          localStorage.setItem("alfasle_active_tab", "dashboard");
+        } catch (_) {}
       }
-
       onLoginSuccess();
       return;
     }
@@ -398,11 +450,12 @@ export function AuthLandingView({
 
       setCurrentUser(matchedUser);
 
-      if (matchedUser.role === "SUPER_ADMIN" && onOpenSuperAdmin) {
-        onOpenSuperAdmin();
-        return;
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("alfasle_session_active", "true");
+          localStorage.setItem("alfasle_active_tab", "dashboard");
+        } catch (_) {}
       }
-
       onLoginSuccess();
     } else {
       setErrorMsg("Identifiant ou email introuvable. Veuillez vérifier ou créer le compte dans le Super Admin.");
@@ -706,6 +759,37 @@ export function AuthLandingView({
                   <label htmlFor="rememberCheck" className="text-slate-600 text-[11px] cursor-pointer">
                     Se souvenir de moi sur cet appareil
                   </label>
+                </div>
+
+                                {/* Bouton d'accès direct 1-Clic KONE ADAMA */}
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-extrabold text-rose-900 flex items-center gap-1.5">
+                      <span>👑</span>
+                      <span>Connexion Directe 1-Clic :</span>
+                    </span>
+                    <span className="text-[10px] font-bold text-rose-600 bg-white px-2 py-0.5 rounded-full border border-rose-200">
+                      Sans mot de passe
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleFastLogin("konedamaa@gmail.com", "Madouu1966", "ADMIN")}
+                      className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-extrabold text-[11px] flex items-center justify-between shadow-md shadow-rose-600/20 transition-all cursor-pointer"
+                    >
+                      <span>Entrer : KONE ADAMA</span>
+                      <span>&rarr;</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleFastLogin("diawara@gmail.com", "Madouu1966", "ADMIN")}
+                      className="py-2.5 px-3 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-[11px] flex items-center justify-between transition-all cursor-pointer"
+                    >
+                      <span>Entrer : Dr. DIAWARA</span>
+                      <span>&rarr;</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Submit button matching reference image */}
