@@ -110,6 +110,7 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
       <Navbar
         onLogoutToLanding={onLogout}
         onOpenSuperAdmin={() => setActiveTab("superadmin")}
+        onOpenEtablissements={() => setActiveTab("etablissements")}
         onToggleMobileMenu={() => setIsMobileMenuOpen((prev) => !prev)}
         isMobileMenuOpen={isMobileMenuOpen}
       />

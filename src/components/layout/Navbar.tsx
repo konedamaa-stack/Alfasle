@@ -26,6 +26,7 @@ import { ConfirmModal } from "@/components/common/ConfirmModal";
 interface NavbarProps {
   onLogoutToLanding?: () => void;
   onOpenSuperAdmin?: () => void;
+  onOpenEtablissements?: () => void;
   onToggleMobileMenu?: () => void;
   isMobileMenuOpen?: boolean;
 }
@@ -33,6 +34,7 @@ interface NavbarProps {
 export function Navbar({
   onLogoutToLanding,
   onOpenSuperAdmin,
+  onOpenEtablissements,
   onToggleMobileMenu,
   isMobileMenuOpen,
 }: NavbarProps) {
@@ -150,6 +152,19 @@ export function Navbar({
             <Shield className="w-3.5 h-3.5 text-amber-600" />
             <span className="hidden sm:inline">Console Super Admin</span>
             <span className="sm:hidden">Super Admin</span>
+          </button>
+        )}
+
+        {/* Shortcut to Établissements Scolaires */}
+        {onOpenEtablissements && (currentUser.role === "ADMIN" || currentUser.role === "SUPER_ADMIN") && (
+          <button
+            onClick={onOpenEtablissements}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 text-xs font-bold transition-all shadow-sm cursor-pointer"
+            title="Gérer ou créer les établissements scolaires"
+          >
+            <School className="w-3.5 h-3.5 text-rose-600" />
+            <span className="hidden sm:inline">Établissements Scolaires</span>
+            <span className="sm:hidden">Écoles</span>
           </button>
         )}
 

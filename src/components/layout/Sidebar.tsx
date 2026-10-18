@@ -66,7 +66,7 @@ export function Sidebar({
         return [
           {
             id: "etablissements",
-            label: "Gestion des Établissements",
+            label: "Établissements Scolaires",
             icon: <School className="w-4 h-4 text-amber-400" />,
             badge: `${etablissements.length} Écoles`,
             badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/30",
@@ -147,6 +147,13 @@ export function Sidebar({
             badge: currentUser.etablissementName ? currentUser.etablissementName.slice(0, 14) : "Campus",
             badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
           },
+          {
+            id: "etablissements",
+            label: "Établissements Scolaires",
+            icon: <School className="w-4 h-4 text-rose-500" />,
+            badge: `${etablissements.length} Écoles`,
+            badgeColor: "bg-rose-50 text-rose-700 border-rose-200",
+          },
           { id: "classes", label: "Classes du Campus", icon: <FolderKanban className="w-4 h-4" /> },
           {
             id: "inscriptions",
@@ -219,6 +226,28 @@ export function Sidebar({
             })}
           </nav>
         </div>
+
+        {/* Admin Multi-Campus Banner */}
+        {currentUser.role === "ADMIN" && (
+          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 space-y-2.5 shadow-sm">
+            <div className="flex items-center gap-2 text-rose-800 text-xs font-bold font-mono">
+              <School className="w-3.5 h-3.5 text-rose-600" />
+              <span>Réseau d'Établissements</span>
+            </div>
+            <p className="text-[10px] text-slate-600 leading-relaxed">
+              Consultez vos différents campus ou créez un nouvel établissement scolaire.
+            </p>
+            <button
+              onClick={() => {
+                setActiveTab("etablissements");
+                if (isMobile && onCloseMobile) onCloseMobile();
+              }}
+              className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white font-extrabold text-[11px] flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
+            >
+              <span>Établissements Scolaires &rarr;</span>
+            </button>
+          </div>
+        )}
 
         {/* Super Admin Access Banner (uniquement pour le rôle SUPER_ADMIN) */}
         {currentUser.role === "SUPER_ADMIN" && (

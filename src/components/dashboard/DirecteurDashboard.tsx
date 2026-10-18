@@ -605,6 +605,15 @@ export function DirecteurDashboard({
               <Edit className="w-4 h-4 text-amber-400" />
               <span>Modifier Campus</span>
             </button>
+
+            <button
+              onClick={() => onNavigate && onNavigate("etablissements")}
+              className="px-4 py-2.5 rounded-2xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-bold text-xs flex items-center gap-2 transition-all shadow-md hover:border-rose-400 cursor-pointer"
+              title="Ouvrir la gestion des établissements et campus"
+            >
+              <School className="w-4 h-4 text-rose-400" />
+              <span>Établissements Scolaires</span>
+            </button>
           </div>
         </div>
 

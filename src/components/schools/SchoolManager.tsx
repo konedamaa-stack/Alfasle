@@ -131,13 +131,13 @@ export function SchoolManager({
               </button>
             )}
 
-            {currentUser.role === "SUPER_ADMIN" && (
+            {(currentUser.role === "SUPER_ADMIN" || currentUser.role === "ADMIN") && (
               <button
                 onClick={() => setIsCreateModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg shadow-blue-600/30 transition-all"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white text-xs font-bold shadow-lg shadow-rose-600/30 transition-all cursor-pointer"
               >
                 <PlusCircle className="w-4 h-4" />
-                <span>Ajouter un Établissement</span>
+                <span>+ Nouvel Établissement</span>
               </button>
             )}
           </div>
