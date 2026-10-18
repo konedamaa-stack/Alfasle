@@ -37,11 +37,15 @@ export function ClassList({
   onSelectClassForCourses,
   onOpenJoinClassModal,
 }: ClassListProps) {
-  const { currentUser, classes, inscriptions, etablissements, updateClass, deleteClass, users } = useStore();
+  const { currentUser, classes, inscriptions, etablissements, updateClass, deleteClass, purgeDemoClasses, users } = useStore();
   const { toast } = useToast();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedEtablissement, setSelectedEtablissement] = useState("ALL");
+  const [selectedEtablissement, setSelectedEtablissement] = useState(() => {
+    return currentUser.etablissementId && currentUser.role !== "SUPER_ADMIN"
+      ? currentUser.etablissementId
+      : "ALL";
+  });
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [selectedLevel, setSelectedLevel] = useState("ALL");
 
@@ -195,6 +199,30 @@ export function ClassList({
               <span>Rejoindre avec un Code</span>
             </button>
           )}
+
+          {classes.some((c) => ["cls_nextjs_mastery", "cls_algo_data", "cls_physique_chimie", "cls_litterature_philo", "cls_reseaux_telecoms", "cls_cloud_distrib"].includes(c.id)) &&
+            (currentUser.role === "ADMIN" || currentUser.role === "SUPER_ADMIN") && (
+              <button
+                onClick={() => {
+                  setConfirmModal({
+                    isOpen: true,
+                    title: "Retirer toutes les classes démo ?",
+                    message: "Voulez-vous supprimer définitivement les classes de démonstration (Next.js, Terminale S, etc.) pour ne conserver que les classes réelles de votre établissement ?",
+                    confirmLabel: "Supprimer les classes démo",
+                    variant: "danger",
+                    onConfirm: () => {
+                      purgeDemoClasses();
+                      toast.success("Nettoyage terminé", "Les classes de démonstration ont été supprimées.");
+                    },
+                  });
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-semibold shadow-sm transition-all cursor-pointer"
+                title="Supprimer les classes de démonstration"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                <span className="hidden sm:inline">Retirer classes démo</span>
+              </button>
+            )}
 
           {(currentUser.role === "TEACHER" || currentUser.role === "ADMIN") && (
             <button

@@ -73,6 +73,7 @@ export function DirecteurDashboard({
     createClass,
     updateClass,
     deleteClass,
+    purgeDemoClasses,
     updateEtablissement,
     approveInscription,
     rejectInscription,
@@ -1083,13 +1084,41 @@ export function DirecteurDashboard({
               />
             </div>
 
-            <button
-              onClick={() => setIsAddClassOpen(true)}
-              className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs shadow-lg shadow-amber-500/25 flex items-center gap-2 transition-all shrink-0"
-            >
-              <PlusCircle className="w-4 h-4 fill-black" />
-              <span>+ Créer une Nouvelle Classe</span>
-            </button>
+            <div className="flex items-center gap-2">
+              {classes.some((c) =>
+                ["cls_nextjs_mastery", "cls_algo_data", "cls_physique_chimie", "cls_litterature_philo", "cls_reseaux_telecoms", "cls_cloud_distrib"].includes(c.id)
+              ) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConfirmModal({
+                      isOpen: true,
+                      title: "Supprimer les classes de démonstration ?",
+                      message: "Voulez-vous retirer définitivement les classes d'exemple pré-installées pour ne conserver que les classes réelles de votre établissement ?",
+                      confirmLabel: "Supprimer les classes démo",
+                      variant: "danger",
+                      onConfirm: () => {
+                        purgeDemoClasses();
+                        toast.success("Nettoyage effectué", "Les classes de test ont été supprimées.");
+                      },
+                    });
+                  }}
+                  className="px-3 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                  title="Supprimer les classes démo"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                  <span className="hidden sm:inline">Retirer classes démo</span>
+                </button>
+              )}
+
+              <button
+                onClick={() => setIsAddClassOpen(true)}
+                className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs shadow-lg shadow-amber-500/25 flex items-center gap-2 transition-all shrink-0 cursor-pointer"
+              >
+                <PlusCircle className="w-4 h-4 fill-black" />
+                <span>+ Créer une Nouvelle Classe</span>
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

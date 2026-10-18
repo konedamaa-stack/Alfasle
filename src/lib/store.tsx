@@ -54,6 +54,7 @@ interface StoreContextType {
   updateClass: (id: string, data: Partial<Classe>) => void;
   deleteClass: (id: string) => void;
   archiveClass: (id: string) => void;
+  purgeDemoClasses: () => void;
 
   // Inscriptions & Pré-inscriptions
   inscriptions: Inscription[];
@@ -146,87 +147,7 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          // Filter out deleted establishments and related records
-          const filteredSaved = parsed.filter((item: any) => {
-            const id = (item.id || "").toLowerCase();
-            const name = (item.name || item.title || item.userName || "").toLowerCase();
-            const email = (item.email || item.userEmail || "").toLowerCase();
-            const subdomain = (item.subdomain || "").toLowerCase();
-            const etabId = (item.etablissementId || "").toLowerCase();
-            const desc = (item.description || item.bio || item.motivation || "").toLowerCase();
-
-            const isDeleted =
-              id.includes("raya") ||
-              id.includes("arqam") ||
-              id.includes("tawhid") ||
-              id.includes("quran") ||
-              id.includes("coran") ||
-              id.includes("lycee_excellence") ||
-              id.includes("el_manar") ||
-              id.includes("elmanar") ||
-              id.includes("yasmine") ||
-              id.includes("polytech") ||
-              id.includes("bakary") ||
-              name.includes("raya") ||
-              name.includes("arqam") ||
-              name.includes("tawhid") ||
-              name.includes("djibril") ||
-              name.includes("quran") ||
-              name.includes("coran") ||
-              name.includes("el-manar") ||
-              name.includes("el manar") ||
-              name.includes("fatima") ||
-              name.includes("zahra") ||
-              name.includes("yasmine") ||
-              name.includes("polytech") ||
-              name.includes("polytechnique") ||
-              name.includes("bakary") ||
-              name.includes("lycée d'excellence") ||
-              name.includes("lycee d'excellence") ||
-              name.includes("قرآن") ||
-              name.includes("القرآن") ||
-              name.includes("تعليم القرآن") ||
-              name.includes("توحيد") ||
-              desc.includes("قرآن") ||
-              desc.includes("القرآن") ||
-              desc.includes("تعليم القرآن") ||
-              desc.includes("el-manar") ||
-              desc.includes("el manar") ||
-              desc.includes("polytech") ||
-              email.includes("raya") ||
-              email.includes("arqam") ||
-              email.includes("djibril") ||
-              email.includes("quran") ||
-              email.includes("coran") ||
-              email.includes("tawhid") ||
-              email.includes("elmanar") ||
-              email.includes("fatima") ||
-              email.includes("yasmine") ||
-              email.includes("polytech") ||
-              email.includes("bakary") ||
-              subdomain.includes("raya") ||
-              subdomain.includes("arqam") ||
-              subdomain.includes("tawhid") ||
-              subdomain.includes("quran") ||
-              subdomain.includes("coran") ||
-              subdomain.includes("el-manar") ||
-              subdomain.includes("elmanar") ||
-              subdomain.includes("polytech") ||
-              subdomain.includes("lycee-excellence") ||
-              etabId.includes("raya") ||
-              etabId.includes("arqam") ||
-              etabId.includes("tawhid") ||
-              etabId.includes("quran") ||
-              etabId.includes("coran") ||
-              etabId.includes("el_manar") ||
-              etabId.includes("elmanar") ||
-              etabId.includes("polytech") ||
-              etabId.includes("lycee_excellence");
-
-            return !isDeleted;
-          });
-
-          let merged = [...filteredSaved];
+          let merged = [...parsed];
 
           // Assurer que le compte Super Admin et Directeur existent au minimum dans users
           if (suffix === "users") {
@@ -552,8 +473,23 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       createdAt: new Date().toISOString(),
     };
 
+    const starterCourse: Cours = {
+      id: `crs_${Date.now()}`,
+      classeId: starterClassId,
+      discipline: "Général",
+      teacherName: "Prof. Sarah Mansouri",
+      chapterTitle: "Module 1 : Accueil & Présentation",
+      title: `Introduction & Programme - ${data.name}`,
+      summary: `Présentation du cursus et des objectifs pédagogiques de l'établissement ${data.name}.`,
+      content: `Bienvenue à **${data.name}** !\n\nCe premier cours présente l'organisation des études, les règles de l'établissement et les ressources pédagogiques mises à votre disposition.`,
+      order: 1,
+      status: "PUBLISHED",
+      publishedAt: new Date().toISOString(),
+    };
+
     setEtablissements((prev) => [newEtab, ...prev]);
     setClasses((prev) => [starterClass, ...prev]);
+    setCourses((prev) => [starterCourse, ...prev]);
 
     // 2. If director has email, provision Director user in system
     if (data.directorEmail && data.directorName) {
@@ -757,6 +693,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const archiveClass = (id: string) => {
     setClasses((prev) => prev.map((c) => (c.id === id ? { ...c, status: "ARCHIVED" } : c)));
+  };
+
+  const purgeDemoClasses = () => {
+    const demoClassIds = new Set([
+      "cls_nextjs_mastery",
+      "cls_algo_data",
+      "cls_physique_chimie",
+      "cls_litterature_philo",
+      "cls_reseaux_telecoms",
+      "cls_cloud_distrib",
+    ]);
+
+    setClasses((prev) => prev.filter((c) => !demoClassIds.has(c.id)));
+    setInscriptions((prev) => prev.filter((i) => !demoClassIds.has(i.classeId)));
+    setCourses((prev) => prev.filter((crs) => !demoClassIds.has(crs.classeId)));
+    setAssignments((prev) => prev.filter((a) => !demoClassIds.has(a.classeId)));
   };
 
   // Inscriptions
@@ -1485,6 +1437,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         updateClass,
         deleteClass,
         archiveClass,
+        purgeDemoClasses,
         inscriptions,
         applyToClass,
         submitPreRegistration,

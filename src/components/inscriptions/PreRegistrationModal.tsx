@@ -49,7 +49,7 @@ export function PreRegistrationModal({
   defaultEstablishmentId,
   defaultRole = "STUDENT",
 }: PreRegistrationModalProps) {
-  const { etablissements, classes, submitPreRegistration } = useStore();
+  const { etablissements, classes, courses, submitPreRegistration } = useStore();
   const { toast } = useToast();
 
   const [role, setRole] = useState<InscriptionRole>(defaultRole);
@@ -60,6 +60,7 @@ export function PreRegistrationModal({
     defaultEstablishmentId || (etablissements[0]?.id ?? "etab_lycee_excellence")
   );
   const [classeId, setClasseId] = useState("");
+  const [selectedCourseId, setSelectedCourseId] = useState("");
   const [subject, setSubject] = useState("");
   const [customSubject, setCustomSubject] = useState("");
   const [diplomaOrBio, setDiplomaOrBio] = useState("");
@@ -73,11 +74,13 @@ export function PreRegistrationModal({
   React.useEffect(() => {
     if (defaultEstablishmentId) {
       setEstablishmentId(defaultEstablishmentId);
+    } else if (etablissements.length > 0 && (!establishmentId || !etablissements.some((e) => e.id === establishmentId))) {
+      setEstablishmentId(etablissements[0].id);
     }
     if (defaultRole) {
       setRole(defaultRole);
     }
-  }, [defaultEstablishmentId, defaultRole, isOpen]);
+  }, [defaultEstablishmentId, defaultRole, isOpen, etablissements]);
 
   // Robustly filter available classes for selected establishment (supporting ID, subdomain, and name matching)
   const currentSelectedEst = etablissements.find(
@@ -101,6 +104,27 @@ export function PreRegistrationModal({
     }
     return c.etablissementId?.toLowerCase() === establishmentId?.toLowerCase();
   });
+
+  // Selected class
+  const selectedClass = classes.find((c) => c.id === classeId);
+
+  // Auto-select first class when changing establishment or if invalid
+  React.useEffect(() => {
+    if (availableClasses.length > 0) {
+      if (!classeId || !availableClasses.some((c) => c.id === classeId)) {
+        setClasseId(availableClasses[0].id);
+      }
+    } else if (classes.length > 0 && !classeId) {
+      setClasseId(classes[0].id);
+    }
+  }, [establishmentId, availableClasses, classes]);
+
+  // Courses associated with the selected class
+  const classCourses = courses.filter((crs) => crs.classeId === classeId);
+
+  // All courses belonging to this establishment (across all its classes)
+  const establishmentClassIds = new Set(availableClasses.map((c) => c.id));
+  const establishmentCourses = courses.filter((crs) => establishmentClassIds.has(crs.classeId));
 
   if (!isOpen) return null;
 
@@ -126,14 +150,16 @@ export function PreRegistrationModal({
     }
 
     const selectedEstablishment = etablissements.find((e) => e.id === establishmentId);
-    const selectedClass = classes.find((c) => c.id === classeId);
+    const chosenCourse = courses.find((c) => c.id === selectedCourseId);
 
     const finalSubject =
       role === "TEACHER"
         ? subject === "Autre spécialité"
           ? customSubject.trim() || "Spécialité générale"
-          : subject || "Discipline générale"
-        : undefined;
+          : subject || chosenCourse?.discipline || "Discipline générale"
+        : chosenCourse
+        ? `${chosenCourse.discipline ? chosenCourse.discipline + " : " : ""}${chosenCourse.title}`
+        : selectedClass?.disciplines?.[0] || undefined;
 
     const result = submitPreRegistration({
       role,
@@ -165,6 +191,7 @@ export function PreRegistrationModal({
     setUserEmail("");
     setUserPhone("");
     setClasseId("");
+    setSelectedCourseId("");
     setSubject("");
     setCustomSubject("");
     setDiplomaOrBio("");
@@ -351,6 +378,7 @@ export function PreRegistrationModal({
                     onChange={(e) => {
                       setEstablishmentId(e.target.value);
                       setClasseId(""); // Reset class selection on school change
+                      setSelectedCourseId("");
                     }}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer"
                   >
@@ -373,6 +401,31 @@ export function PreRegistrationModal({
                 </div>
               </div>
 
+              {/* Status summary of the selected establishment */}
+              <div className="p-3 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">🏫</span>
+                  <span className="font-bold text-white">
+                    {currentSelectedEst?.name || "Tous les campus AlFasle"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 font-mono text-[11px]">
+                  <span className="px-2.5 py-0.5 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                    {availableClasses.length} classe{availableClasses.length > 1 ? "s" : ""}
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                    {establishmentCourses.length} cours créé{establishmentCourses.length > 1 ? "s" : ""}
+                  </span>
+                </div>
+              </div>
+
+              {availableClasses.length === 0 && (
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>Aucune classe n'est actuellement créée sur ce campus. Vous pouvez choisir une classe sur un autre campus ou sélectionner « Tous les établissements ».</span>
+                </div>
+              )}
+
               {/* Class & Subject Selectors */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
@@ -386,6 +439,7 @@ export function PreRegistrationModal({
                     onChange={(e) => {
                       const selectedId = e.target.value;
                       setClasseId(selectedId);
+                      setSelectedCourseId("");
                       // Auto-sync establishment if user picks a class from another school
                       const chosenClass = classes.find((c) => c.id === selectedId);
                       if (chosenClass?.etablissementId && establishmentId !== chosenClass.etablissementId) {
@@ -396,44 +450,51 @@ export function PreRegistrationModal({
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer"
                   >
                     <option value="">
-                      -- Sélectionnez votre classe ({classes.length} classes actives au total) --
+                      {availableClasses.length > 0
+                        ? `-- Choisissez une classe (${availableClasses.length} classe${availableClasses.length > 1 ? "s" : ""} disponible${availableClasses.length > 1 ? "s" : ""}) --`
+                        : "-- Aucune classe enregistrée sur cet établissement --"}
                     </option>
 
-                    {availableClasses.length > 0 ? (
-                      <>
-                        <optgroup label={`Classes sur ce campus (${availableClasses.length})`}>
-                          {availableClasses.map((c) => (
-                            <option key={c.id} value={c.id}>
-                              ✨ {c.title} ({c.classCode || c.level}) • {c.enrolledCount || 0}/{c.capacity} élèves
-                            </option>
-                          ))}
-                        </optgroup>
-
-                        {classes.filter((c) => !availableClasses.some((ac) => ac.id === c.id)).length > 0 && (
-                          <optgroup label="Toutes les autres classes disponibles sur le réseau">
-                            {classes
-                              .filter((c) => !availableClasses.some((ac) => ac.id === c.id))
-                              .map((c) => (
+                    {establishmentId === "ALL" ? (
+                      etablissements.map((est) => {
+                        const estClasses = classes.filter(
+                          (c) =>
+                            c.etablissementId === est.id ||
+                            c.etablissementId === est.subdomain ||
+                            (c.etablissementName && c.etablissementName.toLowerCase().includes(est.name.toLowerCase()))
+                        );
+                        if (estClasses.length === 0) return null;
+                        return (
+                          <optgroup key={est.id} label={`🏫 ${est.name} (${estClasses.length})`}>
+                            {estClasses.map((c) => {
+                              const cCourses = courses.filter((crs) => crs.classeId === c.id);
+                              return (
                                 <option key={c.id} value={c.id}>
-                                  [{c.etablissementName || "Campus"}] {c.title} • {c.level} ({c.enrolledCount || 0}/{c.capacity} élèves)
+                                  ✨ {c.title} ({c.classCode || c.level}) • {cCourses.length} cours • {c.enrolledCount || 0}/{c.capacity} élèves
                                 </option>
-                              ))}
+                              );
+                            })}
                           </optgroup>
-                        )}
-                      </>
-                    ) : (
-                      <optgroup label="Toutes les classes disponibles sur le réseau AlFasle">
-                        {classes.map((c) => (
+                        );
+                      })
+                    ) : availableClasses.length > 0 ? (
+                      availableClasses.map((c) => {
+                        const cCourses = courses.filter((crs) => crs.classeId === c.id);
+                        return (
                           <option key={c.id} value={c.id}>
-                            [{c.etablissementName || "Campus"}] {c.title} • {c.level} ({c.enrolledCount || 0}/{c.capacity} élèves)
+                            ✨ {c.title} ({c.classCode || c.level}) • {cCourses.length} cours • {c.enrolledCount || 0}/{c.capacity} élèves
                           </option>
-                        ))}
-                      </optgroup>
+                        );
+                      })
+                    ) : (
+                      <option value="" disabled>
+                        ⚠️ Aucune classe créée pour cet établissement
+                      </option>
                     )}
                   </select>
                 </div>
 
-                {role === "TEACHER" && (
+                {role === "TEACHER" ? (
                   <div className="space-y-1.5 animate-fadeIn">
                     <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
                       <Award className="w-3.5 h-3.5 text-emerald-400" />
@@ -462,6 +523,122 @@ export function PreRegistrationModal({
                         className="w-full mt-2 px-3.5 py-2 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-all"
                       />
                     )}
+                  </div>
+                ) : (
+                  <div className="space-y-1.5 animate-fadeIn">
+                    <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                      <Award className="w-3.5 h-3.5 text-indigo-400" />
+                      Filière / Option visée (Optionnel)
+                    </label>
+                    <select
+                      value={selectedCourseId}
+                      onChange={(e) => setSelectedCourseId(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer"
+                    >
+                      <option value="">-- Cursus complet & général --</option>
+                      {classCourses.map((crs) => (
+                        <option key={crs.id} value={crs.id}>
+                          📖 {crs.discipline ? `[${crs.discipline}] ` : ""}{crs.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              {/* COURSES & PROGRAM DETAILS PANEL (Requirement: Affichage des cours créés sur l'établissement) */}
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950/40 border border-indigo-500/20 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                      <BookOpen className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-white flex items-center gap-2">
+                        <span>Programme & Cours de la Classe</span>
+                        {selectedClass && (
+                          <span className="text-[10px] font-normal text-indigo-300 font-mono">
+                            ({selectedClass.classCode || selectedClass.level})
+                          </span>
+                        )}
+                      </h4>
+                      <p className="text-[10px] text-slate-400">
+                        {selectedClass ? selectedClass.title : "Sélectionnez une classe pour voir ses cours"}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    {classCourses.length} cours actif{classCourses.length > 1 ? "s" : ""}
+                  </span>
+                </div>
+
+                {classCourses.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                    {classCourses.map((crs) => {
+                      const isSelected = selectedCourseId === crs.id;
+                      return (
+                        <div
+                          key={crs.id}
+                          onClick={() => setSelectedCourseId(isSelected ? "" : crs.id)}
+                          className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+                            isSelected
+                              ? "bg-indigo-600/20 border-indigo-400 text-white shadow-md ring-1 ring-indigo-400/40"
+                              : "bg-slate-900/80 border-slate-800 hover:border-slate-700 text-slate-300 hover:bg-slate-800/60"
+                          }`}
+                        >
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold text-indigo-300">
+                                {crs.discipline || "Matière"}
+                              </span>
+                              <div className="flex items-center gap-1.5">
+                                {crs.video && (
+                                  <span className="text-emerald-400 flex items-center gap-0.5 font-semibold">
+                                    <span>🎥</span> Vidéo
+                                  </span>
+                                )}
+                                {crs.pdfUrl && (
+                                  <span className="text-amber-400 flex items-center gap-0.5 font-semibold">
+                                    <span>📄</span> PDF
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <h5 className="text-xs font-bold text-white line-clamp-1">
+                              {crs.title}
+                            </h5>
+                            {crs.chapterTitle && (
+                              <p className="text-[10px] text-slate-400 line-clamp-1">
+                                {crs.chapterTitle}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-slate-400">
+                            <span>Prof: {crs.teacherName || selectedClass?.teacherName || "Équipe pédagogique"}</span>
+                            <span className={isSelected ? "text-indigo-300 font-bold" : "text-slate-500"}>
+                              {isSelected ? "✓ Option choisie" : "Cliquer pour cibler +"}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-400 text-xs flex items-center gap-2.5">
+                    <span className="text-lg">📖</span>
+                    <div>
+                      <p className="text-slate-300 font-semibold">
+                        {selectedClass?.disciplines && selectedClass.disciplines.length > 0
+                          ? `Matières au programme : ${selectedClass.disciplines.join(" • ")}`
+                          : "Programme standard et polyvalent"}
+                      </p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">
+                        {establishmentCourses.length > 0
+                          ? `${establishmentCourses.length} autre(s) cours disponible(s) sur les autres classes de cet établissement.`
+                          : "Les supports de cours, vidéos et devoirs seront publiés par les professeurs dès le début des enseignements."}
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
