@@ -1,38 +1,47 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { MainAppLayout } from "@/components/layout/MainAppLayout";
 import { AuthLandingView } from "@/components/auth/AuthLandingView";
 import { SuperAdminLoginView } from "@/components/auth/SuperAdminLoginView";
 import { SchoolSubdomainPortal } from "@/components/auth/SchoolSubdomainPortal";
 import { JoinClassModal } from "@/components/classes/JoinClassModal";
-import { Soumission, Devoir, Etablissement } from "@/types";
+import { Etablissement } from "@/types";
 
 export default function Home() {
-  const [showLandingView, setShowLandingView] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      const isSessionActive = localStorage.getItem("alfasle_session_active");
-      if (isSessionActive === "true") {
-        return false;
-      }
-    }
-    return true;
-  });
+  const [mounted, setMounted] = useState(false);
+  const [showLandingView, setShowLandingView] = useState<boolean>(true);
   const [showSuperAdminView, setShowSuperAdminView] = useState<boolean>(false);
   const [selectedSubdomainSchool, setSelectedSubdomainSchool] = useState<Etablissement | null>(null);
   const [isJoinClassOpen, setIsJoinClassOpen] = useState(false);
 
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== "undefined") {
+      try {
+        const isSessionActive = localStorage.getItem("alfasle_session_active");
+        if (isSessionActive === "true") {
+          setShowLandingView(false);
+        }
+      } catch (_) {}
+    }
+  }, []);
+
   const handleLoginSuccess = () => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("alfasle_session_active", "true");
+      try {
+        localStorage.setItem("alfasle_session_active", "true");
+      } catch (_) {}
     }
     setShowLandingView(false);
   };
 
   const handleLogout = () => {
     if (typeof window !== "undefined") {
-      localStorage.removeItem("alfasle_session_active");
+      try {
+        localStorage.removeItem("alfasle_session_active");
+      } catch (_) {}
     }
     setShowLandingView(true);
   };

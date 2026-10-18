@@ -55,7 +55,7 @@ export function Navbar({
 
   const unreadNotifs = notifications.filter((n) => !n.isRead && n.userId === currentUser.id);
 
-  const getRoleBadge = (role: UserRole) => {
+  const getRoleBadge = (role?: string) => {
     switch (role) {
       case "SUPER_ADMIN":
         return {
@@ -81,16 +81,22 @@ export function Navbar({
           icon: <User className="w-3.5 h-3.5" />,
           color: "bg-purple-500/20 text-purple-300 border-purple-500/30",
         };
+      case "DIRECTEUR":
       case "ADMIN":
+      default:
         return {
           label: "Directeur",
-          icon: <Shield className="w-3.5 h-3.5" />,
-          color: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+          icon: <Shield className="w-3.5 h-3.5 text-rose-500" />,
+          color: "bg-rose-500/20 text-rose-300 border-rose-500/30",
         };
     }
   };
 
-  const badge = getRoleBadge(currentUser.role);
+  const badge = getRoleBadge(currentUser?.role) || {
+    label: "Directeur",
+    icon: <Shield className="w-3.5 h-3.5 text-rose-500" />,
+    color: "bg-rose-500/20 text-rose-300 border-rose-500/30",
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 px-3 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between shadow-sm">

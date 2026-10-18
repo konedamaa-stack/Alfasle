@@ -167,10 +167,29 @@ export function Sidebar({
           { id: "grades", label: "Notes & Relevés", icon: <Award className="w-4 h-4" /> },
           { id: "analytics", label: "Statistiques Campus", icon: <BarChart3 className="w-4 h-4" /> },
         ];
+
+      default:
+        return [
+          {
+            id: "dashboard",
+            label: "Direction & Inscriptions",
+            icon: <School className="w-4 h-4 text-emerald-600" />,
+            badge: "Campus",
+            badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
+          },
+          {
+            id: "etablissements",
+            label: "Établissements Scolaires",
+            icon: <School className="w-4 h-4 text-rose-500" />,
+            badge: `${etablissements?.length || 0} Écoles`,
+            badgeColor: "bg-rose-50 text-rose-700 border-rose-200",
+          },
+          { id: "classes", label: "Classes du Campus", icon: <FolderKanban className="w-4 h-4" /> },
+        ];
     }
   };
 
-  const navItems = getNavItems();
+  const navItems = getNavItems() || [];
 
   const renderSidebarContent = (isMobile = false) => (
     <div className="space-y-5 flex-1 flex flex-col justify-between">
