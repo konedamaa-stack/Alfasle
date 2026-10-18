@@ -53,7 +53,7 @@ export function Sidebar({
   isOpenMobile,
   onCloseMobile,
 }: SidebarProps) {
-  const { currentUser, inscriptions, submissions, assignments, etablissements } = useStore();
+  const { currentUser, classes, inscriptions, submissions, assignments, etablissements } = useStore();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = React.useState(false);
 
   const pendingInscriptionsCount = inscriptions.filter((i) => i.status === "PENDING").length;
@@ -137,7 +137,6 @@ export function Sidebar({
           { id: "grades", label: "Bulletins & Notes", icon: <Award className="w-4 h-4" /> },
         ];
 
-      case "DIRECTEUR":
       case "ADMIN":
         return [
           {
