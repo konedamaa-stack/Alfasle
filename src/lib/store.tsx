@@ -600,6 +600,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     if (isSupabaseConfigured()) {
       supabase.from("etablissements").upsert(mapEtablissementToRow(newEtab)).then();
       supabase.from("classes").upsert(mapClasseToRow(starterClass)).then();
+      supabase
+        .from("courses")
+        .upsert({
+          id: starterCourse.id,
+          classe_id: starterCourse.classeId,
+          chapter_title: starterCourse.chapterTitle || "Module 1 : Accueil & Présentation",
+          title: starterCourse.title,
+          summary: starterCourse.summary || "",
+          content: starterCourse.content || "",
+          display_order: 1,
+          status: "PUBLISHED",
+          discipline: starterCourse.discipline || "Général",
+          teacher_name: starterCourse.teacherName || "Direction",
+          published_at: starterCourse.publishedAt,
+        })
+        .then();
     }
 
     return newEtab;
