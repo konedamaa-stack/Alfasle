@@ -114,7 +114,7 @@ interface StoreContextType {
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
-const STORAGE_PREFIX = "alfasle_v16_";
+const STORAGE_PREFIX = "alfasle_v18_";
 
 function cleanLegacyStorage() {
   // Safe: no aggressive deletion of user data
