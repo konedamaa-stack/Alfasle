@@ -115,7 +115,7 @@ interface StoreContextType {
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
-const STORAGE_PREFIX = "alfasle_v19_";
+const STORAGE_PREFIX = "alfasle_v20_";
 
 function cleanLegacyStorage() {
   if (typeof window !== "undefined") {
@@ -144,61 +144,12 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
         if (Array.isArray(parsed)) {
           let merged = [...parsed];
 
-          // Assurer que le compte Super Admin et Directeur existent au minimum dans users
+          // Assurer que le compte Super Admin existe au minimum dans users
           if (suffix === "users") {
             const hasSuperAdmin = merged.some((u: any) => u.role === "SUPER_ADMIN");
             if (!hasSuperAdmin && initialData[0]) {
               merged.unshift(initialData[0]);
             }
-
-            merged = (merged as unknown as User[]).map((u) => {
-              if (u.id === "u_admin_diawara" || u.id === "u_admin_excellence" || u.username === "diawara" || u.email === "diawara@gmail.com") {
-                return {
-                  ...u,
-                  id: "u_admin_diawara",
-                  name: "Dr. Mahamadou DIAWARA (Directeur)",
-                  username: "diawara",
-                  email: "diawara@gmail.com",
-                  password: u.password || "Madouu1966@",
-                  role: "ADMIN" as const,
-                  bio: "Directeur & Administrateur Principal du Groupe Scolaire AlFasle.",
-                  etablissementId: "etab_gs_alfasle",
-                  etablissementName: "Groupe Scolaire AlFasle",
-                };
-              }
-              if (u.id === "u_admin_sanogo" || u.username === "sanogo" || u.email?.toLowerCase().includes("sanogo")) {
-                return {
-                  ...u,
-                  id: "u_admin_sanogo",
-                  name: "M. SANOGO (Directeur)",
-                  username: "sanogo",
-                  email: "sanogo@gmail.com",
-                  role: "ADMIN" as const,
-                  bio: "Directeur & Administrateur d'Établissement.",
-                  etablissementId: u.etablissementId || "etab_gs_alfasle",
-                  etablissementName: u.etablissementName || "Groupe Scolaire AlFasle",
-                };
-              }
-              return u;
-            }) as unknown as T[];
-          }
-
-          if (suffix === "etablissements") {
-            merged = (merged as unknown as Etablissement[]).map((e) => {
-              if (e.id === "etab_gs_alfasle" || e.id === "etab_lycee_excellence") {
-                return {
-                  ...e,
-                  id: "etab_gs_alfasle",
-                  name: "Groupe Scolaire AlFasle",
-                  subdomain: "gs-alfasle",
-                  city: "Abidjan",
-                  country: "Côte d'Ivoire",
-                  directorName: "Dr. Mahamadou DIAWARA",
-                  directorEmail: "diawara@gmail.com",
-                };
-              }
-              return e;
-            }) as unknown as T[];
           }
 
           if (suffix === "classes") {
@@ -520,58 +471,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   // Etablissement Management
   const createEtablissement = (data: Omit<Etablissement, "id" | "createdAt" | "classesCount" | "studentsCount">) => {
     const etabId = `etab_${Date.now()}`;
-    const starterClassId = `cls_${Date.now()}`;
-
-    // 1. Create starter class for this new school
-    const starterClass: Classe = {
-      id: starterClassId,
-      classCode: `${data.code.replace(/[^A-Z0-9]/gi, "").substring(0, 4).toUpperCase()}-101`,
-      etablissementId: etabId,
-      etablissementName: data.name,
-      title: `Tronc Commun & Pédagogie - ${data.name}`,
-      description: `Classe inaugurale de l'établissement ${data.name}. Cours, devoirs et ressources partagés.`,
-      level: "Tous Niveaux",
-      category: "Général",
-      capacity: data.maxStudentsQuota || 250,
-      enrollmentMode: "OPEN",
-      status: "ACTIVE",
-      teacherId: "u_teacher_sarah",
-      teacherName: "Prof. Sarah Mansouri",
-      coverImage: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80",
-      createdAt: new Date().toISOString(),
-      enrolledCount: 0,
-      pendingCount: 0,
-      coursesCount: 1,
-      assignmentsCount: 0,
-    };
 
     const newEtab: Etablissement = {
       ...data,
       id: etabId,
-      classesCount: 1,
+      classesCount: 0,
       studentsCount: 0,
       createdAt: new Date().toISOString(),
     };
 
-    const starterCourse: Cours = {
-      id: `crs_${Date.now()}`,
-      classeId: starterClassId,
-      discipline: "Général",
-      teacherName: "Prof. Sarah Mansouri",
-      chapterTitle: "Module 1 : Accueil & Présentation",
-      title: `Introduction & Programme - ${data.name}`,
-      summary: `Présentation du cursus et des objectifs pédagogiques de l'établissement ${data.name}.`,
-      content: `Bienvenue à **${data.name}** !\n\nCe premier cours présente l'organisation des études, les règles de l'établissement et les ressources pédagogiques mises à votre disposition.`,
-      order: 1,
-      status: "PUBLISHED",
-      publishedAt: new Date().toISOString(),
-    };
-
     setEtablissements((prev) => [newEtab, ...prev]);
-    setClasses((prev) => [starterClass, ...prev]);
-    setCourses((prev) => [starterCourse, ...prev]);
 
-    // 2. If director has email, provision Director user in system
+    // If director has email, provision Director user in system
     if (data.directorEmail && data.directorName) {
       const directorPass = data.directorPassword?.trim() || "Madouu1966";
       const directorUser: User = {

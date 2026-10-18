@@ -22,8 +22,8 @@ export const initialEtablissements: Etablissement[] = [
     subscriptionPlan: "ENTERPRISE",
     maxStudentsQuota: 500,
     maxClassesQuota: 20,
-    classesCount: 1,
-    studentsCount: 25,
+    classesCount: 0,
+    studentsCount: 0,
     createdAt: "2026-09-01T08:00:00Z",
   },
   {
@@ -47,8 +47,8 @@ export const initialEtablissements: Etablissement[] = [
     subscriptionPlan: "PREMIUM",
     maxStudentsQuota: 400,
     maxClassesQuota: 15,
-    classesCount: 1,
-    studentsCount: 20,
+    classesCount: 0,
+    studentsCount: 0,
     createdAt: "2026-09-01T08:00:00Z",
   },
   {
@@ -72,8 +72,8 @@ export const initialEtablissements: Etablissement[] = [
     subscriptionPlan: "ENTERPRISE",
     maxStudentsQuota: 500,
     maxClassesQuota: 20,
-    classesCount: 2,
-    studentsCount: 45,
+    classesCount: 0,
+    studentsCount: 0,
     createdAt: "2025-01-01T08:00:00Z",
   },
 ];
@@ -92,7 +92,7 @@ export const initialUsers: User[] = [
     createdAt: "2024-12-01T00:00:00Z",
   },
 
-  // --- ÉTABLISSEMENT 1 : KOULIYAT ---
+  // --- DIRECTEUR KOULIYAT ---
   {
     id: "u_dir_kouliyat",
     name: "KONE ADAMA (Directeur KOULIYAT)",
@@ -106,34 +106,8 @@ export const initialUsers: User[] = [
     etablissementName: "KOULIYAT",
     createdAt: "2026-09-01T08:00:00Z",
   },
-  {
-    id: "u_teacher_kouliyat",
-    name: "Prof. Ousmane Traoré (KOULIYAT)",
-    username: "ousmane_kouliyat",
-    email: "ousmane@kouliyat.alfasle.xyz",
-    password: "Madouu1966@",
-    role: "TEACHER",
-    bio: "Enseignant Tronc Commun à KOULIYAT.",
-    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
-    etablissementId: "etab_1792343761588",
-    etablissementName: "KOULIYAT",
-    createdAt: "2026-09-02T09:00:00Z",
-  },
-  {
-    id: "u_student_kouliyat",
-    name: "Moussa Keita (Élève KOULIYAT)",
-    username: "moussa_kouliyat",
-    email: "moussa@kouliyat.student.xyz",
-    password: "Madouu1966@",
-    role: "STUDENT",
-    bio: "Élève inscrit à KOULIYAT.",
-    avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
-    etablissementId: "etab_1792343761588",
-    etablissementName: "KOULIYAT",
-    createdAt: "2026-09-05T10:00:00Z",
-  },
 
-  // --- ÉTABLISSEMENT 2 : RAYATIL ISLAM ---
+  // --- DIRECTEUR RAYATIL ISLAM ---
   {
     id: "u_dir_rayatil",
     name: "Directeur RAYATIL ISLAM",
@@ -147,34 +121,8 @@ export const initialUsers: User[] = [
     etablissementName: "RAYATIL ISLAM",
     createdAt: "2026-09-01T08:00:00Z",
   },
-  {
-    id: "u_teacher_rayatil",
-    name: "Prof. Bakary Camara (RAYATIL)",
-    username: "bakary_rayatil",
-    email: "bakary@rayatil-islam.edu",
-    password: "Madouu1966@",
-    role: "TEACHER",
-    bio: "Enseignant à RAYATIL ISLAM.",
-    avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
-    etablissementId: "etab_1790534921442",
-    etablissementName: "RAYATIL ISLAM",
-    createdAt: "2026-09-02T09:00:00Z",
-  },
-  {
-    id: "u_student_rayatil",
-    name: "Fatoumata Diarra (Élève RAYATIL)",
-    username: "fatoumata_rayatil",
-    email: "fatoumata@rayatil.student.xyz",
-    password: "Madouu1966@",
-    role: "STUDENT",
-    bio: "Élève inscrite à RAYATIL ISLAM.",
-    avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
-    etablissementId: "etab_1790534921442",
-    etablissementName: "RAYATIL ISLAM",
-    createdAt: "2026-09-05T10:00:00Z",
-  },
 
-  // --- ÉTABLISSEMENT 3 : GROUPE SCOLAIRE ALFASLE ---
+  // --- DIRECTEUR GROUPE SCOLAIRE ALFASLE ---
   {
     id: "u_admin_kone",
     name: "KONE ADAMA (Directeur GS)",
@@ -188,248 +136,22 @@ export const initialUsers: User[] = [
     etablissementName: "Groupe Scolaire AlFasle",
     createdAt: "2025-01-01T08:00:00Z",
   },
-  {
-    id: "u_teacher_diallo",
-    name: "Prof. Amadou Diallo",
-    username: "adiallo",
-    email: "amadou.diallo@alfasle.edu",
-    password: "Madouu1966@",
-    role: "TEACHER",
-    bio: "Professeur principal de Mathématiques & Physique (Groupe Scolaire AlFasle).",
-    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-    etablissementId: "etab_gs_alfasle",
-    etablissementName: "Groupe Scolaire AlFasle",
-    createdAt: "2025-02-01T09:00:00Z",
-  },
-  {
-    id: "u_student_kone",
-    name: "KONE (Élève GS)",
-    username: "kone",
-    email: "kone@student.alfasle.edu",
-    password: "Madouu1966@",
-    role: "STUDENT",
-    bio: "Élève en Terminale D au Groupe Scolaire AlFasle.",
-    avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
-    etablissementId: "etab_gs_alfasle",
-    etablissementName: "Groupe Scolaire AlFasle",
-    createdAt: "2025-02-05T14:00:00Z",
-  },
 ];
 
-export const initialClasses: Classe[] = [
-  // --- CLASSE KOULIYAT ---
-  {
-    id: "cls_kouliyat_tc",
-    classCode: "KOU-101",
-    etablissementId: "etab_1792343761588",
-    etablissementName: "KOULIYAT",
-    title: "Tronc Commun & Enseignement Supérieur - KOULIYAT",
-    description: "Classe inaugurale de l'établissement KOULIYAT. Tronc commun, sciences et formation supérieure.",
-    level: "Tous Niveaux",
-    category: "Général",
-    disciplines: ["Informatique", "Mathématiques", "Gestion"],
-    capacity: 250,
-    enrollmentMode: "OPEN",
-    status: "ACTIVE",
-    teacherId: "u_teacher_kouliyat",
-    teacherName: "Prof. Ousmane Traoré (KOULIYAT)",
-    coverImage: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80",
-    createdAt: "2026-09-01T10:00:00Z",
-    enrolledCount: 1,
-    pendingCount: 0,
-    coursesCount: 1,
-    assignmentsCount: 0,
-  },
+// Classes complètement vierges (0 classes)
+export const initialClasses: Classe[] = [];
 
-  // --- CLASSE RAYATIL ISLAM ---
-  {
-    id: "cls_islam_tc",
-    classCode: "ISL-101",
-    etablissementId: "etab_1790534921442",
-    etablissementName: "RAYATIL ISLAM",
-    title: "Tronc Commun Secondaire - RAYATIL ISLAM",
-    description: "Classe inaugurale de RAYATIL ISLAM. Enseignement général et humanités.",
-    level: "Tous Niveaux",
-    category: "Général",
-    disciplines: ["Arabe", "Français", "Mathématiques"],
-    capacity: 250,
-    enrollmentMode: "OPEN",
-    status: "ACTIVE",
-    teacherId: "u_teacher_rayatil",
-    teacherName: "Prof. Bakary Camara (RAYATIL)",
-    coverImage: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=800&auto=format&fit=crop&q=80",
-    createdAt: "2026-09-01T10:00:00Z",
-    enrolledCount: 1,
-    pendingCount: 0,
-    coursesCount: 1,
-    assignmentsCount: 0,
-  },
+// Inscriptions / Candidatures complètement vierges (0 candidatures)
+export const initialInscriptions: Inscription[] = [];
 
-  // --- CLASSES GROUPE SCOLAIRE ALFASLE ---
-  {
-    id: "cls_gs_tle_d",
-    classCode: "AF-TLE-D",
-    etablissementId: "etab_gs_alfasle",
-    etablissementName: "Groupe Scolaire AlFasle",
-    title: "Terminale D : Sciences Expérimentales & Mathématiques",
-    description: "Programme officiel de Terminale D préparatoire au Baccalauréat.",
-    level: "Terminale",
-    category: "Sciences",
-    disciplines: ["Mathématiques", "Physique-Chimie", "SVT"],
-    capacity: 35,
-    enrollmentMode: "OPEN",
-    status: "ACTIVE",
-    teacherId: "u_teacher_diallo",
-    teacherName: "Prof. Amadou Diallo",
-    coverImage: "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800&auto=format&fit=crop&q=80",
-    startDate: "2026-09-15",
-    endDate: "2027-06-30",
-    createdAt: "2026-08-20T10:00:00Z",
-    enrolledCount: 25,
-    pendingCount: 0,
-    coursesCount: 2,
-    assignmentsCount: 1,
-  },
-  {
-    id: "cls_gs_2nde_c",
-    classCode: "AF-2NDE-C",
-    etablissementId: "etab_gs_alfasle",
-    etablissementName: "Groupe Scolaire AlFasle",
-    title: "Seconde C : Sciences & Technologie",
-    description: "Enseignement secondaire général scientifique et technique.",
-    level: "Seconde",
-    category: "Sciences",
-    disciplines: ["Mathématiques", "Physique-Chimie", "Informatique"],
-    capacity: 35,
-    enrollmentMode: "OPEN",
-    status: "ACTIVE",
-    teacherId: "u_teacher_diallo",
-    teacherName: "Prof. Amadou Diallo",
-    coverImage: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80",
-    startDate: "2026-09-20",
-    endDate: "2027-06-30",
-    createdAt: "2026-08-22T14:00:00Z",
-    enrolledCount: 20,
-    pendingCount: 0,
-    coursesCount: 1,
-    assignmentsCount: 0,
-  },
-];
+// Cours complètement vierges (0 cours)
+export const initialCourses: Cours[] = [];
 
-export const initialInscriptions: Inscription[] = [
-  // KOULIYAT
-  {
-    id: "ins_moussa_kouliyat",
-    userId: "u_student_kouliyat",
-    userName: "Moussa Keita (Élève KOULIYAT)",
-    userEmail: "moussa@kouliyat.student.xyz",
-    role: "STUDENT",
-    etablissementId: "etab_1792343761588",
-    etablissementName: "KOULIYAT",
-    classeId: "cls_kouliyat_tc",
-    classeTitle: "Tronc Commun & Enseignement Supérieur - KOULIYAT",
-    status: "APPROVED",
-    appliedAt: "2026-09-06T10:00:00Z",
-  },
-  // RAYATIL ISLAM
-  {
-    id: "ins_fatoumata_rayatil",
-    userId: "u_student_rayatil",
-    userName: "Fatoumata Diarra (Élève RAYATIL)",
-    userEmail: "fatoumata@rayatil.student.xyz",
-    role: "STUDENT",
-    etablissementId: "etab_1790534921442",
-    etablissementName: "RAYATIL ISLAM",
-    classeId: "cls_islam_tc",
-    classeTitle: "Tronc Commun Secondaire - RAYATIL ISLAM",
-    status: "APPROVED",
-    appliedAt: "2026-09-06T10:00:00Z",
-  },
-  // Groupe Scolaire AlFasle
-  {
-    id: "ins_kone_tle_d",
-    userId: "u_student_kone",
-    userName: "KONE (Élève GS)",
-    userEmail: "kone@student.alfasle.edu",
-    role: "STUDENT",
-    etablissementId: "etab_gs_alfasle",
-    etablissementName: "Groupe Scolaire AlFasle",
-    classeId: "cls_gs_tle_d",
-    classeTitle: "Terminale D : Sciences Expérimentales & Mathématiques",
-    status: "APPROVED",
-    appliedAt: "2026-08-25T10:00:00Z",
-  },
-];
-
-export const initialCourses: Cours[] = [
-  // --- COURS KOULIYAT ---
-  {
-    id: "crs_kouliyat_intro",
-    classeId: "cls_kouliyat_tc",
-    discipline: "Général",
-    teacherName: "Prof. Ousmane Traoré (KOULIYAT)",
-    chapterTitle: "Module 1 : Accueil & Présentation",
-    title: "Introduction au Cursus Académique - KOULIYAT",
-    summary: "Présentation des filières, méthodologie de travail et règles d'encadrement à KOULIYAT.",
-    content: "Bienvenue à **KOULIYAT** !\n\nCe premier cours présente l'organisation des études, le calendrier pédagogique et les ressources mises à disposition des étudiants.",
-    order: 1,
-    status: "PUBLISHED",
-    publishedAt: "2026-09-02T10:00:00Z",
-  },
-
-  // --- COURS RAYATIL ISLAM ---
-  {
-    id: "crs_islam_intro",
-    classeId: "cls_islam_tc",
-    discipline: "Général",
-    teacherName: "Prof. Bakary Camara (RAYATIL)",
-    chapterTitle: "Module 1 : Accueil & Cursus",
-    title: "Introduction & Règlement Pédagogique - RAYATIL ISLAM",
-    summary: "Programme d'études et organisation de l'année scolaire à RAYATIL ISLAM.",
-    content: "Bienvenue à **RAYATIL ISLAM** !\n\nCe cours d'accueil détaille les matières au programme, les coefficients et le planning des devoirs.",
-    order: 1,
-    status: "PUBLISHED",
-    publishedAt: "2026-09-02T10:00:00Z",
-  },
-
-  // --- COURS GROUPE SCOLAIRE ALFASLE ---
-  {
-    id: "crs_math_tle_d",
-    classeId: "cls_gs_tle_d",
-    discipline: "Mathématiques",
-    teacherName: "Prof. Amadou Diallo",
-    chapterTitle: "Module 1 : Analyse Mathématique & Fonctions",
-    title: "Limites, Continuité et Fonctions Exponentielles",
-    summary: "Théorème des valeurs intermédiaires, dérivées successives et résolutions d'équations différentielles pour le Bac.",
-    content: "Cours officiel de Terminale D avec exercices corrigés et méthodologie de résolution pour les examens d'État.",
-    order: 1,
-    status: "PUBLISHED",
-    publishedAt: "2026-09-16T10:00:00Z",
-    video: {
-      id: "vid_math_01",
-      title: "Analyse des fonctions exponentielles",
-      streamUrl: "https://www.youtube.com/watch?v=wm5gMKuwSYk",
-      durationMinutes: 45,
-      status: "READY",
-    },
-    pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    pdfName: "Fascicule_Maths_TerminaleD_Chap1.pdf",
-  },
-  {
-    id: "crs_phys_2nde_c",
-    classeId: "cls_gs_2nde_c",
-    discipline: "Physique-Chimie",
-    teacherName: "Prof. Amadou Diallo",
-    chapterTitle: "Module 1 : Cinématique & Mouvements",
-    title: "Cinématique & Détermination des Vitesses en Seconde C",
-    summary: "Trajectoires, vitesse instantanée et référentiels galiléens.",
-    content: "Cours complet illustré d'exercices d'application expérimentaux.",
-    order: 1,
-    status: "PUBLISHED",
-    publishedAt: "2026-09-21T08:00:00Z",
-  },
-];
-
+// Devoirs complètement vierges (0 devoirs)
 export const initialAssignments: Devoir[] = [];
+
+// Soumissions complètement vierges (0 soumissions)
 export const initialSubmissions: Soumission[] = [];
+
+// Notifications
 export const initialNotifications: AppNotification[] = [];
