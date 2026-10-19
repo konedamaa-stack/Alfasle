@@ -133,12 +133,12 @@ export function CreateClassModal({
     e.preventDefault();
     if (!title.trim()) return;
 
-    let targetEtabId = (!isSuperAdmin && currentUser.etablissementId)
-      ? currentUser.etablissementId
-      : (selectedEtab?.id || selectedEtabId);
-    let targetEtabName = (!isSuperAdmin && currentUser.etablissementName)
-      ? currentUser.etablissementName
-      : (selectedEtab?.name || currentUser.etablissementName);
+    let targetEtabId =
+      selectedEtab?.id ||
+      (!isSuperAdmin && currentUser.etablissementId ? currentUser.etablissementId : selectedEtabId);
+    let targetEtabName =
+      selectedEtab?.name ||
+      (!isSuperAdmin && currentUser.etablissementName ? currentUser.etablissementName : "Établissement Académique");
 
     // Handle custom user-provided establishment
     if (selectedEtabId === "CUSTOM" || !targetEtabId) {

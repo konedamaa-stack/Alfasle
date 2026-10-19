@@ -80,10 +80,22 @@ export function DirecteurDashboard({
   } = useStore();
   const { toast } = useToast();
 
+  // Établissements dirigés par cet utilisateur (si Directeur multi-campus ou Super Admin)
+  const myManagedEtabs =
+    currentUser.role === "SUPER_ADMIN"
+      ? etablissements
+      : etablissements.filter(
+          (e) =>
+            e.id === currentUser.etablissementId ||
+            (currentUser.email && e.directorEmail?.toLowerCase() === currentUser.email.toLowerCase()) ||
+            (currentUser.username && e.directorName?.toLowerCase().includes(currentUser.username.toLowerCase()))
+        );
+
   // Campus sélectionné avec possibilité de bascule immédiate entre campus
   const [selectedEtabId, setSelectedEtabId] = useState<string>(() => {
     return (
       currentUser.etablissementId ||
+      myManagedEtabs[0]?.id ||
       etablissements.find(
         (e) =>
           (currentUser.etablissementName && e.name === currentUser.etablissementName) ||
@@ -94,18 +106,13 @@ export function DirecteurDashboard({
     );
   });
 
-  React.useEffect(() => {
-    if (currentUser.etablissementId) {
-      setSelectedEtabId(currentUser.etablissementId);
-    }
-  }, [currentUser.etablissementId]);
-
   const currentEtab =
-    (currentUser.role !== "SUPER_ADMIN" && currentUser.etablissementId
-      ? etablissements.find((e) => e.id === currentUser.etablissementId || (currentUser.etablissementName && e.name === currentUser.etablissementName))
-      : null) ||
     etablissements.find((e) => e.id === selectedEtabId) ||
     etablissements.find((e) => e.id === currentUser.etablissementId) ||
+    (currentUser.etablissementName
+      ? etablissements.find((e) => e.name.toLowerCase().trim() === currentUser.etablissementName?.toLowerCase().trim())
+      : null) ||
+    myManagedEtabs[0] ||
     etablissements[0];
 
   // Active Sub-Tab
@@ -223,7 +230,8 @@ export function DirecteurDashboard({
     (c) =>
       c.etablissementId === currentEtab?.id ||
       c.etablissementId === currentEtab?.subdomain ||
-      (currentEtab && c.etablissementName === currentEtab.name)
+      (currentEtab && c.etablissementName?.toLowerCase().trim() === currentEtab.name?.toLowerCase().trim()) ||
+      c.teacherId === currentUser.id
   );
 
   const schoolStudents = users.filter(
@@ -582,8 +590,8 @@ export function DirecteurDashboard({
           </div>
 
           <div className="shrink-0 flex flex-wrap items-center gap-2.5">
-            {/* Sélecteur de Campus réservé au Super Admin */}
-            {currentUser.role === "SUPER_ADMIN" && etablissements.length > 1 && (
+            {/* Sélecteur de Campus accessible pour Super Admin ou Directeur multi-campus */}
+            {myManagedEtabs.length > 1 && (
               <div className="flex items-center gap-2 bg-slate-900/95 border border-blue-400/40 px-3.5 py-2 rounded-2xl shadow-xl backdrop-blur-md">
                 <Building2 className="w-4 h-4 text-blue-400 shrink-0" />
                 <span className="text-[11px] font-bold text-slate-300 shrink-0">Campus :</span>
@@ -592,7 +600,7 @@ export function DirecteurDashboard({
                   onChange={(e) => setSelectedEtabId(e.target.value)}
                   className="bg-transparent text-white font-extrabold text-xs focus:outline-none cursor-pointer pr-1"
                 >
-                  {etablissements.map((etab) => (
+                  {myManagedEtabs.map((etab) => (
                     <option key={etab.id} value={etab.id} className="bg-slate-900 text-white font-medium">
                       {etab.name} ({etab.city})
                     </option>

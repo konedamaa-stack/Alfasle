@@ -155,6 +155,21 @@ export function ClassList({
   const categories = ["ALL", "Informatique", "Mathématiques", "Design", "Sciences", "Langues"];
   const levels = ["ALL", "Débutant", "Intermédiaire", "Avancé"];
 
+  const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
+  const userEtabId = currentUser.etablissementId;
+
+  // Établissements rattachés ou dirigés par cet utilisateur (si Directeur multi-campus ou Super Admin)
+  const myManagedEtabs = isSuperAdmin
+    ? etablissements
+    : etablissements.filter(
+        (e) =>
+          e.id === userEtabId ||
+          (currentUser.email && e.directorEmail?.toLowerCase() === currentUser.email.toLowerCase()) ||
+          (currentUser.username && e.directorName?.toLowerCase().includes(currentUser.username.toLowerCase()))
+      );
+
+  const myManagedEtabIds = new Set(myManagedEtabs.map((e) => e.id));
+
   const filteredClasses = classes.filter((c) => {
     const matchesSearch =
       c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -162,14 +177,28 @@ export function ClassList({
       c.teacherName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (c.classCode && c.classCode.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
-    const userEtabId = currentUser.etablissementId;
-
-    const matchesEtab = isSuperAdmin
-      ? selectedEtablissement === "ALL" || c.etablissementId === selectedEtablissement
-      : userEtabId
-      ? c.etablissementId === userEtabId || (currentUser.etablissementName && c.etablissementName === currentUser.etablissementName)
-      : true;
+    let matchesEtab = true;
+    if (isSuperAdmin) {
+      matchesEtab = selectedEtablissement === "ALL" || c.etablissementId === selectedEtablissement;
+    } else if (myManagedEtabs.length > 1) {
+      if (selectedEtablissement !== "ALL") {
+        matchesEtab = c.etablissementId === selectedEtablissement;
+      } else {
+        matchesEtab =
+          myManagedEtabIds.has(c.etablissementId) ||
+          c.etablissementId === userEtabId ||
+          c.teacherId === currentUser.id ||
+          (currentUser.etablissementName &&
+            c.etablissementName?.toLowerCase().trim() === currentUser.etablissementName?.toLowerCase().trim());
+      }
+    } else if (userEtabId) {
+      matchesEtab =
+        myManagedEtabIds.has(c.etablissementId) ||
+        c.etablissementId === userEtabId ||
+        c.teacherId === currentUser.id ||
+        (currentUser.etablissementName &&
+          c.etablissementName?.toLowerCase().trim() === currentUser.etablissementName?.toLowerCase().trim());
+    }
 
     const matchesCat = selectedCategory === "ALL" || c.category.includes(selectedCategory);
     const matchesLevel = selectedLevel === "ALL" || c.level === selectedLevel;
@@ -263,8 +292,8 @@ export function ClassList({
           />
         </div>
 
-        {/* Établissement Filter - Accessible uniquement pour Super Admin */}
-        {currentUser.role === "SUPER_ADMIN" ? (
+        {/* Établissement Filter - Accessible pour Super Admin ou Directeur multi-campus */}
+        {currentUser.role === "SUPER_ADMIN" || myManagedEtabs.length > 1 ? (
           <div className="flex items-center gap-2 w-full md:w-auto">
             <label className="text-xs text-slate-400 whitespace-nowrap hidden sm:inline">Établissement :</label>
             <select
@@ -272,8 +301,10 @@ export function ClassList({
               onChange={(e) => setSelectedEtablissement(e.target.value)}
               className="w-full sm:w-auto px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-blue-500 cursor-pointer"
             >
-              <option value="ALL">Tous les campus ({etablissements.length})</option>
-              {etablissements.map((etab) => (
+              <option value="ALL">
+                {currentUser.role === "SUPER_ADMIN" ? `Tous les campus (${etablissements.length})` : `Tous mes campus (${myManagedEtabs.length})`}
+              </option>
+              {(currentUser.role === "SUPER_ADMIN" ? etablissements : myManagedEtabs).map((etab) => (
                 <option key={etab.id} value={etab.id}>
                   🏫 {etab.name} ({etab.city})
                 </option>
