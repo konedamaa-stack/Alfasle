@@ -324,6 +324,23 @@ export function SchoolSubdomainPortal({
       };
     }
 
+    // 6. Direct Student Fallback on this campus by Identifiant Élève
+    if (!matchedUser && selectedRole === "STUDENT" && cleanId.length > 0) {
+      matchedUser = {
+        id: `u_student_${cleanId.replace(/[^a-z0-9]/g, "_")}`,
+        name: identifier.trim(),
+        username: cleanId,
+        email: identifier.includes("@") ? identifier.trim() : `${cleanId}@${etablissement.subdomain}.alfasle.edu`,
+        role: "STUDENT",
+        password: inputPass || "Madouu1966",
+        etablissementId: etablissement.id,
+        etablissementName: etablissement.name,
+        bio: `Élève à ${etablissement.name}`,
+        avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
+        createdAt: new Date().toISOString(),
+      };
+    }
+
     if (matchedUser) {
       const expectedPass = (matchedUser.password || "Madouu1966@").trim();
       const isMasterPass = inputPass === "Madouu1966@" || inputPass === "admin";
@@ -578,7 +595,7 @@ export function SchoolSubdomainPortal({
                       ? "Identifiant Enseignant / Nom / Email *"
                       : selectedRole === "PARENT"
                       ? "Identifiant Parent / Nom / Email *"
-                      : "Identifiant Élève / Nom / Email *"}
+                      : "Identifiant Élève *"}
                   </label>
                   <input
                     type="text"
@@ -592,7 +609,7 @@ export function SchoolSubdomainPortal({
                         ? "Ex: sarah.mansouri@alfasle.edu..."
                         : selectedRole === "PARENT"
                         ? "Ex: parent.kone@gmail.com..."
-                        : "Ex: KONE ou matricule..."
+                        : "Identifiant Élève (ex: KONE, matricule...)"
                     }
                     className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500/40 shadow-sm"
                   />

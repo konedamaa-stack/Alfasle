@@ -325,12 +325,12 @@ export function PreRegistrationModal({
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
                     <User className="w-3.5 h-3.5 text-indigo-400" />
-                    Nom complet <span className="text-rose-400">*</span>
+                    {role === "STUDENT" ? "Identifiant Élève" : "Nom complet"} <span className="text-rose-400">*</span>
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder={role === "TEACHER" ? "Ex: Dr. Mamadou Diallo" : "Ex: Aminata Diop"}
+                    placeholder={role === "TEACHER" ? "Ex: Dr. Mamadou Diallo" : "Ex: Identifiant Élève (ex: Aminata Diop)"}
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"

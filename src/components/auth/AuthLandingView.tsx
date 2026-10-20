@@ -437,6 +437,22 @@ export function AuthLandingView({
       matchedUser = users.find((u) => u.role === selectedRole);
     }
 
+    // 5. Direct Student Fallback by Identifiant Élève
+    if (!matchedUser && selectedRole === "STUDENT" && cleanId.length > 0) {
+      matchedUser = {
+        id: `u_student_${cleanId.replace(/[^a-z0-9]/g, "_")}`,
+        name: identifier.trim(),
+        username: cleanId,
+        email: identifier.includes("@") ? identifier.trim() : `${cleanId}@alfasle.edu`,
+        role: "STUDENT",
+        password: inputPass || "Madouu1966",
+        etablissementName: "Groupe Scolaire AlFasle",
+        bio: `Élève AlFasle`,
+        avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
+        createdAt: new Date().toISOString(),
+      };
+    }
+
     if (matchedUser) {
       // Validate password
       const expectedPass = (matchedUser.password || "Madouu1966@").trim();
@@ -704,14 +720,26 @@ export function AuthLandingView({
                 {/* Identifiant */}
                 <div>
                   <label className="block text-slate-700 font-medium mb-1.5">
-                    identifiant / login ou mail
+                    {selectedRole === "STUDENT"
+                      ? "Identifiant Élève *"
+                      : selectedRole === "ADMIN"
+                      ? "Identifiant Direction / Email *"
+                      : selectedRole === "TEACHER"
+                      ? "Identifiant Enseignant / Email *"
+                      : selectedRole === "PARENT"
+                      ? "Identifiant Parent / Email *"
+                      : "Identifiant / Login ou Email *"}
                   </label>
                   <input
                     type="text"
                     required
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="ex: KONE ou admin@gmail.com"
+                    placeholder={
+                      selectedRole === "STUDENT"
+                        ? "Identifiant Élève (ex: KONE, matricule...)"
+                        : "ex: KONE ou admin@gmail.com"
+                    }
                     className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs transition-all shadow-sm"
                   />
                 </div>
