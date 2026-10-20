@@ -3,17 +3,17 @@ import { User, Etablissement, Classe, Inscription, Cours, Devoir, Soumission, Ap
 export const initialEtablissements: Etablissement[] = [
   {
     id: "etab_1792343761588",
-    name: "KOULIYAT",
+    name: "هيئة التدريس - جامعة النور الإسلامية",
     code: "ALF-INS-84",
     subdomain: "kouliyat",
     type: "INSTITUT",
-    city: "Bamako",
-    country: "Mali",
-    address: "Campus Universitaire KOULIYAT, Bamako",
-    phone: "+223 70 12 34 56",
-    email: "contact@kouliyat.alfasle.xyz",
-    description: "Établissement d'enseignement supérieur et secondaire KOULIYAT.",
-    logoUrl: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=150&auto=format&fit=crop&q=80",
+    city: "DIVO",
+    country: "Côte d'Ivoire",
+    address: "Campus Universitaire An-Nour, Divo",
+    phone: "+225 07 12 34 56",
+    email: "contact@an-nour.alfasle.xyz",
+    description: "جامعة النور الإسلامية بمدينة ديفو - هيئة التدريس (Université Islamique An-Nour de Divo - U.I.N.D.).",
+    logoUrl: "/logo-an-nour.png",
     coverImage: "https://images.unsplash.com/photo-1562774053-701939374585?w=800&auto=format&fit=crop&q=80",
     directorName: "KONE ADAMA (Directeur)",
     directorEmail: "konedamaa@gmail.com",
@@ -92,18 +92,18 @@ export const initialUsers: User[] = [
     createdAt: "2024-12-01T00:00:00Z",
   },
 
-  // --- DIRECTEUR KOULIYAT ---
+  // --- DIRECTEUR ---
   {
     id: "u_dir_kouliyat",
-    name: "KONE ADAMA (Directeur KOULIYAT)",
+    name: "KONE ADAMA (Directeur)",
     username: "konedamaa_kouliyat",
     email: "konedamaa@gmail.com",
     password: "Madouu1966",
     role: "ADMIN",
-    bio: "Directeur de l'établissement KOULIYAT.",
+    bio: "Directeur de l'établissement هيئة التدريس - جامعة النور الإسلامية.",
     avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
     etablissementId: "etab_1792343761588",
-    etablissementName: "KOULIYAT",
+    etablissementName: "هيئة التدريس - جامعة النور الإسلامية",
     createdAt: "2026-09-01T08:00:00Z",
   },
 

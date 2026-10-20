@@ -138,7 +138,7 @@ export function SuperAdminDashboard({
   const [editEtabName, setEditEtabName] = useState("");
   const [editEtabCode, setEditEtabCode] = useState("");
   const [editEtabSubdomain, setEditEtabSubdomain] = useState("");
-  const [editEtabType, setEditEtabType] = useState<"LYCEE" | "COLLEGE" | "UNIVERSITE" | "INSTITUT" | "ECOLE_PRIMAIRE">("LYCEE");
+  const [editEtabType, setEditEtabType] = useState<Etablissement["type"]>("LYCEE");
   const [editEtabCity, setEditEtabCity] = useState("");
   const [editEtabCountry, setEditEtabCountry] = useState("");
   const [editEtabAddress, setEditEtabAddress] = useState("");

@@ -184,20 +184,22 @@ export function ClassList({
       if (selectedEtablissement !== "ALL") {
         matchesEtab = c.etablissementId === selectedEtablissement;
       } else {
-        matchesEtab =
+        matchesEtab = Boolean(
           myManagedEtabIds.has(c.etablissementId) ||
           c.etablissementId === userEtabId ||
           c.teacherId === currentUser.id ||
           (currentUser.etablissementName &&
-            c.etablissementName?.toLowerCase().trim() === currentUser.etablissementName?.toLowerCase().trim());
+            c.etablissementName?.toLowerCase().trim() === currentUser.etablissementName?.toLowerCase().trim())
+        );
       }
     } else if (userEtabId) {
-      matchesEtab =
+      matchesEtab = Boolean(
         myManagedEtabIds.has(c.etablissementId) ||
         c.etablissementId === userEtabId ||
         c.teacherId === currentUser.id ||
         (currentUser.etablissementName &&
-          c.etablissementName?.toLowerCase().trim() === currentUser.etablissementName?.toLowerCase().trim());
+          c.etablissementName?.toLowerCase().trim() === currentUser.etablissementName?.toLowerCase().trim())
+      );
     }
 
     const matchesCat = selectedCategory === "ALL" || c.category.includes(selectedCategory);

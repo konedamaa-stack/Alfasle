@@ -384,11 +384,12 @@ export function SchoolSubdomainPortal({
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-orange-400 via-amber-400 to-orange-500 p-0.5 shadow-lg shadow-orange-500/20 shrink-0">
             <img
               src={
-                etablissement.logoUrl ||
-                "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=150"
+                etablissement.logoUrl && !etablissement.logoUrl.includes("photo-1546410531-bb4caa6b424d")
+                  ? etablissement.logoUrl
+                  : "/logo-an-nour.png"
               }
               alt={etablissement.name}
-              className="w-full h-full object-cover rounded-[14px]"
+              className="w-full h-full object-contain bg-white rounded-[14px]"
             />
           </div>
           <div className="min-w-0">
@@ -446,7 +447,7 @@ export function SchoolSubdomainPortal({
               {/* Badge specific to establishment */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/25 backdrop-blur-md border border-white/40 text-xs font-bold text-white shadow-sm">
                 <span>🏫</span>
-                <span className="tracking-wide uppercase truncate max-w-[200px]">
+                <span className="tracking-wide uppercase truncate max-w-none">
                   {etablissement.name}
                 </span>
               </div>

@@ -20,7 +20,7 @@ export interface Etablissement {
   name: string;
   code: string; // e.g. "ALF-LYC-01"
   subdomain: string; // e.g. "polytech-kone", "lycee-excellence", "el-manar"
-  type: "LYCEE" | "COLLEGE" | "UNIVERSITE" | "INSTITUT" | "ECOLE_PRIMAIRE";
+  type: "LYCEE" | "COLLEGE" | "UNIVERSITE" | "INSTITUT" | "ECOLE_PRIMAIRE" | "AUTRE";
   city: string;
   country: string;
   address?: string;
@@ -92,6 +92,7 @@ export interface Inscription {
   activationToken?: string;
   emailConfirmed?: boolean;
   appliedAt: string;
+  createdAt?: string;
   reviewedAt?: string;
   reviewedBy?: string;
 }

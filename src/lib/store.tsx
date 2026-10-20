@@ -153,12 +153,42 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
         if (Array.isArray(parsed)) {
           let merged = [...parsed];
 
-          // Assurer que le compte Super Admin existe au minimum dans users
+          // Assurer que le compte Super Admin existe au minimum dans users et mise à jour KOULIYAT
           if (suffix === "users") {
             const hasSuperAdmin = merged.some((u: any) => u.role === "SUPER_ADMIN");
             if (!hasSuperAdmin && initialData[0]) {
               merged.unshift(initialData[0]);
             }
+            merged = (merged as unknown as User[]).map((u) => {
+              if (u.etablissementName === "KOULIYAT" || u.etablissementId === "etab_1792343761588") {
+                return {
+                  ...u,
+                  etablissementName: "هيئة التدريس - جامعة النور الإسلامية",
+                };
+              }
+              return u;
+            }) as unknown as T[];
+          }
+
+          if (suffix === "etablissements") {
+            merged = (merged as unknown as Etablissement[]).map((e) => {
+              if (
+                e.id === "etab_1792343761588" ||
+                e.name === "KOULIYAT" ||
+                e.subdomain === "kouliyat"
+              ) {
+                return {
+                  ...e,
+                  name: "هيئة التدريس - جامعة النور الإسلامية",
+                  city: e.city || "DIVO",
+                  country: e.country || "Côte d'Ivoire",
+                  address: e.address || "Campus Universitaire An-Nour, Divo",
+                  description: "جامعة النور الإسلامية بمدينة ديفو - هيئة التدريس (Université Islamique An-Nour de Divo - U.I.N.D.).",
+                  logoUrl: "/logo-an-nour.png",
+                };
+              }
+              return e;
+            }) as unknown as T[];
           }
 
           if (suffix === "classes") {
@@ -242,6 +272,17 @@ function loadInitialUser(defaultUser: User): User {
               ...parsed,
               name: "M. SANOGO (Directeur)",
               email: "sanogo@gmail.com",
+            };
+            localStorage.setItem(`${STORAGE_PREFIX}currentUser`, JSON.stringify(parsed));
+          }
+          // Mise à jour immédiate si l'établissement est KOULIYAT
+          if (
+            parsed.etablissementName === "KOULIYAT" ||
+            parsed.etablissementId === "etab_1792343761588"
+          ) {
+            parsed = {
+              ...parsed,
+              etablissementName: "هيئة التدريس - جامعة النور الإسلامية",
             };
             localStorage.setItem(`${STORAGE_PREFIX}currentUser`, JSON.stringify(parsed));
           }
@@ -347,7 +388,21 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
               if (!demoEtabBlacklist.has(e.id)) map.set(e.id, e);
             });
             fetchedEtabs.forEach((e) => {
-              if (!demoEtabBlacklist.has(e.id)) map.set(e.id, e);
+              if (!demoEtabBlacklist.has(e.id)) {
+                if (e.id === "etab_1792343761588" || e.name === "KOULIYAT" || e.subdomain === "kouliyat") {
+                  map.set(e.id, {
+                    ...e,
+                    name: "هيئة التدريس - جامعة النور الإسلامية",
+                    city: e.city || "DIVO",
+                    country: e.country || "Côte d'Ivoire",
+                    address: e.address || "Campus Universitaire An-Nour, Divo",
+                    description: "جامعة النور الإسلامية بمدينة ديفو - هيئة التدريس (Université Islamique An-Nour de Divo - U.I.N.D.).",
+                    logoUrl: "/logo-an-nour.png",
+                  });
+                } else {
+                  map.set(e.id, e);
+                }
+              }
             });
             return Array.from(map.values());
           });
@@ -650,10 +705,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       supabase
         .from("classes")
         .upsert(mapClasseToRow(newClass))
-        .then(({ error }) => {
-          if (error) console.error("Erreur sauvegarde classe Supabase:", error);
-        })
-        .catch((err) => console.error("Erreur réseau Supabase:", err));
+        .then(
+          ({ error }: any) => {
+            if (error) console.error("Erreur sauvegarde classe Supabase:", error);
+          },
+          (err: any) => console.error("Erreur réseau Supabase:", err)
+        );
     }
 
     // Notification
