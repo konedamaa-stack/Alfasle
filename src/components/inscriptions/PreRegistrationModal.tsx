@@ -136,10 +136,6 @@ export function PreRegistrationModal({
       setErrorMsg("Veuillez renseigner votre nom complet.");
       return;
     }
-    if (!userEmail.trim() || !userEmail.includes("@")) {
-      setErrorMsg("Veuillez renseigner une adresse email valide.");
-      return;
-    }
     if (!establishmentId) {
       setErrorMsg("Veuillez sélectionner un établissement scolaire.");
       return;
@@ -151,6 +147,10 @@ export function PreRegistrationModal({
 
     const selectedEstablishment = etablissements.find((e) => e.id === establishmentId);
     const chosenCourse = courses.find((c) => c.id === selectedCourseId);
+
+    const cleanSlug = userName.trim().toLowerCase().replace(/[^a-z0-9]/g, "") || "candidat";
+    const effectiveEmail = userEmail.trim() || `${cleanSlug}.${Date.now().toString().slice(-4)}@alfasle.edu`;
+    setUserEmail(effectiveEmail);
 
     const finalSubject =
       role === "TEACHER"
@@ -164,7 +164,7 @@ export function PreRegistrationModal({
     const result = submitPreRegistration({
       role,
       userName: userName.trim(),
-      userEmail: userEmail.trim().toLowerCase(),
+      userEmail: effectiveEmail,
       userPhone: userPhone.trim(),
       etablissementId: establishmentId,
       classeId,
@@ -251,11 +251,11 @@ export function PreRegistrationModal({
 
               <div className="p-4 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 text-left text-xs space-y-2 max-w-lg mx-auto">
                 <div className="flex items-center gap-2 text-indigo-200 font-bold">
-                  <Mail className="w-4 h-4 text-indigo-400 shrink-0" />
-                  Email de confirmation & Définition du mot de passe :
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  Dossier de candidature transmis :
                 </div>
                 <p className="text-slate-300 leading-relaxed">
-                  Un email avec lien d'activation a été envoyé à <strong className="text-white font-mono">{userEmail}</strong>. Vous pouvez confirmer votre inscription et définir votre propre mot de passe dès maintenant.
+                  Votre dossier a été transmis avec succès auprès de l&apos;établissement. Vous pouvez dès maintenant finaliser et définir votre mot de passe d&apos;accès.
                 </p>
               </div>
 
@@ -265,8 +265,8 @@ export function PreRegistrationModal({
                   onClick={() => setIsActivationOpen(true)}
                   className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-black text-xs shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all transform hover:scale-105"
                 >
-                  <Mail className="w-4 h-4 text-black" />
-                  <span>📨 Ouvrir l'Email & Définir mon Mot de passe &rarr;</span>
+                  <Sparkles className="w-4 h-4 text-black" />
+                  <span>Définir mon Mot de passe d&apos;accès &rarr;</span>
                 </button>
 
                 <button
@@ -339,23 +339,6 @@ export function PreRegistrationModal({
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 text-indigo-400" />
-                    Adresse Email (de validation) <span className="text-rose-400">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="votre.email@exemple.com"
-                    value={userEmail}
-                    onChange={(e) => setUserEmail(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
                     <Phone className="w-3.5 h-3.5 text-indigo-400" />
                     Numéro de Téléphone
                   </label>
@@ -367,38 +350,38 @@ export function PreRegistrationModal({
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
                   />
                 </div>
+              </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                    <School className="w-3.5 h-3.5 text-indigo-400" />
-                    Établissement visé <span className="text-rose-400">*</span>
-                  </label>
-                  <select
-                    value={establishmentId}
-                    onChange={(e) => {
-                      setEstablishmentId(e.target.value);
-                      setClasseId(""); // Reset class selection on school change
-                      setSelectedCourseId("");
-                    }}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer"
-                  >
-                    <option value="ALL">-- Tous les établissements (Toutes les classes) --</option>
-                    {etablissements.map((est) => {
-                      const countForEst = classes.filter(
-                        (c) =>
-                          c.etablissementId === est.id ||
-                          c.etablissementId === est.subdomain ||
-                          (c.etablissementName &&
-                            c.etablissementName.toLowerCase().includes(est.name.toLowerCase()))
-                      ).length;
-                      return (
-                        <option key={est.id} value={est.id}>
-                          🏫 {est.name} ({countForEst} classe{countForEst > 1 ? "s" : ""})
-                        </option>
-                      );
-                    })}
-                  </select>
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <School className="w-3.5 h-3.5 text-indigo-400" />
+                  Établissement visé <span className="text-rose-400">*</span>
+                </label>
+                <select
+                  value={establishmentId}
+                  onChange={(e) => {
+                    setEstablishmentId(e.target.value);
+                    setClasseId(""); // Reset class selection on school change
+                    setSelectedCourseId("");
+                  }}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer"
+                >
+                  <option value="ALL">-- Tous les établissements (Toutes les classes) --</option>
+                  {etablissements.map((est) => {
+                    const countForEst = classes.filter(
+                      (c) =>
+                        c.etablissementId === est.id ||
+                        c.etablissementId === est.subdomain ||
+                        (c.etablissementName &&
+                          c.etablissementName.toLowerCase().includes(est.name.toLowerCase()))
+                    ).length;
+                    return (
+                      <option key={est.id} value={est.id}>
+                        🏫 {est.name} ({countForEst} classe{countForEst > 1 ? "s" : ""})
+                      </option>
+                    );
+                  })}
+                </select>
               </div>
 
               {/* Status summary of the selected establishment */}
