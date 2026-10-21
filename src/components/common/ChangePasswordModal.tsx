@@ -68,28 +68,28 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-md glass-panel bg-slate-900/95 border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-md glass-panel bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+        <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-white">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-600">
               <KeyRound className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-black text-white">Modifier mon mot de passe</h3>
+              <h3 className="text-base font-black text-slate-900">Modifier mon mot de passe</h3>
               <p className="text-xs text-slate-400 font-mono">{currentUser.email}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-slate-200">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-slate-800">
           {errorMsg && (
             <ValidationMessage
               type="error"
@@ -109,7 +109,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">
               Mot de passe actuel
             </label>
             <input
@@ -118,12 +118,12 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
               onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="Saisissez votre mot de passe actuel"
               required
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-xs"
+              className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-xs"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">
               Nouveau mot de passe *
             </label>
             <div className="relative">
@@ -134,12 +134,12 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
                 placeholder="Nouveau mot de passe (min 6 car.)"
                 required
                 minLength={6}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-xs pr-10"
+                className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-xs pr-10"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -147,7 +147,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">
               Confirmer le nouveau mot de passe *
             </label>
             <input
@@ -157,7 +157,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
               placeholder="Retapez le nouveau mot de passe"
               required
               minLength={6}
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-xs"
+              className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-xs"
             />
           </div>
 
@@ -165,7 +165,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors"
+              className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs transition-colors"
             >
               Annuler
             </button>

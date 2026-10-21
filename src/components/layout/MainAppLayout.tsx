@@ -170,16 +170,16 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
                 />
               ) : currentUser.role === "PARENT" ? (
                 <div className="space-y-6">
-                  <div className="glass-panel p-6 rounded-3xl border border-slate-800 bg-gradient-to-r from-purple-950/40 to-slate-900/60">
+                  <div className="glass-panel p-6 rounded-3xl border border-slate-200 bg-gradient-to-r from-purple-50 via-white to-indigo-50 shadow-sm">
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-xs font-bold text-purple-400 uppercase tracking-wider">
+                        <span className="text-xs font-bold text-purple-700 uppercase tracking-wider">
                           Espace Famille & Tuteur
                         </span>
-                        <h2 className="text-2xl font-black text-white mt-1">
+                        <h2 className="text-2xl font-black text-slate-900 mt-1">
                           Bienvenue, {currentUser.name}
                         </h2>
-                        <p className="text-xs text-slate-400 mt-1">
+                        <p className="text-xs text-slate-600 mt-1">
                           Suivez les cours, les devoirs et les bulletins scolaires de vos enfants.
                         </p>
                       </div>
@@ -266,27 +266,27 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
 
           {/* SETTINGS */}
           {activeTab === "settings" && (
-            <div className="glass-panel rounded-3xl p-8 border border-slate-800 space-y-5 max-w-2xl">
-              <h2 className="text-xl font-bold text-white">Paramètres de la Plateforme Multi-Établissements</h2>
-              <p className="text-xs text-slate-400 leading-relaxed">
+            <div className="glass-panel rounded-3xl p-8 border border-slate-200 space-y-5 max-w-2xl bg-white shadow-sm">
+              <h2 className="text-xl font-bold text-slate-900">Paramètres de la Plateforme Multi-Établissements</h2>
+              <p className="text-xs text-slate-600 leading-relaxed">
                 Configurez les options globales de la plateforme AlFasle, la distribution des cours, les codes d&apos;inscription et les passerelles d&apos;hébergement.
               </p>
-              <div className="space-y-3 pt-4 border-t border-slate-800">
-                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs">
+              <div className="space-y-3 pt-4 border-t border-slate-200">
+                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
                   <div>
-                    <p className="font-semibold text-white">Admissions par Codes Classes</p>
-                    <p className="text-slate-400">Autoriser l&apos;auto-inscription des élèves via code unique</p>
+                    <p className="font-semibold text-slate-900">Admissions par Codes Classes</p>
+                    <p className="text-slate-500">Autoriser l&apos;auto-inscription des élèves via code unique</p>
                   </div>
-                  <span className="text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                  <span className="text-emerald-700 font-bold bg-emerald-100 px-2.5 py-1 rounded-full border border-emerald-300">
                     Activé
                   </span>
                 </div>
-                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs">
+                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
                   <div>
-                    <p className="font-semibold text-white">Isolation des Établissements</p>
-                    <p className="text-slate-400">Cloisonnement des données entre campus distincts</p>
+                    <p className="font-semibold text-slate-900">Isolation des Établissements</p>
+                    <p className="text-slate-500">Cloisonnement des données entre campus distincts</p>
                   </div>
-                  <span className="text-blue-400 font-bold bg-blue-500/10 px-2.5 py-1 rounded-full border border-blue-500/20">
+                  <span className="text-blue-700 font-bold bg-blue-100 px-2.5 py-1 rounded-full border border-blue-300">
                     Multi-Tenant
                   </span>
                 </div>
@@ -334,13 +334,13 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
       />
 
       {/* Mobile Bottom Navigation Bar (Fixed for quick 1-tap thumb navigation) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#080d1a]/95 backdrop-blur-xl border-t border-slate-800/90 px-2 py-1.5 flex items-center justify-around shadow-2xl safe-area-bottom">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-xl border-t border-slate-200 px-2 py-1.5 flex items-center justify-around shadow-lg safe-area-bottom">
         <button
           onClick={() => setActiveTab(currentUser.role === "SUPER_ADMIN" ? "superadmin" : "dashboard")}
           className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all ${
             activeTab === "dashboard" || activeTab === "superadmin"
-              ? "text-indigo-400 font-bold"
-              : "text-slate-400 hover:text-white"
+              ? "text-indigo-600 font-bold"
+              : "text-slate-500 hover:text-slate-900"
           }`}
         >
           <LayoutDashboard className="w-5 h-5" />
@@ -351,8 +351,8 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
           onClick={() => setActiveTab("classes")}
           className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all ${
             activeTab === "classes" || activeTab === "catalog"
-              ? "text-indigo-400 font-bold"
-              : "text-slate-400 hover:text-white"
+              ? "text-indigo-600 font-bold"
+              : "text-slate-500 hover:text-slate-900"
           }`}
         >
           <FolderKanban className="w-5 h-5" />
@@ -363,8 +363,8 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
           onClick={() => setActiveTab("courses")}
           className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all ${
             activeTab === "courses"
-              ? "text-indigo-400 font-bold"
-              : "text-slate-400 hover:text-white"
+              ? "text-indigo-600 font-bold"
+              : "text-slate-500 hover:text-slate-900"
           }`}
         >
           <BookOpen className="w-5 h-5" />
@@ -375,8 +375,8 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
           onClick={() => setActiveTab("assignments")}
           className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all ${
             activeTab === "assignments"
-              ? "text-indigo-400 font-bold"
-              : "text-slate-400 hover:text-white"
+              ? "text-indigo-600 font-bold"
+              : "text-slate-500 hover:text-slate-900"
           }`}
         >
           <FileCheck2 className="w-5 h-5" />
@@ -386,7 +386,7 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
         <button
           onClick={() => setIsMobileMenuOpen(true)}
           className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all ${
-            isMobileMenuOpen ? "text-indigo-400 font-bold" : "text-slate-400 hover:text-white"
+            isMobileMenuOpen ? "text-indigo-600 font-bold" : "text-slate-500 hover:text-slate-900"
           }`}
         >
           <Menu className="w-5 h-5" />

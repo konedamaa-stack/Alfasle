@@ -457,12 +457,12 @@ export function SchoolSubdomainPortal({
 
           {/* LEFT COLUMN: School Custom Theme Banner (Light Orange / Warm Orange) */}
           <div className="md:col-span-5 bg-gradient-to-br from-amber-500 via-orange-400 to-orange-500 p-6 sm:p-8 flex flex-col justify-between text-white relative overflow-hidden shadow-inner">
-            <div className="absolute -top-16 -right-16 w-56 h-56 bg-white/20 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute -top-16 -right-16 w-56 h-56 bg-slate-100 rounded-full blur-2xl pointer-events-none" />
             <div className="absolute -bottom-16 -left-16 w-60 h-60 bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
 
             <div className="relative z-10 space-y-5">
               {/* Badge specific to establishment */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/25 backdrop-blur-md border border-white/40 text-xs font-bold text-white shadow-sm">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/25 backdrop-blur-md border border-slate-200 text-xs font-bold text-slate-900 shadow-sm">
                 <span>🏫</span>
                 <span className="tracking-wide uppercase truncate max-w-none">
                   {etablissement.name}
@@ -470,7 +470,7 @@ export function SchoolSubdomainPortal({
               </div>
 
               <div className="space-y-3 pt-2">
-                <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight text-white drop-shadow-sm">
+                <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight text-slate-900 drop-shadow-sm">
                   Espace Campus & Cours en Ligne !
                 </h2>
                 <p className="text-xs text-orange-50/95 leading-relaxed font-medium">
@@ -479,28 +479,28 @@ export function SchoolSubdomainPortal({
               </div>
 
               {/* School Metrics */}
-              <div className="p-3.5 rounded-2xl bg-black/15 backdrop-blur-md border border-white/25 space-y-2 text-xs">
+              <div className="p-3.5 rounded-2xl bg-slate-50 backdrop-blur-md border border-slate-200 space-y-2 text-xs">
                 <div className="flex items-center justify-between text-orange-50 font-medium">
                   <span>Classes disponibles sur ce campus :</span>
-                  <span className="font-bold bg-white/25 px-2 py-0.5 rounded-full border border-white/30 text-white">
+                  <span className="font-bold bg-white/25 px-2 py-0.5 rounded-full border border-slate-200 text-slate-900">
                     {schoolClasses.length} Classes
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-orange-100 font-medium">
                   <span>Effectif inscrits :</span>
-                  <span className="font-bold text-white">{enrolledCount} Élèves</span>
+                  <span className="font-bold text-slate-900">{enrolledCount} Élèves</span>
                 </div>
                 {etablissement.directorName && (
-                  <div className="pt-1 border-t border-white/20 flex items-center justify-between text-[11px] text-orange-100">
+                  <div className="pt-1 border-t border-slate-200 flex items-center justify-between text-[11px] text-orange-100">
                     <span>Directeur :</span>
-                    <span className="font-semibold text-white">{etablissement.directorName}</span>
+                    <span className="font-semibold text-slate-900">{etablissement.directorName}</span>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="relative z-10 pt-4 border-t border-white/25 text-[11px] text-orange-100">
-              Instance sécurisée : <strong className="text-white font-bold">{etablissement.subdomain}.alfasle.edu</strong>
+            <div className="relative z-10 pt-4 border-t border-slate-200 text-[11px] text-orange-100">
+              Instance sécurisée : <strong className="text-slate-900 font-bold">{etablissement.subdomain}.alfasle.edu</strong>
             </div>
           </div>
 
@@ -676,7 +676,7 @@ export function SchoolSubdomainPortal({
                 >
                   <span>🎓 Pré-inscription Élève</span>
                 </button>
-                <span className="text-slate-300">•</span>
+                <span className="text-slate-600">•</span>
                 <button
                   type="button"
                   onClick={() => {

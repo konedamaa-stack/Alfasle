@@ -30,22 +30,22 @@ export default function ErrorBoundary({
   };
 
   return (
-    <div className="min-h-screen bg-[#080d1a] text-white flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-white text-slate-900 flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="max-w-lg w-full bg-slate-900/95 border border-slate-800 p-6 sm:p-8 rounded-3xl shadow-2xl relative z-10 text-center space-y-6 backdrop-blur-xl">
-        <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 flex items-center justify-center mx-auto shadow-inner">
+      <div className="max-w-lg w-full bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl shadow-2xl relative z-10 text-center space-y-6 backdrop-blur-xl">
+        <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-600 flex items-center justify-center mx-auto shadow-inner">
           <AlertTriangle className="w-8 h-8" />
         </div>
 
         <div className="space-y-2">
-          <span className="px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+          <span className="px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-rose-500/20 text-rose-600 border border-rose-500/30">
             RÉCUPÉRATION SYSTÈME
           </span>
-          <h1 className="text-xl sm:text-2xl font-black text-white">
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900">
             Une mise à jour a été appliquée
           </h1>
-          <p className="text-xs text-slate-300 leading-relaxed">
+          <p className="text-xs text-slate-600 leading-relaxed">
             Votre navigateur a besoin de synchroniser les nouveaux campus et paramètres multi-établissements. Cliquez ci-dessous pour réinitialiser la session en toute sécurité.
           </p>
         </div>
@@ -57,7 +57,7 @@ export default function ErrorBoundary({
           >
             {cleared ? (
               <>
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 <span>Rechargement en cours...</span>
               </>
             ) : (
@@ -71,7 +71,7 @@ export default function ErrorBoundary({
           <a
             href="/"
             onClick={handleCleanAndReload}
-            className="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer block"
+            className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer block"
           >
             <Home className="w-3.5 h-3.5 inline mr-1" />
             <span>Retourner au portail d&apos;accueil</span>
@@ -79,7 +79,7 @@ export default function ErrorBoundary({
         </div>
 
         {error?.message && (
-          <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 text-left text-[11px] font-mono text-rose-300/80 overflow-x-auto max-h-24">
+          <div className="p-3 rounded-xl bg-white border border-slate-200 text-left text-[11px] font-mono text-rose-600/80 overflow-x-auto max-h-24">
             {error.message}
           </div>
         )}

@@ -111,22 +111,22 @@ export function AccountActivationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-xl glass-panel bg-slate-900/95 border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+      <div className="relative w-full max-w-xl glass-panel bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+        <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shadow-inner">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 shadow-inner">
               <Mail className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+              <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
                 <span>Confirmation & Activation</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono border border-emerald-500/30">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-mono border border-emerald-200 font-bold">
                   Email Automatisé
                 </span>
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500">
                 Activation de compte pour <strong>{targetEmail}</strong>
               </p>
             </div>
@@ -134,52 +134,52 @@ export function AccountActivationModal({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto space-y-6 text-slate-200">
+        <div className="p-6 overflow-y-auto space-y-6 text-slate-800 bg-white">
           {/* STEP 1: EMAIL SIMULATION PREVIEW */}
           {step === "EMAIL_PREVIEW" && (
             <div className="space-y-5 animate-fadeIn">
-              <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700 space-y-3">
-                <div className="flex items-center justify-between text-xs text-slate-400 pb-2 border-b border-slate-700/80">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                <div className="flex items-center justify-between text-xs text-slate-500 pb-2 border-b border-slate-200">
                   <div className="flex items-center gap-2">
-                    <Inbox className="w-4 h-4 text-indigo-400" />
+                    <Inbox className="w-4 h-4 text-indigo-600" />
                     <span>Boîte de réception : <strong>{targetEmail}</strong></span>
                   </div>
-                  <div className="flex items-center gap-1 font-mono text-[10px] text-slate-500">
+                  <div className="flex items-center gap-1 font-mono text-[10px] text-slate-400">
                     <Clock className="w-3 h-3" />
                     <span>À l'instant</span>
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <p className="text-xs font-bold text-white">
+                  <p className="text-xs font-bold text-slate-900">
                     Sujet : [AlFasle] Confirmation de votre pré-inscription & Activation de votre compte
                   </p>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-slate-500">
                     De : <strong>admissions@gs-alfasle.edu</strong> (Direction AlFasle)
                   </p>
                 </div>
 
                 {/* Email Body Preview */}
-                <div className="mt-3 p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3 text-xs leading-relaxed text-slate-300">
-                  <p className="font-semibold text-white">
-                    Bonjour <span className="text-indigo-300 font-bold">{targetName}</span>,
+                <div className="mt-3 p-4 rounded-xl bg-white border border-slate-200 space-y-3 text-xs leading-relaxed text-slate-700 shadow-sm">
+                  <p className="font-semibold text-slate-900">
+                    Bonjour <span className="text-indigo-600 font-bold">{targetName}</span>,
                   </p>
                   <p>
                     Nous avons bien reçu votre demande de pré-inscription en tant que{" "}
-                    <strong className="text-white">
+                    <strong className="text-slate-900">
                       {targetRole === "TEACHER" ? "👨‍🏫 Enseignant" : "🎓 Élève"}
                     </strong>{" "}
-                    au sein de l'établissement <strong className="text-white">{targetSchool}</strong> pour la classe{" "}
-                    <span className="text-indigo-300 font-semibold">{targetClass}</span>.
+                    au sein de l'établissement <strong className="text-slate-900">{targetSchool}</strong> pour la classe{" "}
+                    <span className="text-indigo-600 font-semibold">{targetClass}</span>.
                   </p>
-                  <p className="text-slate-400">
+                  <p className="text-slate-500">
                     Pour finaliser votre inscription et accéder à vos cours et outils pédagogiques, veuillez cliquer sur le bouton ci-dessous pour activer votre compte et choisir votre mot de passe personnalisé.
                   </p>
 
@@ -187,7 +187,7 @@ export function AccountActivationModal({
                     <button
                       type="button"
                       onClick={() => setStep("SET_PASSWORD")}
-                      className="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2 mx-auto transition-all transform hover:scale-105"
+                      className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 mx-auto transition-all transform hover:scale-105"
                     >
                       <Sparkles className="w-4 h-4 text-amber-300" />
                       <span>Activer mon Compte & Définir mon Mot de passe &rarr;</span>
@@ -196,12 +196,12 @@ export function AccountActivationModal({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs text-slate-400">
+              <div className="flex items-center justify-between text-xs text-slate-500">
                 <span>Vous êtes sur votre machine de test ?</span>
                 <button
                   type="button"
                   onClick={() => setStep("SET_PASSWORD")}
-                  className="text-indigo-400 font-bold hover:underline flex items-center gap-1"
+                  className="text-indigo-600 font-bold hover:underline flex items-center gap-1"
                 >
                   <span>Passer à l'étape du mot de passe</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -214,17 +214,17 @@ export function AccountActivationModal({
           {step === "SET_PASSWORD" && (
             <form onSubmit={handleActivateSubmit} className="space-y-5 animate-fadeIn">
               <div className="space-y-1">
-                <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                  <Lock className="w-4 h-4 text-indigo-400" />
+                <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-indigo-600" />
                   <span>Définissez votre nouveau mot de passe</span>
                 </h4>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-500">
                   Choisissez un mot de passe sécurisé pour vous connecter désormais avec votre email ou votre identifiant.
                 </p>
               </div>
 
               {errorMsg && (
-                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
                   <span>⚠️</span>
                   <span>{errorMsg}</span>
                 </div>
@@ -232,7 +232,7 @@ export function AccountActivationModal({
 
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                     Nouveau Mot de Passe *
                   </label>
                   <div className="relative">
@@ -243,12 +243,12 @@ export function AccountActivationModal({
                       placeholder="Ex: MonMotDePasse2026@"
                       required
                       minLength={6}
-                      className="w-full px-4 py-3 rounded-xl bg-slate-950/70 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-xs pr-10"
+                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500 text-xs pr-10"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -256,7 +256,7 @@ export function AccountActivationModal({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                     Confirmer le Mot de Passe *
                   </label>
                   <input
@@ -266,14 +266,14 @@ export function AccountActivationModal({
                     placeholder="Retapez votre mot de passe"
                     required
                     minLength={6}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-950/70 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-xs"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500 text-xs"
                   />
                 </div>
               </div>
 
               {/* Password strength tips */}
-              <div className="p-3 rounded-xl bg-slate-800/40 border border-slate-700/60 text-[11px] text-slate-400 space-y-1">
-                <p className="font-semibold text-slate-300">Conseils de sécurité :</p>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-500 space-y-1">
+                <p className="font-semibold text-slate-700">Conseils de sécurité :</p>
                 <p>• Au moins 6 caractères (recommandé : 8+ avec chiffres et lettres).</p>
                 <p>• Vous pourrez modifier ce mot de passe à tout moment depuis votre profil.</p>
               </div>
@@ -282,7 +282,7 @@ export function AccountActivationModal({
                 <button
                   type="button"
                   onClick={() => setStep("EMAIL_PREVIEW")}
-                  className="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors"
+                  className="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
                 >
                   &larr; Retour à l'email
                 </button>
@@ -290,13 +290,13 @@ export function AccountActivationModal({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-black text-xs shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5"
+                  className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5"
                 >
                   {isLoading ? (
                     <span>Activation en cours...</span>
                   ) : (
                     <>
-                      <CheckCircle2 className="w-4 h-4 text-black" />
+                      <CheckCircle2 className="w-4 h-4 text-white" />
                       <span>Confirmer & Accéder à mon Espace</span>
                     </>
                   )}
@@ -308,17 +308,17 @@ export function AccountActivationModal({
           {/* STEP 3: SUCCESS */}
           {step === "SUCCESS" && (
             <div className="py-8 text-center space-y-4 animate-fadeIn">
-              <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto shadow-xl">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-lg font-black text-white">Compte Activé avec Succès !</h4>
-                <p className="text-xs text-slate-300 max-w-sm mx-auto">
+                <h4 className="text-lg font-black text-slate-900">Compte Activé avec Succès !</h4>
+                <p className="text-xs text-slate-600 max-w-sm mx-auto">
                   Votre mot de passe a été enregistré. Vous êtes automatiquement connecté en tant que{" "}
                   <strong>{targetRole === "TEACHER" ? "Professeur" : "Élève"}</strong>.
                 </p>
               </div>
-              <p className="text-[11px] font-mono text-indigo-400 animate-pulse">
+              <p className="text-[11px] font-mono text-indigo-600 animate-pulse">
                 Redirection vers votre tableau de bord...
               </p>
             </div>

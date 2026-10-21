@@ -4,14 +4,14 @@
 
 @layer base {
   :root {
-    --background: #090d16;
-    --foreground: #f8fafc;
-    --card: #0f172a;
-    --card-foreground: #f8fafc;
-    --primary: #6366f1;
+    --background: #f8fafc;
+    --foreground: #0f172a;
+    --card: #ffffff;
+    --card-foreground: #0f172a;
+    --primary: #4f46e5;
     --primary-foreground: #ffffff;
-    --border: #334155;
-    --input: #0f172a;
+    --border: #e2e8f0;
+    --input: #ffffff;
     --ring: #6366f1;
   }
 }
@@ -23,52 +23,54 @@ body {
   overflow-x: hidden;
 }
 
-/* Glassmorphism Dark Mode Styling */
+/* Glassmorphism Clean Light Mode Styling */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.92);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(51, 65, 85, 0.6);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+  color: #0f172a;
 }
 
 .glass-card {
-  background: rgba(15, 23, 42, 0.75);
+  background: #ffffff;
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(51, 65, 85, 0.5);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  color: #0f172a;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card:hover {
-  background: rgba(30, 41, 59, 0.9);
-  border-color: rgba(99, 102, 241, 0.5);
-  box-shadow: 0 12px 24px rgba(99, 102, 241, 0.15);
+  background: #f8fafc;
+  border-color: rgba(99, 102, 241, 0.35);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.08);
   transform: translateY(-2px);
 }
 
-/* Force dark styling on all form inputs and browser native dropdown selects */
+/* Form inputs and native browser dropdown selects in light mode */
 select option,
 select optgroup {
-  background-color: #0f172a !important;
-  color: #f8fafc !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
 }
 
 input, select, textarea {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
-/* Custom scrollbar */
+/* Custom light scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0b1120;
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #cbd5e1;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #94a3b8;
 }

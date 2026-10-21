@@ -76,7 +76,7 @@ export function AuthLandingView({
       espaceDesc: "Gestion et création globale des établissements scolaires",
       defaultLogin: "konedamaa@gmail.com",
       defaultPass: "Madouu1966@",
-      cardBg: "from-amber-600 via-orange-700 to-slate-900",
+      cardBg: "from-amber-600 via-orange-700 to-slate-50",
       gradient: "from-amber-500 to-orange-600",
     },
     ADMIN: {
@@ -559,12 +559,12 @@ export function AuthLandingView({
             className={`md:col-span-5 bg-gradient-to-br ${currentConfig.cardBg} p-6 sm:p-10 flex flex-col justify-between text-white relative overflow-hidden transition-all duration-500`}
           >
             {/* Soft decorative background shapes */}
-            <div className="absolute -top-16 -right-16 w-56 h-56 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="absolute -bottom-16 -left-16 w-60 h-60 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -top-16 -right-16 w-56 h-56 bg-slate-50 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute -bottom-16 -left-16 w-60 h-60 bg-slate-50 rounded-full blur-3xl pointer-events-none" />
 
             <div className="relative z-10 space-y-6">
               {/* Badge matching screenshot: ESSAYER2 */}
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/25 text-xs font-bold shadow-sm">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 backdrop-blur-md border border-slate-200 text-xs font-bold shadow-sm">
                 <span>🏫</span>
                 <span className="tracking-wide uppercase">{brandBadgeText}</span>
               </div>
@@ -574,21 +574,21 @@ export function AuthLandingView({
                 <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-tight drop-shadow-sm">
                   {currentConfig.leftTitle}
                 </h1>
-                <p className="text-xs sm:text-sm text-white/90 leading-relaxed max-w-sm">
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed max-w-sm">
                   {currentConfig.leftDesc}
                 </p>
               </div>
 
               {/* Extra multi-school pill */}
               <div className="pt-2">
-                <div className="p-3 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 space-y-1.5 text-xs">
-                  <div className="flex items-center justify-between text-[11px] font-semibold text-white">
+                <div className="p-3 rounded-2xl bg-slate-100 backdrop-blur-md border border-slate-200 space-y-1.5 text-xs">
+                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-900">
                     <span>Établissements connectés</span>
                     <span className="font-bold bg-white/25 px-2 py-0.5 rounded-full">
                       {etablissements.length} Écoles
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-[11px] text-white/80">
+                  <div className="flex items-center justify-between text-[11px] text-slate-700">
                     <span>Classes actives</span>
                     <span className="font-bold">{classes.length} Formations</span>
                   </div>
@@ -597,12 +597,12 @@ export function AuthLandingView({
             </div>
 
             {/* Bottom Left Note */}
-            <div className="relative z-10 pt-6 border-t border-white/15 space-y-2">
-              <div className="flex items-center gap-2 text-xs text-white/90">
-                <ShieldCheck className="w-4 h-4 text-emerald-300" />
+            <div className="relative z-10 pt-6 border-t border-slate-200 space-y-2">
+              <div className="flex items-center gap-2 text-xs text-slate-700">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
                 <span>Connexion sécurisée SSL / TLS 256-bit</span>
               </div>
-              <p className="text-[11px] text-white/70">
+              <p className="text-[11px] text-slate-700">
                 Année Scolaire & Universitaire 2026-2027
               </p>
             </div>
@@ -858,7 +858,7 @@ export function AuthLandingView({
                 >
                   <span>🎓 Pré-inscription Élève</span>
                 </button>
-                <span className="text-slate-300">•</span>
+                <span className="text-slate-600">•</span>
                 <button
                   type="button"
                   onClick={() => {

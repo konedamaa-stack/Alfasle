@@ -217,12 +217,12 @@ export function ClassList({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h2 className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">
+          <h2 className="text-lg sm:text-2xl font-extrabold text-slate-900 tracking-tight">
             {currentUser.role === "TEACHER"
               ? "Gestion des Classes Pédagogiques"
               : "Catalogue des Classes & Formations"}
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             {currentUser.role === "TEACHER"
               ? "Consultez, éditez et gérez les effectifs de vos promotions"
               : "Explorez les programmes disponibles et inscrivez-vous en ligne"}
@@ -233,7 +233,7 @@ export function ClassList({
           {onOpenJoinClassModal && (
             <button
               onClick={onOpenJoinClassModal}
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-300 border border-blue-500/30 text-xs font-semibold shadow-md transition-all"
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-blue-700 border border-slate-200 text-xs font-semibold shadow-sm transition-all cursor-pointer"
             >
               <span>🔑</span>
               <span>Rejoindre avec un Code</span>
@@ -260,10 +260,10 @@ export function ClassList({
                   },
                 });
               }}
-              className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-semibold shadow-sm transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold shadow-sm transition-all cursor-pointer"
               title="Vider et supprimer toutes les classes"
             >
-              <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+              <Trash2 className="w-3.5 h-3.5 text-rose-600" />
               <span>Vider toutes les classes</span>
             </button>
           )}
@@ -271,7 +271,7 @@ export function ClassList({
           {(currentUser.role === "TEACHER" || currentUser.role === "ADMIN") && (
             <button
               onClick={onOpenCreateClass}
-              className="flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all"
+              className="flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md shadow-blue-600/20 transition-all cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
               <span>+ Nouvelle Classe</span>
@@ -281,7 +281,7 @@ export function ClassList({
       </div>
 
       {/* Filter Bar */}
-      <div className="glass-panel rounded-2xl p-3 sm:p-4 border border-slate-800 flex flex-col md:flex-row gap-3 sm:gap-4 justify-between items-stretch md:items-center">
+      <div className="glass-panel rounded-2xl p-3 sm:p-4 border border-slate-200 flex flex-col md:flex-row gap-3 sm:gap-4 justify-between items-stretch md:items-center">
         {/* Search */}
         <div className="w-full md:w-72 relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -290,18 +290,18 @@ export function ClassList({
             placeholder="Filtrer par mot-clé, code, prof..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+            className="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition-colors"
           />
         </div>
 
         {/* Établissement Filter - Accessible pour Super Admin ou Directeur multi-campus */}
         {currentUser.role === "SUPER_ADMIN" || myManagedEtabs.length > 1 ? (
           <div className="flex items-center gap-2 w-full md:w-auto">
-            <label className="text-xs text-slate-400 whitespace-nowrap hidden sm:inline">Établissement :</label>
+            <label className="text-xs text-slate-500 whitespace-nowrap hidden sm:inline">Établissement :</label>
             <select
               value={selectedEtablissement}
               onChange={(e) => setSelectedEtablissement(e.target.value)}
-              className="w-full sm:w-auto px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-blue-500 cursor-pointer"
+              className="w-full sm:w-auto px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white cursor-pointer"
             >
               <option value="ALL">
                 {currentUser.role === "SUPER_ADMIN" ? `Tous les campus (${etablissements.length})` : `Tous mes campus (${myManagedEtabs.length})`}
@@ -314,7 +314,7 @@ export function ClassList({
             </select>
           </div>
         ) : (
-          <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs font-bold">
+          <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold">
             <span>🏫</span>
             <span>{currentUser.etablissementName || "Établissement"}</span>
           </div>
@@ -326,10 +326,10 @@ export function ClassList({
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors shrink-0 ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors shrink-0 cursor-pointer ${
                 selectedCategory === cat
                   ? "bg-blue-600 text-white font-semibold shadow-sm"
-                  : "bg-slate-800/80 text-slate-400 hover:text-slate-200 border border-slate-700"
+                  : "bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200"
               }`}
             >
               {cat === "ALL" ? "Toutes" : cat}
@@ -341,9 +341,9 @@ export function ClassList({
       {/* Grid of Classes */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredClasses.length === 0 ? (
-          <div className="col-span-full py-16 text-center glass-panel rounded-2xl border border-slate-800">
-            <FolderKanban className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-            <p className="text-sm font-semibold text-slate-300">Aucune classe trouvée</p>
+          <div className="col-span-full py-16 text-center glass-panel rounded-2xl border border-slate-200">
+            <FolderKanban className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+            <p className="text-sm font-semibold text-slate-700">Aucune classe trouvée</p>
             <p className="text-xs text-slate-500 mt-1">
               Essayez de modifier vos critères de recherche ou créez une nouvelle classe.
             </p>
@@ -356,10 +356,10 @@ export function ClassList({
             return (
               <div
                 key={cls.id}
-                className="glass-card rounded-2xl overflow-hidden border border-slate-800 flex flex-col justify-between group hover:border-slate-700 transition-all shadow-lg"
+                className="glass-card rounded-2xl overflow-hidden border border-slate-200 flex flex-col justify-between group hover:border-slate-300 transition-all shadow-sm hover:shadow-md"
               >
                 {/* Image Cover */}
-                <div className="h-40 w-full relative overflow-hidden bg-slate-800">
+                <div className="h-40 w-full relative overflow-hidden bg-slate-100">
                   <img
                     src={
                       cls.coverImage ||
@@ -368,20 +368,20 @@ export function ClassList({
                     alt={cls.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
 
                   {/* Level & Category badges */}
                   <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
-                    <span className="px-2.5 py-0.5 rounded-md bg-slate-900/90 backdrop-blur-md text-blue-300 border border-blue-500/30 text-[10px] font-bold font-mono">
+                    <span className="px-2.5 py-0.5 rounded-md bg-white/90 backdrop-blur-md text-blue-700 border border-blue-200 text-[10px] font-bold font-mono">
                       {cls.classCode}
                     </span>
-                    <span className="px-2 py-0.5 rounded-md bg-slate-900/90 backdrop-blur-md text-slate-200 border border-slate-700 text-[10px] font-medium">
+                    <span className="px-2 py-0.5 rounded-md bg-white/90 backdrop-blur-md text-slate-700 border border-slate-200 text-[10px] font-medium">
                       {cls.level}
                     </span>
                   </div>
 
                   {/* Enrollment mode */}
-                  <span className="absolute top-3 right-3 px-2 py-0.5 rounded-md bg-slate-900/90 backdrop-blur-md text-amber-300 border border-amber-500/30 text-[10px] font-medium">
+                  <span className="absolute top-3 right-3 px-2 py-0.5 rounded-md bg-amber-100/90 backdrop-blur-md text-amber-800 border border-amber-300 text-[10px] font-medium">
                     {cls.enrollmentMode === "MANUAL_APPROVAL" ? "Sur sélection" : "Accès direct"}
                   </span>
                 </div>
@@ -389,15 +389,15 @@ export function ClassList({
                 {/* Content */}
                 <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
                   <div className="space-y-2">
-                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-400">
+                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-600">
                       <span>🏫</span>
                       <span className="truncate">{cls.etablissementName}</span>
                     </div>
 
-                    <h3 className="text-base font-bold text-white group-hover:text-blue-300 transition-colors line-clamp-2">
+                    <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2">
                       {cls.title}
                     </h3>
-                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
                       {cls.description}
                     </p>
 
@@ -415,13 +415,13 @@ export function ClassList({
                           {discList.slice(0, 3).map((d) => (
                             <span
                               key={d}
-                              className="px-2 py-0.5 rounded-md bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-[10px] font-semibold"
+                              className="px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 text-[10px] font-semibold"
                             >
                               📚 {d}
                             </span>
                           ))}
                           {discList.length > 3 && (
-                            <span className="px-1.5 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-bold">
+                            <span className="px-1.5 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold">
                               +{discList.length - 3}
                             </span>
                           )}
@@ -431,11 +431,11 @@ export function ClassList({
                   </div>
 
                   {/* Teacher info */}
-                  <div className="flex items-center gap-2 pt-2 border-t border-slate-800/80">
-                    <div className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-bold flex items-center justify-center">
+                  <div className="flex items-center gap-2 pt-2 border-t border-slate-200">
+                    <div className="w-6 h-6 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold flex items-center justify-center">
                       👨‍🏫
                     </div>
-                    <span className="text-xs text-slate-300 font-medium">{cls.teacherName}</span>
+                    <span className="text-xs text-slate-700 font-medium">{cls.teacherName}</span>
                   </div>
 
                   {/* Stats & Capacity - Clickable to view students */}
@@ -445,16 +445,16 @@ export function ClassList({
                     className="w-full text-left space-y-1.5 pt-2 hover:opacity-90 group/cap cursor-pointer"
                     title="Cliquer pour voir la liste des élèves inscrits"
                   >
-                    <div className="flex items-center justify-between text-[11px] text-slate-400">
-                      <span className="flex items-center gap-1 group-hover/cap:text-sky-300 transition-colors">
-                        <Users className="w-3.5 h-3.5 text-sky-400" />
+                    <div className="flex items-center justify-between text-[11px] text-slate-500">
+                      <span className="flex items-center gap-1 group-hover/cap:text-sky-600 transition-colors">
+                        <Users className="w-3.5 h-3.5 text-sky-600" />
                         <span>Inscrits :</span>
                       </span>
-                      <span className="font-semibold text-slate-200 group-hover/cap:text-sky-300">
+                      <span className="font-semibold text-slate-800 group-hover/cap:text-sky-600">
                         {cls.enrolledCount || 0} / {cls.capacity} places
                       </span>
                     </div>
-                    <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-500 rounded-full transition-all"
                         style={{
@@ -468,31 +468,31 @@ export function ClassList({
                   </button>
 
                   {/* Actions according to Role */}
-                  <div className="pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
+                  <div className="pt-3 border-t border-slate-200 flex items-center justify-between gap-2">
                     {currentUser.role === "TEACHER" || currentUser.role === "ADMIN" || currentUser.role === "SUPER_ADMIN" ? (
                       <div className="w-full flex items-center gap-1.5">
                         <button
                           type="button"
                           onClick={() => setViewingClassStudents(cls)}
-                          className="px-2.5 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 text-xs font-bold flex items-center justify-center gap-1 transition-all shadow-sm"
+                          className="px-2.5 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold flex items-center justify-center gap-1 transition-all shadow-sm cursor-pointer"
                           title="Voir la liste des élèves de cette classe"
                         >
-                          <Users className="w-3.5 h-3.5 text-sky-400" />
+                          <Users className="w-3.5 h-3.5 text-sky-600" />
                           <span className="hidden sm:inline">Élèves</span>
                         </button>
 
                         <button
                           onClick={() => handleOpenEdit(cls)}
-                          className="flex-1 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/40 text-xs font-bold flex items-center justify-center gap-1 transition-all shadow-sm"
+                          className="flex-1 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold flex items-center justify-center gap-1 transition-all shadow-sm cursor-pointer"
                           title="Modifier les informations de la classe"
                         >
-                          <Edit className="w-3.5 h-3.5 text-amber-400" />
+                          <Edit className="w-3.5 h-3.5 text-amber-600" />
                           <span>Modifier</span>
                         </button>
 
                         <button
                           onClick={() => onSelectClassForCourses && onSelectClassForCourses(cls.id)}
-                          className="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-1 transition-colors shadow-sm"
+                          className="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-1 transition-colors shadow-sm cursor-pointer"
                           title="Gérer les cours de cette classe"
                         >
                           <BookOpen className="w-3.5 h-3.5" />
@@ -505,7 +505,7 @@ export function ClassList({
                             e.stopPropagation();
                             handleDeleteClass(cls);
                           }}
-                          className="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs font-bold flex items-center justify-center transition-all"
+                          className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-bold flex items-center justify-center transition-all cursor-pointer"
                           title="Supprimer cette classe"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -517,27 +517,27 @@ export function ClassList({
                         {studentStatus === "APPROVED" ? (
                           <button
                             onClick={() => onSelectClassForCourses && onSelectClassForCourses(cls.id)}
-                            className="w-full py-2 rounded-xl bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 text-xs font-semibold flex items-center justify-center gap-1.5"
+                            className="w-full py-2 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer hover:bg-emerald-100 transition-colors"
                           >
-                            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                             Accéder à la Classe
                           </button>
                         ) : studentStatus === "PENDING" ? (
-                          <div className="w-full py-2 rounded-xl bg-amber-500/10 text-amber-300 border border-amber-500/20 text-xs font-semibold flex items-center justify-center gap-1.5">
-                            <Clock className="w-4 h-4 text-amber-400 animate-spin" />
+                          <div className="w-full py-2 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold flex items-center justify-center gap-1.5">
+                            <Clock className="w-4 h-4 text-amber-600 animate-spin" />
                             Préinscription en attente
                           </div>
                         ) : studentStatus === "REJECTED" ? (
-                          <div className="w-full py-2 rounded-xl bg-rose-500/10 text-rose-300 border border-rose-500/20 text-xs font-medium text-center">
+                          <div className="w-full py-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-medium text-center">
                             Demande non retenue
                           </div>
                         ) : (
                           <button
                             disabled={isFull}
                             onClick={() => setApplyingClass(cls)}
-                            className={`w-full py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-all ${
+                            className={`w-full py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer ${
                               isFull
-                                ? "bg-slate-800 text-slate-500 cursor-not-allowed"
+                                ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
                                 : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20"
                             }`}
                           >
@@ -564,21 +564,21 @@ export function ClassList({
 
       {/* Edit Class Modal */}
       {isEditModalOpen && editingClass && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-lg bg-[#0a0f1e] border border-amber-500/40 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            <div className="px-6 py-5 border-b border-slate-800 bg-[#070b16] flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+          <div className="w-full max-w-lg bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="px-6 py-5 border-b border-slate-200 bg-amber-50/60 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                <div className="w-10 h-10 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-700">
                   <FolderKanban className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-white">Modifier les Informations de la Classe</h3>
-                  <p className="text-xs text-amber-400 font-mono">{editingClass.classCode} • {editingClass.title}</p>
+                  <h3 className="text-base font-black text-slate-900">Modifier les Informations de la Classe</h3>
+                  <p className="text-xs text-amber-700 font-mono font-bold">{editingClass.classCode} • {editingClass.title}</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsEditModalOpen(false)}
-                className="p-2 rounded-xl text-slate-400 hover:text-white transition-colors"
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -586,46 +586,46 @@ export function ClassList({
 
             <form onSubmit={handleSaveEdit} className="p-6 overflow-y-auto flex-1 space-y-4 text-xs">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Nom / Titre de la Classe *</label>
+                <label className="block text-slate-700 font-semibold mb-1">Nom / Titre de la Classe *</label>
                 <input
                   type="text"
                   required
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white font-bold focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-bold focus:outline-none focus:border-amber-500 focus:bg-white"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Code Classe *</label>
+                  <label className="block text-slate-700 font-semibold mb-1">Code Classe *</label>
                   <input
                     type="text"
                     required
                     value={editCode}
                     onChange={(e) => setEditCode(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-amber-300 font-mono font-bold focus:outline-none focus:border-amber-500 uppercase"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-amber-700 font-mono font-bold focus:outline-none focus:border-amber-500 uppercase focus:bg-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Niveau d&apos;Étude *</label>
+                  <label className="block text-slate-700 font-semibold mb-1">Niveau d&apos;Étude *</label>
                   <input
                     type="text"
                     required
                     value={editLevel}
                     onChange={(e) => setEditLevel(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Professeur Responsable</label>
+                  <label className="block text-slate-700 font-semibold mb-1">Professeur Responsable</label>
                   <select
                     value={editTeacherId}
                     onChange={(e) => setEditTeacherId(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white cursor-pointer"
                   >
                     <option value="">-- Non assigné --</option>
                     {users
@@ -639,39 +639,39 @@ export function ClassList({
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Capacité Max (Élèves)</label>
+                  <label className="block text-slate-700 font-semibold mb-1">Capacité Max (Élèves)</label>
                   <input
                     type="number"
                     min={5}
                     max={200}
                     value={editCapacity}
                     onChange={(e) => setEditCapacity(parseInt(e.target.value) || 35)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white"
                   />
                 </div>
               </div>
 
               {/* Disciplines de la classe */}
-              <div className="p-4 bg-slate-950/80 border border-slate-800 rounded-2xl space-y-2.5">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold text-amber-300">
+                  <label className="block text-xs font-bold text-amber-800">
                     📚 Disciplines & Matières enseignées ({editDisciplines.length})
                   </label>
-                  <span className="text-[10px] text-slate-400">Programme pluri-disciplinaire</span>
+                  <span className="text-[10px] text-slate-500">Programme pluri-disciplinaire</span>
                 </div>
 
                 {editDisciplines.length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5 p-2 bg-slate-900 rounded-xl border border-slate-800">
+                  <div className="flex flex-wrap gap-1.5 p-2 bg-white rounded-xl border border-slate-200">
                     {editDisciplines.map((d) => (
                       <span
                         key={d}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600/30 border border-indigo-500/40 text-indigo-200 shadow-sm"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-50 border border-indigo-200 text-indigo-700 shadow-sm"
                       >
                         <span>{d}</span>
                         <button
                           type="button"
                           onClick={() => handleRemoveEditDiscipline(d)}
-                          className="text-indigo-400 hover:text-rose-400 transition-colors"
+                          className="text-indigo-400 hover:text-rose-600 transition-colors cursor-pointer"
                           title="Supprimer la discipline"
                         >
                           <X className="w-3.5 h-3.5" />
@@ -680,7 +680,7 @@ export function ClassList({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-amber-400 italic">Aucune discipline configurée.</p>
+                  <p className="text-xs text-amber-700 italic">Aucune discipline configurée.</p>
                 )}
 
                 <div className="flex items-center gap-2 pt-1">
@@ -695,12 +695,12 @@ export function ClassList({
                         handleAddEditDiscipline();
                       }
                     }}
-                    className="flex-1 px-3 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                    className="flex-1 px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-400"
                   />
                   <button
                     type="button"
                     onClick={handleAddEditDiscipline}
-                    className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-xl text-xs font-semibold border border-amber-500/30 transition-colors"
+                    className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-xl text-xs font-semibold border border-amber-200 transition-colors cursor-pointer"
                   >
                     + Ajouter
                   </button>
@@ -708,37 +708,37 @@ export function ClassList({
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Description & Programme</label>
+                <label className="block text-slate-700 font-semibold mb-1">Description & Programme</label>
                 <textarea
                   rows={3}
                   value={editDesc}
                   onChange={(e) => setEditDesc(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white"
                 />
               </div>
 
-              <div className="pt-3 border-t border-slate-800 flex justify-between items-center gap-2">
+              <div className="pt-3 border-t border-slate-200 flex justify-between items-center gap-2">
                 <button
                   type="button"
                   onClick={() => handleDeleteClass(editingClass)}
-                  className="px-4 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold flex items-center gap-1.5 transition-all"
+                  className="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
                 >
-                  <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
                   <span>Supprimer la Classe</span>
                 </button>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setIsEditModalOpen(false)}
-                    className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-semibold"
+                    className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold cursor-pointer"
                   >
                     Annuler
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black flex items-center gap-2 shadow-lg shadow-amber-500/25"
+                    className="px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black flex items-center gap-2 shadow-md shadow-amber-500/25 cursor-pointer"
                   >
-                    <CheckCircle2 className="w-4 h-4 fill-black" />
+                    <CheckCircle2 className="w-4 h-4 fill-slate-950 text-amber-500" />
                     <span>Enregistrer</span>
                   </button>
                 </div>
@@ -750,25 +750,25 @@ export function ClassList({
 
       {/* Viewing Students Modal */}
       {viewingClassStudents && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-2xl bg-[#0a0f1e] border border-sky-500/30 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-gradient-to-r from-sky-950/40 via-slate-900 to-indigo-950/40">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+          <div className="w-full max-w-2xl bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-slate-200 flex items-center justify-between bg-gradient-to-r from-sky-50 via-white to-indigo-50">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 font-mono text-xs font-bold border border-sky-500/30">
+                  <span className="px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 font-mono text-xs font-bold border border-sky-200">
                     {viewingClassStudents.classCode}
                   </span>
-                  <span className="text-xs text-slate-400">{viewingClassStudents.level}</span>
+                  <span className="text-xs text-slate-500">{viewingClassStudents.level}</span>
                 </div>
-                <h3 className="text-lg font-black text-white">{viewingClassStudents.title}</h3>
-                <p className="text-xs text-slate-400">
-                  Enseignant : <strong className="text-slate-200">{viewingClassStudents.teacherName}</strong> • {viewingClassStudents.etablissementName}
+                <h3 className="text-lg font-black text-slate-900">{viewingClassStudents.title}</h3>
+                <p className="text-xs text-slate-500">
+                  Enseignant : <strong className="text-slate-800">{viewingClassStudents.teacherName}</strong> • {viewingClassStudents.etablissementName}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setViewingClassStudents(null)}
-                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -807,13 +807,13 @@ export function ClassList({
                 if (displayStudents.length === 0) {
                   return (
                     <div className="text-center py-12 space-y-4">
-                      <div className="w-14 h-14 rounded-2xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center mx-auto">
+                      <div className="w-14 h-14 rounded-2xl bg-sky-50 border border-sky-200 text-sky-600 flex items-center justify-center mx-auto">
                         <Users className="w-7 h-7" />
                       </div>
                       <div className="space-y-1">
-                        <h4 className="text-sm font-bold text-white">Aucun élève inscrit pour l&apos;instant</h4>
-                        <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                          Partagez le code de classe <strong className="text-sky-300 font-mono">{viewingClassStudents.classCode}</strong> aux élèves pour qu&apos;ils puissent se préinscrire.
+                        <h4 className="text-sm font-bold text-slate-900">Aucun élève inscrit pour l&apos;instant</h4>
+                        <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                          Partagez le code de classe <strong className="text-sky-700 font-mono">{viewingClassStudents.classCode}</strong> aux élèves pour qu&apos;ils puissent se préinscrire.
                         </p>
                       </div>
                       <button
@@ -823,9 +823,9 @@ export function ClassList({
                           setCopiedCode(true);
                           setTimeout(() => setCopiedCode(false), 2000);
                         }}
-                        className="px-4 py-2 rounded-xl bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border border-sky-500/30 text-xs font-bold inline-flex items-center gap-1.5 transition-all"
+                        className="px-4 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer"
                       >
-                        {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                         <span>{copiedCode ? "Code copié !" : `Copier le Code (${viewingClassStudents.classCode})`}</span>
                       </button>
                     </div>
@@ -835,7 +835,7 @@ export function ClassList({
                 return (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-slate-300">
+                      <span className="font-bold text-slate-700">
                         Liste des Élèves Inscrits ({displayStudents.length} élèves) :
                       </span>
                       <button
@@ -845,21 +845,21 @@ export function ClassList({
                           setCopiedCode(true);
                           setTimeout(() => setCopiedCode(false), 2000);
                         }}
-                        className="text-[11px] text-sky-400 hover:text-sky-300 flex items-center gap-1 font-semibold"
+                        className="text-[11px] text-sky-600 hover:text-sky-700 flex items-center gap-1 font-semibold cursor-pointer"
                       >
-                        {copiedCode ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                        {copiedCode ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
                         <span>{copiedCode ? "Code copié !" : `Code : ${viewingClassStudents.classCode}`}</span>
                       </button>
                     </div>
 
-                    <div className="divide-y divide-slate-800/80 rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden">
+                    <div className="divide-y divide-slate-200 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden">
                       {displayStudents.map((st, idx) => (
                         <div
                           key={st.id || idx}
-                          className="p-3.5 flex items-center justify-between text-xs hover:bg-slate-900/60 transition-colors"
+                          className="p-3.5 flex items-center justify-between text-xs hover:bg-slate-100/70 transition-colors"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-sky-500/20 border border-sky-500/30 overflow-hidden shrink-0 flex items-center justify-center text-sky-300 font-bold text-xs">
+                            <div className="w-9 h-9 rounded-full bg-sky-100 border border-sky-200 overflow-hidden shrink-0 flex items-center justify-center text-sky-700 font-bold text-xs">
                               {st.avatar ? (
                                 <img src={st.avatar} alt={st.name} className="w-full h-full object-cover" />
                               ) : (
@@ -867,12 +867,12 @@ export function ClassList({
                               )}
                             </div>
                             <div>
-                              <p className="font-bold text-white">{st.name}</p>
-                              <p className="text-[11px] text-slate-400 font-mono">{st.email}</p>
+                              <p className="font-bold text-slate-900">{st.name}</p>
+                              <p className="text-[11px] text-slate-500 font-mono">{st.email}</p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold font-mono">
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-800 text-[10px] font-bold font-mono">
                               INSCRIT ACTIF
                             </span>
                             <p className="text-[10px] text-slate-500 mt-0.5">
@@ -887,11 +887,11 @@ export function ClassList({
               })()}
             </div>
 
-            <div className="px-6 py-4 border-t border-slate-800 bg-[#070b16] flex justify-end">
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
               <button
                 type="button"
                 onClick={() => setViewingClassStudents(null)}
-                className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors"
+                className="px-5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs transition-colors cursor-pointer"
               >
                 Fermer
               </button>

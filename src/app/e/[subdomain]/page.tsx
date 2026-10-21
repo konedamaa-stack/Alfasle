@@ -85,8 +85,8 @@ export default function SubdomainSchoolPage() {
   // While checking Supabase cloud in background
   if (isCheckingCloud) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 space-y-4">
-        <Loader2 className="w-9 h-9 text-blue-400 animate-spin" />
+      <div className="min-h-screen bg-white text-slate-900 flex flex-col items-center justify-center p-6 space-y-4">
+        <Loader2 className="w-9 h-9 text-blue-600 animate-spin" />
         <p className="text-xs text-slate-400 font-mono">Connexion au campus AlFasle ({subdomain})...</p>
       </div>
     );
@@ -95,22 +95,22 @@ export default function SubdomainSchoolPage() {
   // If establishment does NOT exist, show a clean 404 error page
   if (!targetEtab) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      <div className="min-h-screen bg-white text-slate-900 flex flex-col items-center justify-center p-6 relative overflow-hidden">
         {/* Background glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-md w-full glass-panel p-8 rounded-3xl border border-rose-500/30 text-center space-y-6 relative z-10 shadow-2xl">
-          <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mx-auto text-rose-400">
+          <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mx-auto text-rose-600">
             <School className="w-8 h-8" />
           </div>
 
           <div className="space-y-2">
-            <span className="px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+            <span className="px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-rose-500/20 text-rose-600 border border-rose-500/30">
               CAMPUS INTROUVABLE
             </span>
-            <h1 className="text-xl font-bold text-white">Établissement Non Enregistré</h1>
+            <h1 className="text-xl font-bold text-slate-900">Établissement Non Enregistré</h1>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Le sous-domaine <strong className="text-rose-300 font-mono">.{subdomain}.alfasle.xyz</strong> n&apos;est associé à aucun établissement actif du réseau AlFasle.
+              Le sous-domaine <strong className="text-rose-600 font-mono">.{subdomain}.alfasle.xyz</strong> n&apos;est associé à aucun établissement actif du réseau AlFasle.
             </p>
           </div>
 
@@ -125,7 +125,7 @@ export default function SubdomainSchoolPage() {
 
             <a
               href="/super-admin"
-              className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 font-medium text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              className="w-full py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 font-medium text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
               <span>Espace Super Admin (Déployer ce campus)</span>
             </a>

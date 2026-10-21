@@ -32,7 +32,7 @@ export function ConfirmModal({
     switch (variant) {
       case "logout":
         return {
-          icon: <LogOut className="w-6 h-6 text-rose-400" />,
+          icon: <LogOut className="w-6 h-6 text-rose-600" />,
           iconBg: "bg-rose-500/20 border-rose-500/30",
           border: "border-rose-500/40",
           confirmBtn:
@@ -40,7 +40,7 @@ export function ConfirmModal({
         };
       case "danger":
         return {
-          icon: <Trash2 className="w-6 h-6 text-rose-400" />,
+          icon: <Trash2 className="w-6 h-6 text-rose-600" />,
           iconBg: "bg-rose-500/20 border-rose-500/30",
           border: "border-rose-500/40",
           confirmBtn:
@@ -48,7 +48,7 @@ export function ConfirmModal({
         };
       case "warning":
         return {
-          icon: <AlertTriangle className="w-6 h-6 text-amber-400" />,
+          icon: <AlertTriangle className="w-6 h-6 text-amber-600" />,
           iconBg: "bg-amber-500/20 border-amber-500/30",
           border: "border-amber-500/40",
           confirmBtn:
@@ -57,7 +57,7 @@ export function ConfirmModal({
       case "info":
       default:
         return {
-          icon: <RotateCcw className="w-6 h-6 text-indigo-400" />,
+          icon: <RotateCcw className="w-6 h-6 text-indigo-600" />,
           iconBg: "bg-indigo-500/20 border-indigo-500/30",
           border: "border-indigo-500/40",
           confirmBtn:
@@ -71,7 +71,7 @@ export function ConfirmModal({
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
       <div
-        className={`w-full max-w-md bg-[#0a0f1e] border ${vStyles.border} rounded-3xl overflow-hidden shadow-2xl animate-scaleUp flex flex-col`}
+        className={`w-full max-w-md bg-white border ${vStyles.border} rounded-3xl overflow-hidden shadow-2xl animate-scaleUp flex flex-col`}
       >
         <div className="p-6 text-center space-y-4">
           <div
@@ -81,18 +81,18 @@ export function ConfirmModal({
           </div>
 
           <div className="space-y-2">
-            <h3 className="text-lg font-black text-white tracking-tight">{title}</h3>
-            <p className="text-xs text-slate-300 leading-relaxed max-w-sm mx-auto whitespace-pre-line">
+            <h3 className="text-lg font-black text-slate-900 tracking-tight">{title}</h3>
+            <p className="text-xs text-slate-600 leading-relaxed max-w-sm mx-auto whitespace-pre-line">
               {message}
             </p>
           </div>
         </div>
 
-        <div className="p-4 bg-slate-950/80 border-t border-slate-800 flex items-center justify-end gap-2.5">
+        <div className="p-4 bg-white border-t border-slate-200 flex items-center justify-end gap-2.5">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-all"
+            className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold transition-all"
           >
             {cancelLabel}
           </button>

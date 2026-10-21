@@ -42,7 +42,7 @@ export function GradebookView() {
     <div className="space-y-6 animate-fadeIn">
       {/* Header */}
       <div>
-        <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+        <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
           {isTeacher ? "Relevé Général des Notes & Analytics" : "Mon Relevé de Notes & Évaluations"}
         </h2>
         <p className="text-xs text-slate-400">
@@ -54,49 +54,49 @@ export function GradebookView() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="glass-card rounded-2xl p-5 border border-slate-800 flex items-center justify-between">
+        <div className="glass-card rounded-2xl p-5 border border-slate-200 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-medium text-slate-400">Moyenne Globale</p>
-            <p className="text-2xl font-bold text-indigo-300">{averageScore} / 20</p>
-            <p className="text-[11px] text-emerald-400 font-medium">Excellent niveau</p>
+            <p className="text-2xl font-bold text-indigo-600">{averageScore} / 20</p>
+            <p className="text-[11px] text-emerald-600 font-medium">Excellent niveau</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+          <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600">
             <Award className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="glass-card rounded-2xl p-5 border border-slate-800 flex items-center justify-between">
+        <div className="glass-card rounded-2xl p-5 border border-slate-200 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-medium text-slate-400">Copies Corrigées</p>
-            <p className="text-2xl font-bold text-white">{myGradedSubmissions.length}</p>
+            <p className="text-2xl font-bold text-slate-900">{myGradedSubmissions.length}</p>
             <p className="text-[11px] text-slate-400">Sur l'ensemble des devoirs</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+          <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600">
             <CheckCircle2 className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="glass-card rounded-2xl p-5 border border-slate-800 flex items-center justify-between">
+        <div className="glass-card rounded-2xl p-5 border border-slate-200 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-medium text-slate-400">Taux de Réussite</p>
-            <p className="text-2xl font-bold text-emerald-300">96 %</p>
+            <p className="text-2xl font-bold text-emerald-600">96 %</p>
             <p className="text-[11px] text-slate-400">Notes supérieures à 10/20</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+          <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-600">
             <TrendingUp className="w-6 h-6" />
           </div>
         </div>
       </div>
 
       {/* Grade Table */}
-      <div className="glass-panel rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
-        <div className="p-5 border-b border-slate-800">
-          <h3 className="text-sm font-bold text-white">Détail des Évaluations</h3>
+      <div className="glass-panel rounded-2xl border border-slate-200 overflow-hidden shadow-xl">
+        <div className="p-5 border-b border-slate-200">
+          <h3 className="text-sm font-bold text-slate-900">Détail des Évaluations</h3>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-900/80 text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-800">
+          <table className="w-full text-left text-xs text-slate-600">
+            <thead className="bg-white text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-200">
               <tr>
                 <th className="px-5 py-3">Devoir / TP</th>
                 <th className="px-5 py-3">Classe</th>
@@ -106,7 +106,7 @@ export function GradebookView() {
                 <th className="px-5 py-3">Date</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-slate-200">
               {myGradedSubmissions.length === 0 ? (
                 <tr>
                   <td colSpan={isTeacher ? 6 : 5} className="text-center py-12 text-slate-500">
@@ -115,9 +115,9 @@ export function GradebookView() {
                 </tr>
               ) : (
                 myGradedSubmissions.map((sub) => (
-                  <tr key={sub.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="px-5 py-4 font-bold text-white">{sub.devoirTitle}</td>
-                    <td className="px-5 py-4 text-indigo-300">{sub.classeTitle}</td>
+                  <tr key={sub.id} className="hover:bg-slate-100 transition-colors">
+                    <td className="px-5 py-4 font-bold text-slate-900">{sub.devoirTitle}</td>
+                    <td className="px-5 py-4 text-indigo-600">{sub.classeTitle}</td>
                     {isTeacher && (
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2">
@@ -129,16 +129,16 @@ export function GradebookView() {
                             alt={sub.studentName}
                             className="w-6 h-6 rounded-full object-cover"
                           />
-                          <span className="font-semibold text-white">{sub.studentName}</span>
+                          <span className="font-semibold text-slate-900">{sub.studentName}</span>
                         </div>
                       </td>
                     )}
                     <td className="px-5 py-4">
-                      <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-extrabold border border-emerald-500/30 text-xs">
+                      <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-600 font-extrabold border border-emerald-500/30 text-xs">
                         {sub.correction?.score} / {sub.correction?.maxScore}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-slate-300 max-w-xs truncate">
+                    <td className="px-5 py-4 text-slate-600 max-w-xs truncate">
                       {sub.correction?.feedback}
                     </td>
                     <td className="px-5 py-4 text-slate-400 text-[11px]">

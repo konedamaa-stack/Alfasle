@@ -343,60 +343,60 @@ export function PreRegistrationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+      <div className="relative w-full max-w-2xl bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Modal Header */}
-        <div className="relative px-6 py-5 border-b border-slate-800 bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 flex items-center justify-between">
+        <div className="relative px-6 py-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shadow-inner">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 shadow-inner">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-2">
+              <h2 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
                 Portail de Pré-inscription
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 font-semibold">
                   Alfasle
                 </span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500">
                 Rejoignez nos établissements partenaires • Candidature soumise à validation Super Admin
               </p>
             </div>
           </div>
           <button
             onClick={handleResetAndClose}
-            className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 flex items-center justify-center transition-all"
+            className="w-8 h-8 rounded-full bg-white text-slate-400 hover:text-slate-700 hover:bg-slate-100 border border-slate-200 flex items-center justify-center transition-all shadow-sm"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar">
+        <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar bg-white">
           {isSubmitted ? (
             <div className="text-center py-8 px-4 space-y-4 animate-scaleUp">
-              <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-3xl flex items-center justify-center mx-auto shadow-xl shadow-emerald-500/10">
+              <div className="w-16 h-16 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-3xl flex items-center justify-center mx-auto shadow-md">
                 <CheckCircle2 className="w-9 h-9" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-black text-white">
+                <h3 className="text-xl font-black text-slate-900">
                   Candidature enregistrée avec succès !
                 </h3>
-                <p className="text-sm text-slate-300 max-w-lg mx-auto leading-relaxed">
-                  Merci <strong className="text-indigo-300">{userName}</strong>. Votre dossier de pré-inscription pour le rôle de{" "}
-                  <strong className="text-emerald-300">
+                <p className="text-sm text-slate-600 max-w-lg mx-auto leading-relaxed">
+                  Merci <strong className="text-indigo-600">{userName}</strong>. Votre dossier de pré-inscription pour le rôle de{" "}
+                  <strong className="text-emerald-600">
                     {role === "TEACHER" ? "👨‍🏫 Professeur / Enseignant" : "🎓 Élève"}
                   </strong>{" "}
                   a bien été transmis.
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 text-left text-xs space-y-2 max-w-lg mx-auto">
-                <div className="flex items-center gap-2 text-indigo-200 font-bold">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <div className="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-200 text-left text-xs space-y-2 max-w-lg mx-auto">
+                <div className="flex items-center gap-2 text-indigo-900 font-bold">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   Dossier de candidature transmis :
                 </div>
-                <p className="text-slate-300 leading-relaxed">
+                <p className="text-slate-600 leading-relaxed">
                   Votre dossier a été transmis avec succès auprès de l&apos;établissement. Vous pouvez dès maintenant finaliser et définir votre mot de passe d&apos;accès.
                 </p>
               </div>
@@ -405,15 +405,15 @@ export function PreRegistrationModal({
                 <button
                   type="button"
                   onClick={() => setIsActivationOpen(true)}
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-black text-xs shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all transform hover:scale-105"
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all"
                 >
-                  <Sparkles className="w-4 h-4 text-black" />
+                  <Sparkles className="w-4 h-4 text-white" />
                   <span>Définir mon Mot de passe d&apos;accès &rarr;</span>
                 </button>
 
                 <button
                   onClick={handleResetAndClose}
-                  className="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all"
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all"
                 >
                   Fermer
                 </button>
@@ -423,17 +423,17 @@ export function PreRegistrationModal({
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Role Toggle Switch */}
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                   Type de Candidature
                 </label>
-                <div className="grid grid-cols-2 gap-3 p-1.5 bg-slate-950/80 rounded-2xl border border-slate-800">
+                <div className="grid grid-cols-2 gap-3 p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
                   <button
                     type="button"
                     onClick={() => setRole("STUDENT")}
                     className={`flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl text-xs font-bold transition-all ${
                       role === "STUDENT"
-                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 border border-indigo-400/40"
-                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+                        ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20 border border-indigo-600"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-white"
                     }`}
                   >
                     <GraduationCap className="w-4 h-4" />
@@ -445,8 +445,8 @@ export function PreRegistrationModal({
                     onClick={() => setRole("TEACHER")}
                     className={`flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl text-xs font-bold transition-all ${
                       role === "TEACHER"
-                        ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 border border-emerald-400/40"
-                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+                        ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20 border border-emerald-600"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-white"
                     }`}
                   >
                     <Briefcase className="w-4 h-4" />
@@ -456,7 +456,7 @@ export function PreRegistrationModal({
               </div>
 
               {errorMsg && (
-                <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium flex items-center gap-2">
+                <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   {errorMsg}
                 </div>
@@ -465,9 +465,9 @@ export function PreRegistrationModal({
               {/* Personal Info */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-indigo-400" />
-                    {role === "STUDENT" ? "Identifiant Élève" : "Nom complet"} <span className="text-rose-400">*</span>
+                  <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-indigo-600" />
+                    {role === "STUDENT" ? "Identifiant Élève" : "Nom complet"} <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -475,13 +475,13 @@ export function PreRegistrationModal({
                     placeholder={role === "TEACHER" ? "Ex: Dr. Mamadou Diallo" : "Ex: Identifiant Élève (ex: Aminata Diop)"}
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all shadow-sm"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                    <Phone className="w-3.5 h-3.5 text-indigo-400" />
+                  <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-indigo-600" />
                     Numéro de Téléphone
                   </label>
                   <input
@@ -489,15 +489,15 @@ export function PreRegistrationModal({
                     placeholder="+223 70 00 00 00"
                     value={userPhone}
                     onChange={(e) => setUserPhone(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all shadow-sm"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                  <School className="w-3.5 h-3.5 text-indigo-400" />
-                  Établissement visé <span className="text-rose-400">*</span>
+                <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <School className="w-3.5 h-3.5 text-indigo-600" />
+                  Établissement visé <span className="text-rose-500">*</span>
                 </label>
                 <select
                   value={establishmentId}
@@ -506,7 +506,7 @@ export function PreRegistrationModal({
                     setClasseId(""); // Reset class selection on school change
                     setSelectedCourseId("");
                   }}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer shadow-sm"
                 >
                   <option value="ALL">-- Tous les établissements (Toutes les classes) --</option>
                   {etablissements.map((est) => {
@@ -527,46 +527,46 @@ export function PreRegistrationModal({
               </div>
 
               {/* Status summary of the selected establishment */}
-              <div className="p-3 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div className="flex items-center gap-2">
                   <span className="text-base">🏫</span>
-                  <span className="font-bold text-white">
+                  <span className="font-bold text-slate-900">
                     {currentSelectedEst?.name || "Tous les campus AlFasle"}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 font-mono text-[11px]">
-                  <span className="px-2.5 py-0.5 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                  <span className="px-2.5 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200">
                     {availableClasses.length} classe{availableClasses.length > 1 ? "s" : ""}
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                  <span className="px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
                     {establishmentCourses.length} cours créé{establishmentCourses.length > 1 ? "s" : ""}
                   </span>
                 </div>
               </div>
 
               {availableClasses.length === 0 && (
-                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs space-y-3 animate-fadeIn">
+                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs space-y-3 animate-fadeIn">
                   <div className="flex items-start gap-2.5">
-                    <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                    <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                     <div className="space-y-1">
-                      <p className="font-bold text-amber-300">
+                      <p className="font-bold text-amber-900">
                         Aucune classe n'est actuellement créée sur ce campus ({currentSelectedEst?.name || "l'établissement"}).
                       </p>
-                      <p className="text-[11px] text-amber-200/80 leading-relaxed">
+                      <p className="text-[11px] text-amber-800/80 leading-relaxed">
                         Pour afficher les classes et les matières au programme, vous pouvez initialiser automatiquement les classes modèles ou saisir manuellement votre classe ci-dessous.
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-amber-500/20">
+                  <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-amber-200">
                     <button
                       type="button"
                       onClick={() => handleGenerateDefaultClasses(establishmentId)}
-                      className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer transform hover:scale-[1.02]"
+                      className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
                     >
                       <span>⚡ Initialiser les classes & matières pour cet établissement</span>
                     </button>
-                    <span className="text-[11px] text-amber-300/70">ou indiquez votre classe dans le champ ci-dessous :</span>
+                    <span className="text-[11px] text-amber-800">ou indiquez votre classe dans le champ ci-dessous :</span>
                   </div>
                 </div>
               )}
@@ -574,10 +574,10 @@ export function PreRegistrationModal({
               {/* Class & Subject Selectors */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                    <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+                  <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
                     {role === "TEACHER" ? "Classe à enseigner" : "Classe souhaitée"}{" "}
-                    <span className="text-rose-400">*</span>
+                    <span className="text-rose-500">*</span>
                   </label>
 
                   {availableClasses.length > 0 ? (
@@ -593,7 +593,7 @@ export function PreRegistrationModal({
                         }
                       }}
                       required
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer shadow-sm"
                     >
                       <option value="">
                         -- Choisissez une classe ({availableClasses.length} classe{availableClasses.length > 1 ? "s" : ""} disponible{availableClasses.length > 1 ? "s" : ""}) --
@@ -640,9 +640,9 @@ export function PreRegistrationModal({
                         placeholder="Ex: Licence 1 Études Islamiques, Terminale S, 3ème A..."
                         value={customClassName}
                         onChange={(e) => setCustomClassName(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-indigo-500/50 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-indigo-200 text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all shadow-sm"
                       />
-                      <p className="text-[10px] text-indigo-300">
+                      <p className="text-[10px] text-indigo-700">
                         ✍️ Saisissez le nom de la classe. Elle sera automatiquement rattachée à cet établissement.
                       </p>
                     </div>
@@ -651,15 +651,15 @@ export function PreRegistrationModal({
 
                 {role === "TEACHER" ? (
                   <div className="space-y-1.5 animate-fadeIn">
-                    <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                      <Award className="w-3.5 h-3.5 text-emerald-400" />
-                      Matière / Discipline enseignée <span className="text-rose-400">*</span>
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <Award className="w-3.5 h-3.5 text-emerald-600" />
+                      Matière / Discipline enseignée <span className="text-rose-500">*</span>
                     </label>
                     <select
                       value={subject}
                       onChange={(e) => setSubject(e.target.value)}
                       required
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs focus:outline-none focus:border-emerald-500 transition-all cursor-pointer"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-emerald-500 transition-all cursor-pointer shadow-sm"
                     >
                       <option value="">-- Sélectionnez la matière --</option>
                       {COMMON_SUBJECTS.map((sub) => (
@@ -675,20 +675,20 @@ export function PreRegistrationModal({
                         placeholder="Précisez votre matière / spécialité..."
                         value={customSubject}
                         onChange={(e) => setCustomSubject(e.target.value)}
-                        className="w-full mt-2 px-3.5 py-2 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-all"
+                        className="w-full mt-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-all shadow-sm"
                       />
                     )}
                   </div>
                 ) : (
                   <div className="space-y-1.5 animate-fadeIn">
-                    <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                      <Award className="w-3.5 h-3.5 text-indigo-400" />
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <Award className="w-3.5 h-3.5 text-indigo-600" />
                       Filière / Option visée (Optionnel)
                     </label>
                     <select
                       value={selectedCourseId}
                       onChange={(e) => setSelectedCourseId(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer shadow-sm"
                     >
                       <option value="">-- Cursus complet & général --</option>
                       {classCourses.map((crs) => (
@@ -702,27 +702,27 @@ export function PreRegistrationModal({
               </div>
 
               {/* COURSES & PROGRAM DETAILS PANEL (Requirement: Affichage des cours créés sur l'établissement) */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950/40 border border-indigo-500/20 space-y-3">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-indigo-100 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                    <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
                       <BookOpen className="w-4 h-4" />
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-white flex items-center gap-2">
+                      <h4 className="text-xs font-bold text-slate-900 flex items-center gap-2">
                         <span>Programme & Cours de la Classe</span>
                         {selectedClass && (
-                          <span className="text-[10px] font-normal text-indigo-300 font-mono">
+                          <span className="text-[10px] font-normal text-indigo-700 font-mono">
                             ({selectedClass.classCode || selectedClass.level})
                           </span>
                         )}
                       </h4>
-                      <p className="text-[10px] text-slate-400">
+                      <p className="text-[10px] text-slate-500">
                         {selectedClass ? selectedClass.title : "Sélectionnez une classe pour voir ses cours"}
                       </p>
                     </div>
                   </div>
-                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
                     {classCourses.length} cours actif{classCourses.length > 1 ? "s" : ""}
                   </span>
                 </div>
@@ -737,41 +737,41 @@ export function PreRegistrationModal({
                           onClick={() => setSelectedCourseId(isSelected ? "" : crs.id)}
                           className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
                             isSelected
-                              ? "bg-indigo-600/20 border-indigo-400 text-white shadow-md ring-1 ring-indigo-400/40"
-                              : "bg-slate-900/80 border-slate-800 hover:border-slate-700 text-slate-300 hover:bg-slate-800/60"
+                              ? "bg-indigo-50 border-indigo-300 text-slate-900 shadow-sm"
+                              : "bg-white border-slate-200 hover:border-slate-300 text-slate-800 hover:bg-slate-50/50 shadow-sm"
                           }`}
                         >
                           <div className="space-y-1">
                             <div className="flex items-center justify-between text-[10px]">
-                              <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold text-indigo-300">
+                              <span className="px-2 py-0.5 rounded-md bg-indigo-50 font-bold text-indigo-700">
                                 {crs.discipline || "Matière"}
                               </span>
                               <div className="flex items-center gap-1.5">
                                 {crs.video && (
-                                  <span className="text-emerald-400 flex items-center gap-0.5 font-semibold">
+                                  <span className="text-emerald-700 flex items-center gap-0.5 font-semibold">
                                     <span>🎥</span> Vidéo
                                   </span>
                                 )}
                                 {crs.pdfUrl && (
-                                  <span className="text-amber-400 flex items-center gap-0.5 font-semibold">
+                                  <span className="text-amber-700 flex items-center gap-0.5 font-semibold">
                                     <span>📄</span> PDF
                                   </span>
                                 )}
                               </div>
                             </div>
-                            <h5 className="text-xs font-bold text-white line-clamp-1">
+                            <h5 className="text-xs font-bold text-slate-900 line-clamp-1">
                               {crs.title}
                             </h5>
                             {crs.chapterTitle && (
-                              <p className="text-[10px] text-slate-400 line-clamp-1">
+                              <p className="text-[10px] text-slate-500 line-clamp-1">
                                 {crs.chapterTitle}
                               </p>
                             )}
                           </div>
 
-                          <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-slate-400">
+                          <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
                             <span>Prof: {crs.teacherName || selectedClass?.teacherName || "Équipe pédagogique"}</span>
-                            <span className={isSelected ? "text-indigo-300 font-bold" : "text-slate-500"}>
+                            <span className={isSelected ? "text-indigo-600 font-bold" : "text-slate-400"}>
                               {isSelected ? "✓ Option choisie" : "Cliquer pour cibler +"}
                             </span>
                           </div>
@@ -780,22 +780,22 @@ export function PreRegistrationModal({
                     })}
                   </div>
                 ) : (
-                  <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-300 text-xs space-y-2.5">
+                  <div className="p-3.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs space-y-2.5 shadow-sm">
                     <div className="flex items-center gap-2">
                       <span className="text-lg">📖</span>
-                      <p className="font-semibold text-white">
+                      <p className="font-semibold text-slate-900">
                         {selectedClass ? `Matières au programme de : ${selectedClass.title}` : "Programme de la classe"}
                       </p>
                     </div>
 
                     {selectedClass?.disciplines && selectedClass.disciplines.length > 0 ? (
                       <div className="space-y-1.5 pt-1">
-                        <p className="text-[11px] font-bold text-slate-400">Matières et disciplines enseignées :</p>
+                        <p className="text-[11px] font-bold text-slate-500">Matières et disciplines enseignées :</p>
                         <div className="flex flex-wrap gap-1.5">
                           {selectedClass.disciplines.map((disc, idx) => (
                             <span
                               key={idx}
-                              className="px-2.5 py-1 rounded-lg bg-indigo-500/15 border border-indigo-400/30 text-indigo-200 text-xs font-medium flex items-center gap-1.5"
+                              className="px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-medium flex items-center gap-1.5"
                             >
                               <span>📚</span>
                               <span>{disc}</span>
@@ -804,7 +804,7 @@ export function PreRegistrationModal({
                         </div>
                       </div>
                     ) : (
-                      <p className="text-slate-400 text-[11px]">
+                      <p className="text-slate-500 text-[11px]">
                         {selectedClass
                           ? "Programme standard et polyvalent. Les cours et devoirs seront publiés par les professeurs dès le début des enseignements."
                           : "Sélectionnez une classe ou initialisez les classes pour afficher la liste des matières à étudier."}
@@ -817,8 +817,8 @@ export function PreRegistrationModal({
               {/* Teacher Diploma / Experience */}
               {role === "TEACHER" && (
                 <div className="space-y-1.5 animate-fadeIn">
-                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                    <Award className="w-3.5 h-3.5 text-emerald-400" />
+                  <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <Award className="w-3.5 h-3.5 text-emerald-600" />
                     Diplômes, Titres ou Expérience pédagogique
                   </label>
                   <input
@@ -826,15 +826,15 @@ export function PreRegistrationModal({
                     placeholder="Ex: Master 2 Physique-Chimie, 6 ans au Lycée Askia Mohamed"
                     value={diplomaOrBio}
                     onChange={(e) => setDiplomaOrBio(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-all"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-all shadow-sm"
                   />
                 </div>
               )}
 
               {/* Motivation */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                  <FileText className="w-3.5 h-3.5 text-indigo-400" />
+                <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-indigo-600" />
                   Motivation / Présentation
                 </label>
                 <textarea
@@ -846,17 +846,17 @@ export function PreRegistrationModal({
                   }
                   value={motivation}
                   onChange={(e) => setMotivation(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all resize-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all resize-none shadow-sm"
                 />
               </div>
 
               {/* Validation Notice */}
-              <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 text-[11px] text-slate-400 flex items-start gap-2.5">
-                <div className="p-1 rounded-md bg-amber-500/10 text-amber-400 shrink-0 mt-0.5">
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 flex items-start gap-2.5">
+                <div className="p-1 rounded-md bg-amber-100 text-amber-700 shrink-0 mt-0.5">
                   👑
                 </div>
                 <div>
-                  <span className="font-bold text-slate-200">Validation Exclusive Super Admin :</span> Toutes les demandes de pré-inscription sont examinées par le Super Administrateur avant attribution définitive des comptes.
+                  <span className="font-bold text-slate-900">Validation Exclusive Super Admin :</span> Toutes les demandes de pré-inscription sont examinées par le Super Administrateur avant attribution définitive des comptes.
                 </div>
               </div>
 
@@ -865,16 +865,16 @@ export function PreRegistrationModal({
                 <button
                   type="button"
                   onClick={handleResetAndClose}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 text-xs font-semibold transition-all"
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-semibold transition-all"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
-                  className={`px-6 py-2.5 rounded-xl text-white font-bold text-xs shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center gap-2 ${
+                  className={`px-6 py-2.5 rounded-xl text-white font-bold text-xs shadow-md transition-all transform hover:-translate-y-0.5 flex items-center gap-2 ${
                     role === "TEACHER"
-                      ? "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/30"
-                      : "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/30"
+                      ? "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20"
+                      : "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20"
                   }`}
                 >
                   <Sparkles className="w-4 h-4" />

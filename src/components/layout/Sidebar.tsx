@@ -94,21 +94,21 @@ export function Sidebar({
           {
             id: "etablissements",
             label: "Établissements Scolaires",
-            icon: <School className="w-4 h-4 text-amber-400" />,
+            icon: <School className="w-4 h-4 text-amber-600" />,
             badge: `${etablissements.length} Écoles`,
-            badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+            badgeColor: "bg-amber-500/20 text-amber-600 border-amber-500/30",
           },
           {
             id: "classes",
             label: "Gestion des Classes",
-            icon: <FolderKanban className="w-4 h-4 text-purple-400" />,
+            icon: <FolderKanban className="w-4 h-4 text-purple-600" />,
             badge: `${classes.length} Classes`,
-            badgeColor: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+            badgeColor: "bg-purple-500/20 text-purple-600 border-purple-500/30",
           },
           {
             id: "superadmin",
             label: "Console Root Master",
-            icon: <Shield className="w-4 h-4 text-emerald-400" />,
+            icon: <Shield className="w-4 h-4 text-emerald-600" />,
           },
           { id: "dashboard", label: "Vue Pédagogique", icon: <LayoutDashboard className="w-4 h-4" /> },
           { id: "inscriptions", label: "Inscriptions Globales", icon: <Users className="w-4 h-4" /> },
@@ -127,7 +127,7 @@ export function Sidebar({
             label: "Préinscriptions",
             icon: <UserCheck className="w-4 h-4" />,
             badge: pendingInscriptionsCount > 0 ? pendingInscriptionsCount : null,
-            badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+            badgeColor: "bg-amber-500/20 text-amber-600 border-amber-500/30",
           },
           { id: "courses", label: "Cours & Vidéos", icon: <Video className="w-4 h-4" /> },
           {
@@ -135,7 +135,7 @@ export function Sidebar({
             label: "Devoirs & Corrections",
             icon: <FileCheck2 className="w-4 h-4" />,
             badge: pendingGradingCount > 0 ? `${pendingGradingCount} à noter` : null,
-            badgeColor: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+            badgeColor: "bg-purple-500/20 text-purple-600 border-purple-500/30",
           },
           { id: "analytics", label: "Statistiques & Notes", icon: <BarChart3 className="w-4 h-4" /> },
         ];
@@ -151,7 +151,7 @@ export function Sidebar({
             label: "Mes Devoirs",
             icon: <FileCheck2 className="w-4 h-4" />,
             badge: pendingAssignmentsCount > 0 ? pendingAssignmentsCount : null,
-            badgeColor: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+            badgeColor: "bg-blue-500/20 text-blue-600 border-blue-500/30",
           },
           { id: "grades", label: "Mes Notes & Relevés", icon: <Award className="w-4 h-4" /> },
         ];
@@ -253,7 +253,7 @@ export function Sidebar({
                   {item.badge && (
                     <span
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                        isActive ? "bg-white/20 text-white border-white/30" : item.badgeColor
+                        isActive ? "bg-slate-100 text-slate-900 border-slate-200" : item.badgeColor
                       }`}
                     >
                       {item.badge}

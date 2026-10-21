@@ -23,39 +23,39 @@ export function ValidationMessage({
   const config = {
     success: {
       icon: CheckCircle2,
-      container: "bg-emerald-500/10 border-emerald-500/30 text-emerald-300",
-      iconColor: "text-emerald-400",
-      titleColor: "text-emerald-300",
-      bodyColor: "text-emerald-200/90",
+      container: "bg-emerald-500/10 border-emerald-500/30 text-emerald-600",
+      iconColor: "text-emerald-600",
+      titleColor: "text-emerald-600",
+      bodyColor: "text-emerald-600/90",
       badgeText: "Succès",
-      badgeClass: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+      badgeClass: "bg-emerald-500/20 text-emerald-600 border-emerald-500/30",
     },
     error: {
       icon: AlertCircle,
-      container: "bg-rose-500/10 border-rose-500/30 text-rose-300",
-      iconColor: "text-rose-400",
-      titleColor: "text-rose-300",
-      bodyColor: "text-rose-200/90",
+      container: "bg-rose-500/10 border-rose-500/30 text-rose-600",
+      iconColor: "text-rose-600",
+      titleColor: "text-rose-600",
+      bodyColor: "text-rose-600/90",
       badgeText: "Erreur",
-      badgeClass: "bg-rose-500/20 text-rose-300 border-rose-500/30",
+      badgeClass: "bg-rose-500/20 text-rose-600 border-rose-500/30",
     },
     warning: {
       icon: AlertTriangle,
-      container: "bg-amber-500/10 border-amber-500/30 text-amber-300",
-      iconColor: "text-amber-400",
-      titleColor: "text-amber-300",
-      bodyColor: "text-amber-200/90",
+      container: "bg-amber-500/10 border-amber-500/30 text-amber-600",
+      iconColor: "text-amber-600",
+      titleColor: "text-amber-600",
+      bodyColor: "text-amber-600/90",
       badgeText: "Attention",
-      badgeClass: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+      badgeClass: "bg-amber-500/20 text-amber-600 border-amber-500/30",
     },
     info: {
       icon: Info,
-      container: "bg-sky-500/10 border-sky-500/30 text-sky-300",
-      iconColor: "text-sky-400",
-      titleColor: "text-sky-300",
-      bodyColor: "text-sky-200/90",
+      container: "bg-sky-500/10 border-sky-500/30 text-sky-600",
+      iconColor: "text-sky-600",
+      titleColor: "text-sky-600",
+      bodyColor: "text-sky-600/90",
       badgeText: "Info",
-      badgeClass: "bg-sky-500/20 text-sky-300 border-sky-500/30",
+      badgeClass: "bg-sky-500/20 text-sky-600 border-sky-500/30",
     },
   }[type];
 
@@ -88,7 +88,7 @@ export function ValidationMessage({
         <button
           type="button"
           onClick={onClose}
-          className="shrink-0 p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/40 transition-colors"
+          className="shrink-0 p-1 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
           aria-label="Fermer le message"
         >
           <X className="w-4 h-4" />

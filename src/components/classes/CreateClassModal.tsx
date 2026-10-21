@@ -214,22 +214,22 @@ export function CreateClassModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
-      <div className="w-full max-w-xl glass-panel rounded-2xl border border-slate-700 shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+      <div className="w-full max-w-xl glass-panel rounded-2xl border border-slate-200 shadow-2xl overflow-hidden bg-white">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-800">
+        <div className="flex items-center justify-between p-5 border-b border-slate-200 bg-slate-50">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+            <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
               <FolderKanban className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Créer une Nouvelle Classe</h3>
-              <p className="text-xs text-slate-400">Paramétrez les critères d'accès et le programme</p>
+              <h3 className="text-base font-bold text-slate-900">Créer une Nouvelle Classe</h3>
+              <p className="text-xs text-slate-500">Paramétrez les critères d'accès et le programme</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+            className="p-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-400 hover:text-slate-700 border border-slate-200 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -239,23 +239,23 @@ export function CreateClassModal({
         <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
                 Établissement de rattachement *
               </label>
               {!isSuperAdmin ? (
-                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 border border-indigo-500/30 text-white text-xs">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-indigo-50/70 border border-indigo-200 text-slate-900 text-xs">
                   <div className="flex items-center gap-2">
                     <span className="text-base">🏫</span>
                     <div>
-                      <span className="font-bold text-indigo-300">
+                      <span className="font-bold text-indigo-900">
                         {currentUser.etablissementName || selectedEtab?.name || "Mon Établissement"}
                       </span>
                       {selectedEtab?.city && (
-                        <span className="text-[10px] text-slate-400 ml-1.5">({selectedEtab.city})</span>
+                        <span className="text-[10px] text-slate-500 ml-1.5">({selectedEtab.city})</span>
                       )}
                     </div>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold">
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-700 border border-indigo-200 font-semibold">
                     Campus assigné
                   </span>
                 </div>
@@ -263,7 +263,7 @@ export function CreateClassModal({
                 <select
                   value={selectedEtabId}
                   onChange={(e) => setSelectedEtabId(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+                  className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm"
                 >
                   <optgroup label="Établissements enregistrés">
                     {etablissements.map((etab) => (
@@ -281,14 +281,14 @@ export function CreateClassModal({
 
             {/* Custom establishment input if user chooses CUSTOM (Super Admin only) */}
             {isSuperAdmin && selectedEtabId === "CUSTOM" && (
-              <div className="p-3.5 bg-indigo-950/30 border border-indigo-500/30 rounded-xl space-y-2.5 animate-fadeIn">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-300">
-                  <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              <div className="p-3.5 bg-indigo-50/60 border border-indigo-200 rounded-xl space-y-2.5 animate-fadeIn">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-700">
+                  <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
                   Renseignez votre propre établissement :
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-300 mb-1">
+                    <label className="block text-[11px] font-medium text-slate-700 mb-1">
                       Nom de l'établissement *
                     </label>
                     <input
@@ -297,11 +297,11 @@ export function CreateClassModal({
                       placeholder="Ex: Mon Lycée Privé, Institut XYZ..."
                       value={customEtabName}
                       onChange={(e) => setCustomEtabName(e.target.value)}
-                      className="w-full px-3 py-1.5 text-xs bg-slate-900 border border-indigo-500/40 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400"
+                      className="w-full px-3 py-1.5 text-xs bg-white border border-indigo-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-300 mb-1">
+                    <label className="block text-[11px] font-medium text-slate-700 mb-1">
                       Ville / Localisation
                     </label>
                     <input
@@ -309,7 +309,7 @@ export function CreateClassModal({
                       placeholder="Ex: Bamako, Abidjan, Conakry..."
                       value={customEtabCity}
                       onChange={(e) => setCustomEtabCity(e.target.value)}
-                      className="w-full px-3 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400"
+                      className="w-full px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                 </div>
@@ -317,7 +317,7 @@ export function CreateClassModal({
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
                 Code Classe (Unique pour inscription)
               </label>
               <input
@@ -325,13 +325,13 @@ export function CreateClassModal({
                 placeholder="Ex: AF-MATH-202 (Optionnel - Auto)"
                 value={classCode}
                 onChange={(e) => setClassCode(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white uppercase font-mono placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl text-slate-900 uppercase font-mono placeholder-slate-400 focus:outline-none focus:border-indigo-500 shadow-sm"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
               Nom / Titre de la classe *
             </label>
             <input
@@ -340,12 +340,12 @@ export function CreateClassModal({
               placeholder="ex: Conception d'Applications Web avec Next.js 15"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3.5 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 shadow-sm"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
               Description & Objectifs pédagogiques
             </label>
             <textarea
@@ -353,17 +353,17 @@ export function CreateClassModal({
               placeholder="Présentez les compétences visées, le rythme de travail et les prérequis..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-3.5 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 shadow-sm"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Niveau</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Niveau</label>
               <select
                 value={level}
                 onChange={(e) => setLevel(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-500 shadow-sm"
               >
                 <option value="Débutant">Débutant</option>
                 <option value="Intermédiaire">Intermédiaire</option>
@@ -374,13 +374,13 @@ export function CreateClassModal({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
                 Catégorie / Filière
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+                className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm"
               >
                 <optgroup label="Catégories disponibles">
                   {availableCategories.map((cat) => (
@@ -395,8 +395,8 @@ export function CreateClassModal({
               </select>
 
               {category === "CUSTOM" && (
-                <div className="mt-2 p-2.5 bg-indigo-950/40 border border-indigo-500/40 rounded-xl space-y-1 animate-fadeIn">
-                  <label className="block text-[11px] font-semibold text-indigo-300">
+                <div className="mt-2 p-2.5 bg-indigo-50/60 border border-indigo-200 rounded-xl space-y-1 animate-fadeIn">
+                  <label className="block text-[11px] font-semibold text-indigo-700">
                     Nom de votre nouvelle catégorie *
                   </label>
                   <input
@@ -405,7 +405,7 @@ export function CreateClassModal({
                     placeholder="Ex: Finance & Comptabilité, Droit, Médecine..."
                     value={customCategory}
                     onChange={(e) => setCustomCategory(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs bg-slate-900 border border-indigo-500/40 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400"
+                    className="w-full px-3 py-1.5 text-xs bg-white border border-indigo-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
               )}
@@ -413,34 +413,34 @@ export function CreateClassModal({
           </div>
 
           {/* Section: Disciplines / Matières enseignées dans cette classe */}
-          <div className="p-4 bg-slate-900/60 border border-indigo-500/20 rounded-2xl space-y-3">
+          <div className="p-4 bg-slate-50 border border-indigo-100 rounded-2xl space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <label className="block text-xs font-bold text-white">
+                <label className="block text-xs font-bold text-slate-900">
                   📚 Disciplines & Matières enseignées ({disciplines.length})
                 </label>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-slate-500">
                   Sélectionnez les matières enseignées dans cette promotion ou ajoutez-en sur mesure.
                 </p>
               </div>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-semibold border border-indigo-200">
                 Pluri-disciplinaire
               </span>
             </div>
 
             {/* Selected Disciplines Badges */}
             {disciplines.length > 0 ? (
-              <div className="flex flex-wrap gap-1.5 p-2 bg-slate-950/50 rounded-xl border border-slate-800 min-h-[42px] items-center">
+              <div className="flex flex-wrap gap-1.5 p-2 bg-white rounded-xl border border-slate-200 min-h-[42px] items-center">
                 {disciplines.map((d) => (
                   <span
                     key={d}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600/30 border border-indigo-500/40 text-indigo-200 shadow-sm animate-fadeIn"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-50 border border-indigo-200 text-indigo-700 shadow-sm animate-fadeIn"
                   >
                     <span>{d}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveDiscipline(d)}
-                      className="text-indigo-400 hover:text-rose-400 transition-colors"
+                      className="text-indigo-400 hover:text-rose-600 transition-colors"
                       title="Supprimer la matière"
                     >
                       <X className="w-3.5 h-3.5" />
@@ -449,14 +449,14 @@ export function CreateClassModal({
                 ))}
               </div>
             ) : (
-              <div className="text-xs text-amber-400/90 italic p-2 bg-amber-500/10 rounded-xl border border-amber-500/20">
+              <div className="text-xs text-amber-700 italic p-2 bg-amber-50 rounded-xl border border-amber-200">
                 ⚠️ Aucune discipline sélectionnée pour le moment. La classe doit comporter au moins 1 discipline.
               </div>
             )}
 
             {/* Quick add suggestions */}
             <div>
-              <span className="block text-[11px] font-medium text-slate-400 mb-1.5">
+              <span className="block text-[11px] font-medium text-slate-500 mb-1.5">
                 Suggestions rapides (cliquez pour ajouter / retirer) :
               </span>
               <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
@@ -469,8 +469,8 @@ export function CreateClassModal({
                       onClick={() => handleToggleDiscipline(item)}
                       className={`text-[11px] px-2.5 py-1 rounded-lg font-medium transition-all ${
                         isSelected
-                          ? "bg-indigo-600 text-white font-semibold border border-indigo-400 shadow-sm"
-                          : "bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 hover:text-white"
+                          ? "bg-indigo-600 text-white font-semibold border border-indigo-600 shadow-sm"
+                          : "bg-white hover:bg-slate-100 text-slate-700 border border-slate-200"
                       }`}
                     >
                       {isSelected ? "✓ " : "+ "}
@@ -494,12 +494,12 @@ export function CreateClassModal({
                     handleAddCustomDiscipline();
                   }
                 }}
-                className="flex-1 px-3 py-1.5 text-xs bg-slate-950 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400"
+                className="flex-1 px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500"
               />
               <button
                 type="button"
                 onClick={handleAddCustomDiscipline}
-                className="px-3 py-1.5 bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white rounded-xl text-xs font-semibold border border-slate-700 transition-colors"
+                className="px-3 py-1.5 bg-slate-100 hover:bg-indigo-600 hover:text-white text-slate-700 rounded-xl text-xs font-semibold border border-slate-200 transition-colors"
               >
                 + Ajouter
               </button>
@@ -508,7 +508,7 @@ export function CreateClassModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
                 Capacité d'accueil (places max)
               </label>
               <input
@@ -517,18 +517,18 @@ export function CreateClassModal({
                 max={500}
                 value={capacity}
                 onChange={(e) => setCapacity(parseInt(e.target.value) || 1)}
-                className="w-full px-3.5 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-500 shadow-sm"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
                 Mode d'inscription
               </label>
               <select
                 value={enrollmentMode}
                 onChange={(e) => setEnrollmentMode(e.target.value as EnrollmentMode)}
-                className="w-full px-3.5 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-500 shadow-sm"
               >
                 <option value="MANUAL_APPROVAL">Validation manuelle (Préinscription)</option>
                 <option value="OPEN">Ouverte à tous (Automatique)</option>
@@ -538,29 +538,29 @@ export function CreateClassModal({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
               Image de couverture (URL)
             </label>
             <input
               type="url"
               value={coverImage}
               onChange={(e) => setCoverImage(e.target.value)}
-              className="w-full px-3.5 py-2 text-xs bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 shadow-sm"
             />
           </div>
 
           {/* Actions */}
-          <div className="pt-4 border-t border-slate-800 flex items-center justify-end gap-3">
+          <div className="pt-4 border-t border-slate-200 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
             >
               Annuler
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all"
+              className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all"
             >
               Créer la Classe
             </button>
