@@ -303,12 +303,17 @@ export function PreRegistrationModal({
         ? `${chosenCourse.discipline ? chosenCourse.discipline + " : " : ""}${chosenCourse.title}`
         : chosenClassObj?.disciplines?.[0] || undefined;
 
+    const resolvedEstId =
+      establishmentId && establishmentId !== "ALL"
+        ? establishmentId
+        : chosenClassObj?.etablissementId || etablissements[0]?.id || "";
+
     const result = submitPreRegistration({
       role,
       userName: userName.trim(),
       userEmail: effectiveEmail,
       userPhone: userPhone.trim(),
-      etablissementId: establishmentId,
+      etablissementId: resolvedEstId,
       classeId: targetClassId,
       subject: finalSubject,
       diplomaOrBio: role === "TEACHER" ? diplomaOrBio.trim() : undefined,

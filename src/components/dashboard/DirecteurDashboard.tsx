@@ -31,8 +31,11 @@ import {
   Building2,
   X,
   Lock,
+  RefreshCw,
+  Radio,
 } from "lucide-react";
 
+import { SkeletonLoader } from "@/components/common/SkeletonLoader";
 import { ConfirmModal, ConfirmVariant } from "@/components/common/ConfirmModal";
 import { useToast } from "@/lib/toast-context";
 
@@ -54,6 +57,19 @@ const COMMON_SUBJECTS = [
   "Arabe & Éducation Islamique",
   "Économie & Gestion",
   "Autre spécialité",
+];
+
+const SUGGESTED_DISCIPLINES = [
+  "Mathématiques",
+  "Sciences Physiques & Chimie",
+  "Sciences de la Vie et de la Terre (SVT)",
+  "Français & Littérature",
+  "Informatique & Technologies",
+  "Arabe & Éducation Islamique",
+  "Anglais",
+  "Histoire - Géographie",
+  "Philosophie",
+  "Économie & Gestion",
 ];
 
 export function DirecteurDashboard({
@@ -220,6 +236,18 @@ export function DirecteurDashboard({
   const [newClassCapacity, setNewClassCapacity] = useState(35);
   const [newClassTeacherId, setNewClassTeacherId] = useState("");
   const [newClassDesc, setNewClassDesc] = useState("");
+  const [newClassDisciplines, setNewClassDisciplines] = useState<string[]>([
+    "Mathématiques",
+    "Sciences Physiques & Chimie",
+    "Français & Littérature",
+  ]);
+  const [customDisciplineInput, setCustomDisciplineInput] = useState("");
+  const [editClassDisciplines, setEditClassDisciplines] = useState<string[]>([]);
+  const [editCustomDisciplineInput, setEditCustomDisciplineInput] = useState("");
+
+  const [studentFilterType, setStudentFilterType] = useState<"ALL" | "ACTIVE" | "PENDING">("ALL");
+  const [inscriptionsCampusFilter, setInscriptionsCampusFilter] = useState<"CURRENT" | "ALL">("CURRENT");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Viewing Students Modal State
   const [viewingClassStudents, setViewingClassStudents] = useState<Classe | null>(null);
@@ -238,26 +266,68 @@ export function DirecteurDashboard({
     (u) =>
       u.role === "STUDENT" &&
       (u.etablissementId === currentEtab?.id ||
-        (currentEtab && u.etablissementName === currentEtab.name))
+        (currentEtab && u.etablissementName === currentEtab.name) ||
+        (currentEtab && u.etablissementId === currentEtab.subdomain))
   );
 
   const schoolTeachers = users.filter(
     (u) =>
       u.role === "TEACHER" &&
       (u.etablissementId === currentEtab?.id ||
-        (currentEtab && u.etablissementName === currentEtab.name))
+        (currentEtab && u.etablissementName === currentEtab.name) ||
+        (currentEtab && u.etablissementId === currentEtab.subdomain))
   );
 
-  const schoolInscriptions = inscriptions.filter(
-    (i) =>
-      i.etablissementId === currentEtab?.id ||
-      (currentEtab && i.etablissementName === currentEtab.name) ||
-      schoolClasses.some((c) => c.id === i.classeId)
+  const schoolInscriptions = inscriptions.filter((i) => {
+    if (inscriptionsCampusFilter === "ALL") return true;
+    if (!currentEtab) return true;
+    if (i.etablissementId === currentEtab.id) return true;
+    if (i.etablissementId === currentEtab.subdomain) return true;
+    if (currentEtab.name && i.etablissementName?.toLowerCase().includes(currentEtab.name.toLowerCase())) return true;
+    if (schoolClasses.some((c) => c.id === i.classeId)) return true;
+    return false;
+  });
+
+  const pendingStudentCandidates = schoolInscriptions.filter(
+    (i) => i.role === "STUDENT" && i.status === "PENDING"
   );
 
   const pendingInscriptionsCount = schoolInscriptions.filter((i) => i.status === "PENDING").length;
 
-  // Filtered lists
+  // Combined student items for the main Students tab
+  type DisplayStudentItem =
+    | { type: "USER"; data: User }
+    | { type: "INSCRIPTION"; data: Inscription };
+
+  const combinedStudentsList: DisplayStudentItem[] = [
+    ...(studentFilterType !== "PENDING"
+      ? schoolStudents.map((s) => ({ type: "USER" as const, data: s }))
+      : []),
+    ...(studentFilterType !== "ACTIVE"
+      ? pendingStudentCandidates.map((ins) => ({ type: "INSCRIPTION" as const, data: ins }))
+      : []),
+  ];
+
+  const filteredCombinedStudents = combinedStudentsList.filter((item) => {
+    const q = studentSearch.toLowerCase().trim();
+    if (!q) return true;
+    if (item.type === "USER") {
+      const s = item.data;
+      return (
+        s.name.toLowerCase().includes(q) ||
+        s.email.toLowerCase().includes(q) ||
+        (s.username && s.username.toLowerCase().includes(q))
+      );
+    } else {
+      const ins = item.data;
+      return (
+        ins.userName.toLowerCase().includes(q) ||
+        ins.userEmail.toLowerCase().includes(q) ||
+        ins.classeTitle.toLowerCase().includes(q)
+      );
+    }
+  });
+
   const filteredStudents = schoolStudents.filter(
     (s) =>
       s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
@@ -284,8 +354,27 @@ export function DirecteurDashboard({
       i.userName.toLowerCase().includes(inscriptionSearch.toLowerCase()) ||
       i.userEmail.toLowerCase().includes(inscriptionSearch.toLowerCase()) ||
       i.classeTitle.toLowerCase().includes(inscriptionSearch.toLowerCase()) ||
-      (i.subject && i.subject.toLowerCase().includes(inscriptionSearch.toLowerCase()))
+      (i.subject && i.subject.toLowerCase().includes(inscriptionSearch.toLowerCase())) ||
+      (i.etablissementName && i.etablissementName.toLowerCase().includes(inscriptionSearch.toLowerCase()))
   );
+
+  const handleAddCustomDiscipline = () => {
+    const trimmed = customDisciplineInput.trim();
+    if (!trimmed) return;
+    if (!newClassDisciplines.includes(trimmed)) {
+      setNewClassDisciplines((prev) => [...prev, trimmed]);
+    }
+    setCustomDisciplineInput("");
+  };
+
+  const handleAddEditCustomDiscipline = () => {
+    const trimmed = editCustomDisciplineInput.trim();
+    if (!trimmed) return;
+    if (!editClassDisciplines.includes(trimmed)) {
+      setEditClassDisciplines((prev) => [...prev, trimmed]);
+    }
+    setEditCustomDisciplineInput("");
+  };
 
   const togglePasswordVisibility = (userId: string) => {
     setVisiblePasswords((prev) => ({ ...prev, [userId]: !prev[userId] }));
@@ -381,9 +470,12 @@ export function DirecteurDashboard({
       description: newClassDesc.trim() || `Classe officielle dispensée au sein de ${currentEtab?.name}.`,
       level: newClassLevel,
       category: newClassCategory,
-      disciplines: newClassCategory
-        ? newClassCategory.split(",").map((s) => s.trim()).filter(Boolean)
-        : ["Général"],
+      disciplines:
+        newClassDisciplines.length > 0
+          ? newClassDisciplines
+          : newClassCategory
+          ? newClassCategory.split(",").map((s) => s.trim()).filter(Boolean)
+          : ["Général"],
       capacity: newClassCapacity || 35,
       enrollmentMode: "OPEN",
       status: "ACTIVE",
@@ -397,6 +489,8 @@ export function DirecteurDashboard({
     setNewClassCode("");
     setNewClassDesc("");
     setNewClassTeacherId("");
+    setNewClassDisciplines(["Mathématiques", "Sciences Physiques & Chimie", "Français & Littérature"]);
+    setCustomDisciplineInput("");
   };
 
   // --- EDIT HANDLERS ---
@@ -488,6 +582,14 @@ export function DirecteurDashboard({
     setEditClassCapacity(c.capacity || 35);
     setEditClassTeacherId(c.teacherId || "");
     setEditClassDesc(c.description || "");
+    setEditClassDisciplines(
+      c.disciplines && c.disciplines.length > 0
+        ? [...c.disciplines]
+        : c.category
+        ? c.category.split(",").map((s) => s.trim()).filter(Boolean)
+        : ["Général"]
+    );
+    setEditCustomDisciplineInput("");
     setIsEditClassOpen(true);
   };
 
@@ -495,9 +597,14 @@ export function DirecteurDashboard({
     e.preventDefault();
     if (!editingClass) return;
     const assignedTeacher = users.find((u) => u.id === editClassTeacherId);
-    const updatedDisciplines = editClassCategory
-      ? editClassCategory.split(",").map((s) => s.trim()).filter(Boolean)
-      : (editingClass.disciplines || [editingClass.category || "Général"]);
+    const updatedDisciplines =
+      editClassDisciplines.length > 0
+        ? editClassDisciplines
+        : editingClass.disciplines && editingClass.disciplines.length > 0
+        ? editingClass.disciplines
+        : editClassCategory
+        ? editClassCategory.split(",").map((s) => s.trim()).filter(Boolean)
+        : ["Général"];
 
     updateClass(editingClass.id, {
       title: editClassTitle.trim(),
@@ -511,7 +618,7 @@ export function DirecteurDashboard({
       teacherName: assignedTeacher?.name || editingClass.teacherName,
     });
     setIsEditClassOpen(false);
-    toast.success("Enregistrement effectué avec succès", `La classe « ${editClassTitle} » a été mise à jour.`);
+    toast.success("Enregistrement effectué avec succès", `La classe « ${editClassTitle} » a été mise à jour avec ses disciplines dédiées.`);
   };
 
   const handleDeleteClass = (c: Classe) => {
@@ -573,6 +680,10 @@ export function DirecteurDashboard({
                 <Shield className="w-3.5 h-3.5 text-blue-600" />
                 <span>ESPACE DIRECTION & ADMINISTRATION D'ÉTABLISSEMENT</span>
               </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/35 text-emerald-700 text-xs font-semibold">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Sync Cloud Automatique</span>
+              </div>
               {currentEtab?.code && (
                 <span className="px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[11px] font-mono font-semibold">
                   {currentEtab.code}
@@ -608,6 +719,19 @@ export function DirecteurDashboard({
                 </select>
               </div>
             )}
+
+            <button
+              onClick={() => {
+                setIsRefreshing(true);
+                setTimeout(() => setIsRefreshing(false), 650);
+              }}
+              disabled={isRefreshing}
+              className="px-3.5 py-2.5 rounded-2xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-xs flex items-center gap-2 transition-all shadow-md cursor-pointer disabled:opacity-50"
+              title="Synchroniser et rafraîchir en temps réel"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-blue-600" : "text-slate-600"}`} />
+              <span className="hidden sm:inline">Actualiser</span>
+            </button>
 
             <button
               onClick={handleOpenEditCampus}
@@ -817,128 +941,266 @@ export function DirecteurDashboard({
       {/* ========================================================================= */}
       {activeTab === "STUDENTS" && (
         <div className="space-y-4 animate-fadeIn">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 glass-panel rounded-2xl border border-slate-200">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 glass-panel rounded-2xl border border-slate-200">
             <div className="relative flex-1 max-w-md">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
               <input
                 type="text"
-                placeholder="Rechercher un élève par nom, email, identifiant..."
+                placeholder="Rechercher par nom, email, identifiant ou classe..."
                 value={studentSearch}
                 onChange={(e) => setStudentSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-500 focus:outline-none focus:border-sky-500"
               />
             </div>
 
-            <button
-              onClick={() => setIsAddStudentOpen(true)}
-              className="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-lg shadow-sky-600/25 flex items-center gap-2 transition-all shrink-0"
-            >
-              <PlusCircle className="w-4 h-4" />
-              <span>+ Inscrire un Nouvel Élève</span>
-            </button>
-          </div>
-
-          {/* Students Table */}
-          <div className="glass-panel rounded-3xl border border-slate-200 overflow-hidden shadow-xl">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="border-b border-slate-200 bg-white text-slate-400 font-mono text-[11px] uppercase tracking-wider">
-                    <th className="py-3.5 px-4">Élève & Identité</th>
-                    <th className="py-3.5 px-4">Login / Identifiant</th>
-                    <th className="py-3.5 px-4">Email</th>
-                    <th className="py-3.5 px-4">Mot de Passe</th>
-                    <th className="py-3.5 px-4">Classe Rattachée</th>
-                    <th className="py-3.5 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  {filteredStudents.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="text-center py-10 text-slate-400">
-                        Aucun élève inscrit sur ce campus. Cliquez sur « + Inscrire un Nouvel Élève » pour ajouter vos élèves.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredStudents.map((s) => {
-                      const isPwdVisible = visiblePasswords[s.id] || false;
-                      const pwd = s.password || "Madouu1966@";
-                      const studentLogin = s.username || s.name.split(" ")[0].toLowerCase();
-                      const studentInscription = inscriptions.find((i) => i.userId === s.id);
-
-                      return (
-                        <tr key={s.id} className="hover:bg-white transition-colors">
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-3">
-                              <img
-                                src={s.avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"}
-                                alt={s.name}
-                                className="w-9 h-9 rounded-xl object-cover border border-slate-200 shrink-0"
-                              />
-                              <div>
-                                <p className="font-bold text-slate-900 text-xs">{s.name}</p>
-                                <span className="text-[10px] text-slate-500 font-mono">ID: {s.id}</span>
-                              </div>
-                            </div>
-                          </td>
-
-                          <td className="py-3 px-4">
-                            <span className="font-mono text-sky-600 font-bold bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20">
-                              {studentLogin}
-                            </span>
-                          </td>
-
-                          <td className="py-3 px-4 font-mono text-slate-600">{s.email}</td>
-
-                          <td className="py-3 px-4 font-mono">
-                            <div className="flex items-center gap-2">
-                              <span className="text-slate-800 bg-white px-2 py-1 rounded border border-slate-200 font-bold">
-                                {isPwdVisible ? pwd : "••••••••••••"}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => togglePasswordVisibility(s.id)}
-                                className="p-1 text-slate-400 hover:text-slate-900"
-                              >
-                                {isPwdVisible ? <EyeOff className="w-3.5 h-3.5 text-sky-600" /> : <Eye className="w-3.5 h-3.5" />}
-                              </button>
-                            </div>
-                          </td>
-
-                          <td className="py-3 px-4">
-                            {studentInscription ? (
-                              <span className="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-600 border border-indigo-500/30 text-[10px] font-bold">
-                                {studentInscription.classeTitle}
-                              </span>
-                            ) : (
-                              <span className="text-slate-500 italic">Tronc Commun</span>
-                            )}
-                          </td>
-
-                          <td className="py-3 px-4 text-right">
-                            <button
-                              onClick={() => handleOpenEditStudent(s)}
-                              className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-sky-600 border border-sky-500/30 transition-all mr-1.5"
-                              title="Modifier l'élève"
-                            >
-                              <Edit className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteStudent(s)}
-                              className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border border-rose-500/30 transition-all"
-                              title="Supprimer l'élève"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Segmented Filter: Tous / Actifs / Préinscrits */}
+              <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setStudentFilterType("ALL")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                    studentFilterType === "ALL"
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  Tous ({combinedStudentsList.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStudentFilterType("ACTIVE")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                    studentFilterType === "ACTIVE"
+                      ? "bg-white text-sky-600 shadow-sm"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  Confirmés ({schoolStudents.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStudentFilterType("PENDING")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    studentFilterType === "PENDING"
+                      ? "bg-amber-500 text-black shadow-sm font-black"
+                      : "text-amber-700 hover:text-amber-900"
+                  }`}
+                >
+                  <span>Pré-inscriptions</span>
+                  {pendingStudentCandidates.length > 0 && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-black/15 text-[10px] font-mono font-black">
+                      {pendingStudentCandidates.length}
+                    </span>
                   )}
-                </tbody>
-              </table>
+                </button>
+              </div>
+
+              <button
+                onClick={() => setIsAddStudentOpen(true)}
+                className="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-lg shadow-sky-600/25 flex items-center gap-2 transition-all shrink-0 cursor-pointer"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>+ Inscrire un Nouvel Élève</span>
+              </button>
             </div>
           </div>
+
+          {/* Students Table with Skeleton Loading */}
+          {isRefreshing ? (
+            <div className="glass-panel rounded-3xl border border-slate-200 p-6 shadow-xl space-y-4">
+              <div className="flex items-center gap-2 text-xs text-sky-600 font-bold">
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                <span>Synchronisation et chargement des élèves et pré-inscriptions...</span>
+              </div>
+              <SkeletonLoader type="table" rows={6} />
+            </div>
+          ) : (
+            <div className="glass-panel rounded-3xl border border-slate-200 overflow-hidden shadow-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-white text-slate-400 font-mono text-[11px] uppercase tracking-wider">
+                      <th className="py-3.5 px-4">Élève & Identité</th>
+                      <th className="py-3.5 px-4">Login / Identifiant</th>
+                      <th className="py-3.5 px-4">Email</th>
+                      <th className="py-3.5 px-4">Statut & Mot de Passe</th>
+                      <th className="py-3.5 px-4">Classe Rattachée</th>
+                      <th className="py-3.5 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {filteredCombinedStudents.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="text-center py-10 text-slate-400">
+                          {studentFilterType === "PENDING"
+                            ? "Aucune pré-inscription en attente pour cet établissement."
+                            : "Aucun élève trouvé. Cliquez sur « + Inscrire un Nouvel Élève » pour ajouter vos élèves."}
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredCombinedStudents.map((item) => {
+                        if (item.type === "USER") {
+                          const s = item.data;
+                          const isPwdVisible = visiblePasswords[s.id] || false;
+                          const pwd = s.password || "Madouu1966@";
+                          const studentLogin = s.username || s.name.split(" ")[0].toLowerCase();
+                          const studentInscription = inscriptions.find((i) => i.userId === s.id);
+
+                          return (
+                            <tr key={`user-${s.id}`} className="hover:bg-white transition-colors">
+                              <td className="py-3 px-4">
+                                <div className="flex items-center gap-3">
+                                  <img
+                                    src={s.avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"}
+                                    alt={s.name}
+                                    className="w-9 h-9 rounded-xl object-cover border border-slate-200 shrink-0"
+                                  />
+                                  <div>
+                                    <div className="flex items-center gap-1.5">
+                                      <p className="font-bold text-slate-900 text-xs">{s.name}</p>
+                                      <span className="px-1.5 py-0.2 rounded-md bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 text-[9px] font-bold">
+                                        Actif
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] text-slate-500 font-mono">ID: {s.id}</span>
+                                  </div>
+                                </div>
+                              </td>
+
+                              <td className="py-3 px-4">
+                                <span className="font-mono text-sky-600 font-bold bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20">
+                                  {studentLogin}
+                                </span>
+                              </td>
+
+                              <td className="py-3 px-4 font-mono text-slate-600">{s.email}</td>
+
+                              <td className="py-3 px-4 font-mono">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-slate-800 bg-white px-2 py-1 rounded border border-slate-200 font-bold">
+                                    {isPwdVisible ? pwd : "••••••••••••"}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => togglePasswordVisibility(s.id)}
+                                    className="p-1 text-slate-400 hover:text-slate-900 cursor-pointer"
+                                  >
+                                    {isPwdVisible ? <EyeOff className="w-3.5 h-3.5 text-sky-600" /> : <Eye className="w-3.5 h-3.5" />}
+                                  </button>
+                                </div>
+                              </td>
+
+                              <td className="py-3 px-4">
+                                {studentInscription ? (
+                                  <span className="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-600 border border-indigo-500/30 text-[10px] font-bold">
+                                    {studentInscription.classeTitle}
+                                  </span>
+                                ) : (
+                                  <span className="text-slate-500 italic">Tronc Commun</span>
+                                )}
+                              </td>
+
+                              <td className="py-3 px-4 text-right">
+                                <button
+                                  onClick={() => handleOpenEditStudent(s)}
+                                  className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-sky-600 border border-sky-500/30 transition-all mr-1.5 cursor-pointer"
+                                  title="Modifier l'élève"
+                                >
+                                  <Edit className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteStudent(s)}
+                                  className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border border-rose-500/30 transition-all cursor-pointer"
+                                  title="Supprimer l'élève"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        } else {
+                          // item.type === "INSCRIPTION" -> Candidat en attente
+                          const ins = item.data;
+                          const candidateLogin = ins.userEmail ? ins.userEmail.split("@")[0] : ins.userName.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+                          return (
+                            <tr key={`ins-${ins.id}`} className="bg-amber-500/5 hover:bg-amber-500/10 transition-colors border-l-4 border-l-amber-500">
+                              <td className="py-3 px-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 font-black text-xs flex items-center justify-center shrink-0 shadow-md">
+                                    {ins.userName.charAt(0).toUpperCase()}
+                                  </div>
+                                  <div>
+                                    <div className="flex items-center gap-1.5">
+                                      <p className="font-bold text-slate-900 text-xs">{ins.userName}</p>
+                                      <span className="px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-800 border border-amber-500/30 text-[9px] font-black animate-pulse">
+                                        ⏳ Pré-inscrit
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] text-slate-500 font-mono">
+                                      Candidature: {new Date(ins.appliedAt).toLocaleDateString()}
+                                    </span>
+                                  </div>
+                                </div>
+                              </td>
+
+                              <td className="py-3 px-4">
+                                <span className="font-mono text-amber-700 font-bold bg-amber-500/15 px-2 py-0.5 rounded border border-amber-500/30">
+                                  {candidateLogin}
+                                </span>
+                              </td>
+
+                              <td className="py-3 px-4 font-mono text-slate-600">{ins.userEmail}</td>
+
+                              <td className="py-3 px-4 font-mono">
+                                <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-800 border border-amber-500/30 text-[10px] font-bold">
+                                  En attente d&apos;admission
+                                </span>
+                              </td>
+
+                              <td className="py-3 px-4">
+                                <span className="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-700 border border-purple-500/30 text-[10px] font-bold">
+                                  {ins.classeTitle}
+                                </span>
+                              </td>
+
+                              <td className="py-3 px-4 text-right">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    onClick={() => {
+                                      approveInscription(ins.id);
+                                      toast.success("Candidature validée avec succès !", `${ins.userName} est maintenant un élève officiel de la classe ${ins.classeTitle}.`);
+                                    }}
+                                    className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] flex items-center gap-1 transition-all shadow-md cursor-pointer"
+                                    title="Valider et intégrer comme élève officiel"
+                                  >
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    <span>Valider</span>
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      rejectInscription(ins.id);
+                                      toast.info("Candidature refusée", `La préinscription de ${ins.userName} a été rejetée.`);
+                                    }}
+                                    className="px-2 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border border-rose-500/30 font-bold text-[11px] flex items-center gap-1 transition-all cursor-pointer"
+                                    title="Refuser la préinscription"
+                                  >
+                                    <XCircle className="w-3.5 h-3.5" />
+                                    <span>Refuser</span>
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        }
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -1152,6 +1414,26 @@ export function DirecteurDashboard({
 
                     <h3 className="text-sm font-extrabold text-slate-900 leading-snug">{cls.title}</h3>
                     <p className="text-xs text-slate-400 line-clamp-2">{cls.description}</p>
+
+                    {/* Dedicated Disciplines Pills */}
+                    {cls.disciplines && cls.disciplines.length > 0 && (
+                      <div className="pt-2 space-y-1">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                          Matières dédiées ({cls.disciplines.length}) :
+                        </span>
+                        <div className="flex flex-wrap gap-1">
+                          {cls.disciplines.map((d, idx) => (
+                            <span
+                              key={idx}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-800 font-semibold text-[10px]"
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                              {d}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="pt-3 border-t border-slate-200 space-y-2 text-xs">
@@ -1221,7 +1503,7 @@ export function DirecteurDashboard({
       {/* ========================================================================= */}
       {activeTab === "INSCRIPTIONS" && (
         <div className="space-y-4 animate-fadeIn">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 glass-panel rounded-2xl border border-slate-200">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 glass-panel rounded-2xl border border-slate-200">
             <div className="relative flex-1 max-w-md">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
               <input
@@ -1232,18 +1514,55 @@ export function DirecteurDashboard({
                 className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-500 focus:outline-none focus:border-purple-500"
               />
             </div>
-            <span className="text-xs font-bold text-amber-600 bg-amber-500/15 px-3 py-1 rounded-xl border border-amber-500/30">
-              {pendingInscriptionsCount} candidature(s) en attente
-            </span>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setInscriptionsCampusFilter("CURRENT")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                    inscriptionsCampusFilter === "CURRENT"
+                      ? "bg-white text-purple-700 shadow-sm"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  Ce Campus
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInscriptionsCampusFilter("ALL")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                    inscriptionsCampusFilter === "ALL"
+                      ? "bg-purple-600 text-white shadow-sm font-black"
+                      : "text-purple-700 hover:text-purple-900"
+                  }`}
+                >
+                  Tous les Campus ({inscriptions.length})
+                </button>
+              </div>
+
+              <span className="text-xs font-bold text-amber-700 bg-amber-500/15 px-3 py-2 rounded-xl border border-amber-500/30">
+                {pendingInscriptionsCount} en attente
+              </span>
+            </div>
           </div>
 
-          <div className="space-y-3">
-            {filteredInscriptions.length === 0 ? (
-              <div className="py-12 text-center glass-panel rounded-3xl border border-slate-200 text-slate-400">
-                Aucune demande de pré-inscription pour ce campus.
+          {isRefreshing ? (
+            <div className="glass-panel rounded-3xl border border-slate-200 p-6 shadow-xl space-y-4">
+              <div className="flex items-center gap-2 text-xs text-purple-600 font-bold">
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                <span>Chargement des candidatures de pré-inscriptions...</span>
               </div>
-            ) : (
-              filteredInscriptions.map((ins) => (
+              <SkeletonLoader type="card" rows={3} />
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredInscriptions.length === 0 ? (
+                <div className="py-12 text-center glass-panel rounded-3xl border border-slate-200 text-slate-400">
+                  Aucune demande de pré-inscription trouvée {inscriptionsCampusFilter === "CURRENT" ? "pour ce campus" : "sur la plateforme"}.
+                </div>
+              ) : (
+                filteredInscriptions.map((ins) => (
                 <div key={ins.id} className="glass-panel p-5 rounded-2xl border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -1301,8 +1620,9 @@ export function DirecteurDashboard({
               ))
             )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
+    )}
 
       {/* ========================================================================= */}
       {/* MODAL 1: ADD STUDENT */}
@@ -1614,6 +1934,82 @@ export function DirecteurDashboard({
                     onChange={(e) => setNewClassCapacity(parseInt(e.target.value) || 35)}
                     className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 focus:outline-none focus:border-amber-500"
                   />
+                </div>
+              </div>
+
+              {/* Disciplines Dédiées */}
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Matières & Disciplines Dédiées ({newClassDisciplines.length})</span>
+                  </label>
+                </div>
+                
+                {/* Active Selected Disciplines Chips */}
+                <div className="flex flex-wrap gap-1.5 min-h-[32px] p-2 bg-white rounded-xl border border-amber-300">
+                  {newClassDisciplines.length === 0 ? (
+                    <span className="text-slate-400 italic text-[11px]">Aucune discipline configurée. Cliquez sur les suggestions ci-dessous.</span>
+                  ) : (
+                    newClassDisciplines.map((disc, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-950 border border-amber-400/40 text-xs font-bold"
+                      >
+                        <span>{disc}</span>
+                        <button
+                          type="button"
+                          onClick={() => setNewClassDisciplines((prev) => prev.filter((_, i) => i !== idx))}
+                          className="hover:text-rose-600 cursor-pointer ml-0.5"
+                          title="Retirer"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))
+                  )}
+                </div>
+
+                {/* Add Custom Discipline */}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Ajouter une discipline personnalisée..."
+                    value={customDisciplineInput}
+                    onChange={(e) => setCustomDisciplineInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddCustomDiscipline();
+                      }
+                    }}
+                    className="flex-1 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-amber-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddCustomDiscipline}
+                    className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs flex items-center gap-1 cursor-pointer"
+                  >
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    <span>Ajouter</span>
+                  </button>
+                </div>
+
+                {/* Suggested Disciplines Quick Chips */}
+                <div>
+                  <span className="text-[10px] text-slate-600 font-semibold block mb-1">Suggestions rapides :</span>
+                  <div className="flex flex-wrap gap-1">
+                    {SUGGESTED_DISCIPLINES.filter((s) => !newClassDisciplines.includes(s)).slice(0, 8).map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setNewClassDisciplines((prev) => [...prev, s])}
+                        className="px-2 py-0.5 rounded-md bg-white hover:bg-amber-100 text-slate-700 hover:text-amber-900 border border-slate-200 text-[10px] font-medium transition-colors cursor-pointer"
+                      >
+                        + {s}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -2072,6 +2468,82 @@ export function DirecteurDashboard({
                     onChange={(e) => setEditClassCapacity(parseInt(e.target.value) || 35)}
                     className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 focus:outline-none focus:border-amber-500"
                   />
+                </div>
+              </div>
+
+              {/* Disciplines Dédiées */}
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Matières & Disciplines Dédiées ({editClassDisciplines.length})</span>
+                  </label>
+                </div>
+                
+                {/* Active Selected Disciplines Chips */}
+                <div className="flex flex-wrap gap-1.5 min-h-[32px] p-2 bg-white rounded-xl border border-amber-300">
+                  {editClassDisciplines.length === 0 ? (
+                    <span className="text-slate-400 italic text-[11px]">Aucune discipline configurée.</span>
+                  ) : (
+                    editClassDisciplines.map((disc, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-950 border border-amber-400/40 text-xs font-bold"
+                      >
+                        <span>{disc}</span>
+                        <button
+                          type="button"
+                          onClick={() => setEditClassDisciplines((prev) => prev.filter((_, i) => i !== idx))}
+                          className="hover:text-rose-600 cursor-pointer ml-0.5"
+                          title="Retirer"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))
+                  )}
+                </div>
+
+                {/* Add Custom Discipline */}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Ajouter une discipline..."
+                    value={editCustomDisciplineInput}
+                    onChange={(e) => setEditCustomDisciplineInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddEditCustomDiscipline();
+                      }
+                    }}
+                    className="flex-1 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-amber-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddEditCustomDiscipline}
+                    className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs flex items-center gap-1 cursor-pointer"
+                  >
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    <span>Ajouter</span>
+                  </button>
+                </div>
+
+                {/* Suggested Disciplines Quick Chips */}
+                <div>
+                  <span className="text-[10px] text-slate-600 font-semibold block mb-1">Suggestions rapides :</span>
+                  <div className="flex flex-wrap gap-1">
+                    {SUGGESTED_DISCIPLINES.filter((s) => !editClassDisciplines.includes(s)).slice(0, 8).map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setEditClassDisciplines((prev) => [...prev, s])}
+                        className="px-2 py-0.5 rounded-md bg-white hover:bg-amber-100 text-slate-700 hover:text-amber-900 border border-slate-200 text-[10px] font-medium transition-colors cursor-pointer"
+                      >
+                        + {s}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 

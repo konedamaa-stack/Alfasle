@@ -490,12 +490,63 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             return Array.from(map.values());
           });
         }
+
+        // Inscriptions Cloud & Full-Stack API Sync
+        try {
+          const apiRes = await fetch("/api/inscriptions");
+          if (apiRes.ok) {
+            const apiJson = await apiRes.json();
+            if (apiJson.data && Array.isArray(apiJson.data) && apiJson.data.length > 0) {
+              setInscriptions((prev) => {
+                const map = new Map<string, Inscription>();
+                prev.forEach((i) => map.set(i.id, i));
+                apiJson.data.forEach((i: Inscription) => map.set(i.id, i));
+                return Array.from(map.values());
+              });
+            }
+          }
+        } catch (_) {}
       } catch (err) {
         console.warn("Supabase initial sync:", err);
       }
     }
 
     syncFromSupabase();
+  }, []);
+
+  // Real-time automatic synchronization via BroadcastChannel (cross-tab / cross-window)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel("alfasle_sync_channel");
+      channel.onmessage = (event) => {
+        if (event.data?.type === "NEW_INSCRIPTION" && event.data.inscription) {
+          setInscriptions((prev) => {
+            if (prev.some((i) => i.id === event.data.inscription.id)) return prev;
+            return [event.data.inscription, ...prev];
+          });
+        }
+        if (event.data?.type === "INSCRIPTION_STATUS_CHANGED") {
+          setInscriptions((prev) =>
+            prev.map((i) =>
+              i.id === event.data.id ? { ...i, status: event.data.status } : i
+            )
+          );
+        }
+        if (event.data?.type === "CLASS_SYNC" && event.data.classe) {
+          setClasses((prev) => {
+            const map = new Map(prev.map((c) => [c.id, c]));
+            map.set(event.data.classe.id, event.data.classe);
+            return Array.from(map.values());
+          });
+        }
+      };
+    } catch (_) {}
+
+    return () => {
+      if (channel) channel.close();
+    };
   }, []);
 
   // Sync to localStorage
@@ -1020,8 +1071,24 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     diplomaOrBio?: string;
     motivation?: string;
   }) => {
-    const targetEtab = etablissements.find((e) => e.id === data.etablissementId);
     const targetClass = classes.find((c) => c.id === data.classeId);
+    const targetEtab =
+      etablissements.find(
+        (e) => e.id === data.etablissementId || e.subdomain === data.etablissementId
+      ) ||
+      (targetClass ? etablissements.find((e) => e.id === targetClass.etablissementId) : null);
+
+    const finalEtabId =
+      targetEtab?.id ||
+      targetClass?.etablissementId ||
+      (data.etablissementId && data.etablissementId !== "ALL"
+        ? data.etablissementId
+        : etablissements[0]?.id || "etab_default");
+
+    const finalEtabName =
+      targetEtab?.name ||
+      targetClass?.etablissementName ||
+      "Établissement AlFasle";
 
     const activationToken = `act_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 6)}`;
 
@@ -1035,8 +1102,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           ? "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80"
           : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
       role: data.role,
-      etablissementId: data.etablissementId,
-      etablissementName: targetEtab?.name || "Établissement AlFasle",
+      etablissementId: finalEtabId,
+      etablissementName: finalEtabName,
       classeId: data.classeId,
       classeTitle: targetClass?.title || "Classe AlFasle",
       subject: data.subject?.trim(),
@@ -1046,9 +1113,26 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       activationToken,
       motivation: data.motivation?.trim() || "Candidature en ligne en attente de validation Super Admin",
       appliedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
     };
 
     setInscriptions((prev) => [newInscription, ...prev]);
+
+    // Multi-tab automatic real-time broadcast
+    if (typeof window !== "undefined") {
+      try {
+        const channel = new BroadcastChannel("alfasle_sync_channel");
+        channel.postMessage({ type: "NEW_INSCRIPTION", inscription: newInscription });
+        channel.close();
+      } catch (_) {}
+
+      // Asynchronous Full-Stack API persistence
+      fetch("/api/inscriptions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newInscription),
+      }).catch((err) => console.warn("API inscription sync warning:", err));
+    }
 
     // Update pending counter on class
     setClasses((cls) =>
@@ -1057,13 +1141,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       )
     );
 
-    // Create system notification for Super Admin
+    // Create system notification for Super Admin and Director
     setNotifications((prev) => [
       {
         id: `notif_${Date.now()}`,
         userId: "u_super_admin_root",
         title: `Nouvelle préinscription (${data.role === "TEACHER" ? "👨‍🏫 Enseignant" : "🎓 Élève"})`,
-        message: `${data.userName} a postulé pour ${targetClass?.title || "une classe"} (${targetEtab?.name || "Campus"}). Email de confirmation envoyé.`,
+        message: `${data.userName} a postulé pour ${targetClass?.title || "une classe"} (${finalEtabName}). Dossier consultable dans l'établissement.`,
         type: "INSCRIPTION",
         isRead: false,
         createdAt: new Date().toISOString(),
@@ -1073,7 +1157,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     return {
       success: true,
-      message: `Votre demande de pré-inscription pour « ${targetClass?.title || "la classe"} » a été enregistrée. Un email de confirmation a été envoyé à ${data.userEmail}.`,
+      message: `Votre demande de pré-inscription pour « ${targetClass?.title || "la classe"} » a été enregistrée pour ${finalEtabName}.`,
       inscription: newInscription,
     };
   };
