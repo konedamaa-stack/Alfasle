@@ -25,6 +25,8 @@ import { GradingModal } from "./GradingModal";
 import { SubmitAssignmentModal } from "./SubmitAssignmentModal";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
 
+import { isStudentMatchingInscription } from "@/lib/utils";
+
 interface AssignmentListProps {
   onOpenCreateAssignment: () => void;
 }
@@ -77,20 +79,18 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
   const isStudent = currentUser.role === "STUDENT";
   const userEtabId = currentUser.etablissementId;
 
-  // Récupérer la classe approuvée de l'élève (1 seule classe autorisée)
-  const studentApprovedInscriptions = isStudent
-    ? inscriptions.filter(
+  // Récupérer la classe unique de l'élève (1 seule classe autorisée)
+  const studentInscription = isStudent
+    ? inscriptions.find(
         (i) =>
-          (i.userId === currentUser.id ||
-            (currentUser.email && i.userEmail?.toLowerCase() === currentUser.email.toLowerCase())) &&
-          i.status === "APPROVED"
+          isStudentMatchingInscription(i, currentUser) &&
+          (i.status === "APPROVED" || i.status === "PENDING" || i.status === "CONFIRMED")
       )
-    : [];
-  const studentClassIds = new Set(studentApprovedInscriptions.map((i) => i.classeId));
+    : null;
 
   const accessibleClasses = classes.filter((c) => {
     if (isStudent) {
-      return studentClassIds.has(c.id);
+      return studentInscription ? c.id === studentInscription.classeId : false;
     }
     if (isSuperAdmin) return true;
     if (userEtabId) {

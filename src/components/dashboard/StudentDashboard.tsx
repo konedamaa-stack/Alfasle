@@ -14,7 +14,7 @@ import {
   PlayCircle,
   AlertCircle,
 } from "lucide-react";
-import { formatDate, formatDateTime } from "@/lib/utils";
+import { formatDate, formatDateTime, isStudentMatchingInscription } from "@/lib/utils";
 
 interface StudentDashboardProps {
   onNavigate: (tab: any) => void;
@@ -29,10 +29,10 @@ export function StudentDashboard({
 }: StudentDashboardProps) {
   const { currentUser, classes, inscriptions, courses, assignments, submissions } = useStore();
 
-  const myApprovedInscriptions = inscriptions.filter(
-    (i) => i.userId === currentUser.id && i.status === "APPROVED"
-  );
-  const myApprovedClassIds = myApprovedInscriptions.map((i) => i.classeId);
+  const myInscriptions = inscriptions.filter((i) => isStudentMatchingInscription(currentUser, i));
+  const myApprovedInscriptions = myInscriptions.filter((i) => i.status === "APPROVED");
+  const activeInscription = myApprovedInscriptions[0] || myInscriptions[0];
+  const myApprovedClassIds = activeInscription ? [activeInscription.classeId] : [];
   const myClasses = classes.filter((c) => myApprovedClassIds.includes(c.id));
   const myCourses = courses.filter((c) => myApprovedClassIds.includes(c.classeId));
 

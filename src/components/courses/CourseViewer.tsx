@@ -22,8 +22,9 @@ import {
   FileUp,
   File,
   Eye,
+  GraduationCap,
 } from "lucide-react";
-import { getVideoEmbedInfo, getPdfEmbedInfo } from "@/lib/utils";
+import { getVideoEmbedInfo, getPdfEmbedInfo, isStudentMatchingInscription } from "@/lib/utils";
 import { triggerDownload } from "@/lib/download";
 import { ConfirmModal, ConfirmVariant } from "@/components/common/ConfirmModal";
 
@@ -42,16 +43,14 @@ export function CourseViewer({
   const isStudent = currentUser.role === "STUDENT";
   const userEtabId = currentUser.etablissementId;
 
-  // Récupérer la classe approuvée de l'élève (1 seule classe autorisée)
-  const studentApprovedInscriptions = isStudent
-    ? inscriptions.filter(
+  // Récupérer la classe unique rattachée à l'élève (1 seule classe autorisée)
+  const studentInscription = isStudent
+    ? inscriptions.find(
         (i) =>
-          (i.userId === currentUser.id ||
-            (currentUser.email && i.userEmail?.toLowerCase() === currentUser.email.toLowerCase())) &&
-          i.status === "APPROVED"
+          isStudentMatchingInscription(i, currentUser) &&
+          (i.status === "APPROVED" || i.status === "CONFIRMED" || i.status === "PENDING")
       )
-    : [];
-  const studentClassIds = new Set(studentApprovedInscriptions.map((i) => i.classeId));
+    : null;
 
   // Classes accessibles :
   // - Pour un élève : STRICTEMENT sa classe unique où il est inscrit
@@ -59,7 +58,7 @@ export function CourseViewer({
   // - Pour Enseignant / Directeur : classes de son établissement
   const accessibleClasses = classes.filter((c) => {
     if (isStudent) {
-      return studentClassIds.has(c.id);
+      return studentInscription ? c.id === studentInscription.classeId : false;
     }
     if (isSuperAdmin) return true;
     if (userEtabId) {
@@ -72,16 +71,22 @@ export function CourseViewer({
   });
 
   const [activeClassId, setActiveClassId] = useState<string>(
-    selectedClassId && accessibleClasses.some((c) => c.id === selectedClassId)
+    isStudent && studentInscription
+      ? studentInscription.classeId
+      : selectedClassId && accessibleClasses.some((c) => c.id === selectedClassId)
       ? selectedClassId
       : accessibleClasses[0]?.id || ""
   );
 
   React.useEffect(() => {
+    if (isStudent && studentInscription) {
+      setActiveClassId(studentInscription.classeId);
+      return;
+    }
     if (accessibleClasses.length > 0 && (!activeClassId || !accessibleClasses.some((c) => c.id === activeClassId))) {
       setActiveClassId(accessibleClasses[0].id);
     }
-  }, [accessibleClasses, activeClassId]);
+  }, [accessibleClasses, activeClassId, isStudent, studentInscription]);
 
   const [selectedDisciplineFilter, setSelectedDisciplineFilter] = useState<string>("ALL");
 

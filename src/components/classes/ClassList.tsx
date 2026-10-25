@@ -25,17 +25,20 @@ import {
 } from "lucide-react";
 import { ApplyModal } from "./ApplyModal";
 import { ConfirmModal, ConfirmVariant } from "@/components/common/ConfirmModal";
+import { isStudentMatchingInscription } from "@/lib/utils";
 
 interface ClassListProps {
   onOpenCreateClass: () => void;
   onSelectClassForCourses?: (classId: string) => void;
   onOpenJoinClassModal?: () => void;
+  onlyEnrolled?: boolean;
 }
 
 export function ClassList({
   onOpenCreateClass,
   onSelectClassForCourses,
   onOpenJoinClassModal,
+  onlyEnrolled = false,
 }: ClassListProps) {
   const { currentUser, classes, inscriptions, etablissements, updateClass, deleteClass, purgeDemoClasses, users } = useStore();
   const { toast } = useToast();
@@ -170,7 +173,21 @@ export function ClassList({
 
   const myManagedEtabIds = new Set(myManagedEtabs.map((e) => e.id));
 
+  const isStudent = currentUser.role === "STUDENT";
+  const studentInscription = isStudent
+    ? inscriptions.find(
+        (i) =>
+          isStudentMatchingInscription(i, currentUser) &&
+          (i.status === "APPROVED" || i.status === "PENDING" || i.status === "CONFIRMED")
+      )
+    : null;
+
   const filteredClasses = classes.filter((c) => {
+    // Si un élève consulte l'onglet "Ma Classe Inscrite", afficher UNIQUEMENT sa classe
+    if (isStudent && onlyEnrolled) {
+      return studentInscription ? c.id === studentInscription.classeId : false;
+    }
+
     const matchesSearch =
       c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -208,7 +225,9 @@ export function ClassList({
   });
 
   const getStudentStatusForClass = (classId: string) => {
-    const ins = inscriptions.find((i) => i.classeId === classId && i.userId === currentUser.id);
+    const ins = inscriptions.find(
+      (i) => i.classeId === classId && isStudentMatchingInscription(i, currentUser)
+    );
     return ins ? ins.status : null;
   };
 
@@ -352,14 +371,11 @@ export function ClassList({
           filteredClasses.map((cls) => {
             const studentStatus = getStudentStatusForClass(cls.id);
             const isFull = (cls.enrolledCount || 0) >= cls.capacity;
-            const hasOtherClass = currentUser.role === "STUDENT"
-              ? inscriptions.find(
-                  (i) =>
-                    i.userId === currentUser.id &&
-                    i.classeId !== cls.id &&
-                    (i.status === "APPROVED" || i.status === "PENDING" || i.status === "CONFIRMED")
-                )
-              : null;
+            const hasOtherClass = Boolean(
+              isStudent &&
+              studentInscription &&
+              studentInscription.classeId !== cls.id
+            );
 
             return (
               <div
@@ -411,6 +427,17 @@ export function ClassList({
 
                     {/* Disciplines / Matières badges */}
                     {(() => {
+                      // Pour un élève déjà inscrit dans une classe, masquer les matières des autres classes
+                      if (isStudent && studentInscription && studentInscription.classeId !== cls.id) {
+                        return (
+                          <div className="pt-1">
+                            <span className="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-500 text-[10px] font-medium flex items-center gap-1 w-fit">
+                              🔒 Matières de cette classe (Non inscrit)
+                            </span>
+                          </div>
+                        );
+                      }
+
                       const discList =
                         cls.disciplines && cls.disciplines.length > 0
                           ? cls.disciplines
@@ -539,13 +566,13 @@ export function ClassList({
                           <div className="w-full py-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-medium text-center">
                             Demande non retenue
                           </div>
-                        ) : hasOtherClass ? (
+                        ) : hasOtherClass && studentInscription ? (
                           <div
                             className="w-full py-2 px-3 rounded-xl bg-slate-100 text-slate-500 border border-slate-200 text-[11px] font-medium flex items-center justify-center gap-1.5 text-center cursor-not-allowed"
-                            title={`Règle AlFasle : Un élève ne peut s'inscrire que dans une seule classe. Vous êtes déjà rattaché(e) à « ${hasOtherClass.classeTitle} » (${hasOtherClass.etablissementName}).`}
+                            title={`Règle AlFasle : Un élève ne peut s'inscrire que dans une seule classe. Vous êtes déjà rattaché(e) à « ${studentInscription.classeTitle} » (${studentInscription.etablissementName || "AlFasle"}).`}
                           >
                             <AlertCircle className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span className="truncate">Déjà inscrit à « {hasOtherClass.classeTitle} »</span>
+                            <span className="truncate">Déjà inscrit à « {studentInscription.classeTitle} »</span>
                           </div>
                         ) : (
                           <button

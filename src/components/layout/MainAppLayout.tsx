@@ -221,6 +221,7 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
               />
             ) : (
               <ClassList
+                onlyEnrolled={currentUser.role === "STUDENT"}
                 onOpenCreateClass={() => {
                   setCreateClassDefaultEtab(undefined);
                   setIsCreateClassOpen(true);

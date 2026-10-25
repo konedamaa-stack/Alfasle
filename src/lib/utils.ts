@@ -195,3 +195,41 @@ export function getPdfEmbedInfo(rawUrl: string): PdfEmbedInfo {
     isDataUrl: false,
   };
 }
+
+/**
+ * Robust matching between a student user and an inscription (by ID, email, name, or username slug)
+ * Accepts arguments in either order (user, inscription) or (inscription, user).
+ */
+export function isStudentMatchingInscription(arg1: any, arg2: any): boolean {
+  if (!arg1 || !arg2) return false;
+  const isArg1Inscription = Boolean(arg1.classeId || arg1.userEmail || arg1.userName);
+  const i = isArg1Inscription ? arg1 : arg2;
+  const u = isArg1Inscription ? arg2 : arg1;
+
+  if (i.role && i.role !== "STUDENT") return false;
+  if (i.userId && u.id && i.userId === u.id) return true;
+
+  const cleanUserEmail = u.email?.trim().toLowerCase();
+  const cleanInsEmail = i.userEmail?.trim().toLowerCase();
+  if (cleanUserEmail && cleanInsEmail && cleanUserEmail === cleanInsEmail) return true;
+
+  const cleanUserName = u.name?.trim().toLowerCase();
+  const cleanInsName = i.userName?.trim().toLowerCase();
+  if (cleanUserName && cleanInsName && cleanUserName === cleanInsName) return true;
+
+  const cleanUsername = u.username?.trim().toLowerCase();
+  if (cleanUsername && cleanInsName && cleanUsername === cleanInsName) return true;
+
+  // Slug matching (ex: DIAWARA ALAMA vs diawaraalama.3842@alfasle.edu)
+  if (cleanUserName && cleanInsEmail) {
+    const slug = cleanUserName.replace(/[^a-z0-9]/g, "");
+    if (slug.length >= 3 && cleanInsEmail.includes(slug)) return true;
+  }
+  if (cleanUsername && cleanInsEmail) {
+    const slug = cleanUsername.replace(/[^a-z0-9]/g, "");
+    if (slug.length >= 3 && cleanInsEmail.includes(slug)) return true;
+  }
+
+  return false;
+}
+

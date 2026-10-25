@@ -18,6 +18,7 @@ import {
   Sparkles,
   CheckCircle2,
   Award,
+  AlertCircle,
 } from "lucide-react";
 import { AccountActivationModal } from "./AccountActivationModal";
 

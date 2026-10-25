@@ -70,7 +70,7 @@ export interface Classe {
   assignmentsCount?: number;
 }
 
-export type InscriptionStatus = "PENDING" | "APPROVED" | "REJECTED";
+export type InscriptionStatus = "PENDING" | "APPROVED" | "CONFIRMED" | "REJECTED";
 export type InscriptionRole = "STUDENT" | "TEACHER";
 
 export interface Inscription {
