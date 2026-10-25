@@ -96,6 +96,21 @@ export const initialUsers: User[] = [
     etablissementName: "RAYATIL ISLAM",
     createdAt: "2026-09-01T08:00:00Z",
   },
+
+  // --- ÉLÈVE : DIAWARA ALAMA ---
+  {
+    id: "u_student_alama",
+    name: "DIAWARA ALAMA",
+    username: "alama",
+    email: "alama@alfasle.edu",
+    password: "Madouu1966",
+    role: "STUDENT",
+    bio: "Élève inscrit en شعبة الدراسات الإسلامية واللغة العربية.",
+    avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
+    etablissementId: "etab_1792343761588",
+    etablissementName: "هيئة التدريس - جامعة النور الإسلامية",
+    createdAt: "2026-09-01T08:00:00Z",
+  },
 ];
 
 // Classes officielles modèles pré-configurées pour chaque établissement
@@ -179,8 +194,25 @@ export const initialClasses: Classe[] = [
   },
 ];
 
-// Inscriptions / Candidatures complètement vierges (0 candidatures)
-export const initialInscriptions: Inscription[] = [];
+// Inscription officielle approuvée de l'élève DIAWARA ALAMA dans sa classe unique
+export const initialInscriptions: Inscription[] = [
+  {
+    id: "ins_alama_etudes_arabes",
+    userId: "u_student_alama",
+    userName: "DIAWARA ALAMA",
+    userEmail: "alama@alfasle.edu",
+    userPhone: "+225 07 00 00 01",
+    role: "STUDENT",
+    etablissementId: "etab_1792343761588",
+    etablissementName: "هيئة التدريس - جامعة النور الإسلامية",
+    classeId: "cls_nour_etudes_arabes",
+    classeTitle: "شعبة الدراسات الإسلامية واللغة العربية",
+    status: "APPROVED",
+    emailConfirmed: true,
+    appliedAt: "2026-09-01T08:00:00Z",
+    createdAt: "2026-09-01T08:00:00Z",
+  },
+];
 
 // Cours modèles pré-configurés avec les titres par matière
 export const initialCourses: Cours[] = [
@@ -343,8 +375,21 @@ Apprenez à sauvegarder efficacement vos recherches et mémoires juridiques.
   },
 ];
 
-// Devoirs complètement vierges (0 devoirs)
-export const initialAssignments: Devoir[] = [];
+// Devoirs modèles pour la classe
+export const initialAssignments: Devoir[] = [
+  {
+    id: "asg_info_nour_01",
+    classeId: "cls_nour_etudes_arabes",
+    discipline: "Informatique",
+    title: "Devoir Pratique 1 : Créer un dossier et enregistrer un fichier",
+    instructions: "Mettez en pratique vos deux premières leçons d'Informatique : créez un dossier nommé 'Mes_Cours_AlFasle' puis enregistrez un document texte à l'intérieur expliquant ce que vous avez appris.",
+    dueDate: "2026-11-15T23:59:00Z",
+    maxScore: 20,
+    submissionsCount: 0,
+    gradedCount: 0,
+    createdAt: "2026-09-01T08:00:00Z",
+  },
+];
 
 // Soumissions complètement vierges (0 soumissions)
 export const initialSubmissions: Soumission[] = [];

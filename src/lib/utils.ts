@@ -215,19 +215,25 @@ export function isStudentMatchingInscription(arg1: any, arg2: any): boolean {
 
   const cleanUserName = u.name?.trim().toLowerCase();
   const cleanInsName = i.userName?.trim().toLowerCase();
-  if (cleanUserName && cleanInsName && cleanUserName === cleanInsName) return true;
+  if (cleanUserName && cleanInsName) {
+    if (cleanUserName === cleanInsName) return true;
+    if (cleanInsName.includes(cleanUserName) || cleanUserName.includes(cleanInsName)) return true;
+  }
 
   const cleanUsername = u.username?.trim().toLowerCase();
-  if (cleanUsername && cleanInsName && cleanUsername === cleanInsName) return true;
+  if (cleanUsername && cleanInsName) {
+    if (cleanUsername === cleanInsName) return true;
+    if (cleanInsName.includes(cleanUsername) || cleanUsername.includes(cleanInsName)) return true;
+  }
 
-  // Slug matching (ex: DIAWARA ALAMA vs diawaraalama.3842@alfasle.edu)
+  // Slug matching (ex: DIAWARA ALAMA vs diawaraalama.3842@alfasle.edu or alama@alfasle.edu)
   if (cleanUserName && cleanInsEmail) {
     const slug = cleanUserName.replace(/[^a-z0-9]/g, "");
-    if (slug.length >= 3 && cleanInsEmail.includes(slug)) return true;
+    if (slug.length >= 3 && (cleanInsEmail.includes(slug) || slug.includes(cleanInsEmail.split("@")[0]))) return true;
   }
   if (cleanUsername && cleanInsEmail) {
     const slug = cleanUsername.replace(/[^a-z0-9]/g, "");
-    if (slug.length >= 3 && cleanInsEmail.includes(slug)) return true;
+    if (slug.length >= 3 && (cleanInsEmail.includes(slug) || slug.includes(cleanInsEmail.split("@")[0]))) return true;
   }
 
   return false;

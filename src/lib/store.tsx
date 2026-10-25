@@ -32,6 +32,7 @@ import {
   mapRowToEtablissement,
   mapEtablissementToRow,
 } from "./supabase";
+import { isStudentMatchingInscription } from "./utils";
 
 interface StoreContextType {
   currentUser: User;
@@ -250,12 +251,62 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
           }
 
           if (suffix === "inscriptions") {
-            merged = (merged as unknown as Inscription[]).filter(
+            let currentInscriptions = (merged as unknown as Inscription[]).filter(
               (i) =>
                 i.etablissementId !== "etab_gs_alfasle" &&
                 i.etablissementId !== "gs-alfasle" &&
                 !i.etablissementName?.toLowerCase().includes("groupe scolaire alfasle")
-            ) as unknown as T[];
+            );
+
+            initialInscriptions.forEach((initIns) => {
+              const alreadyExists = currentInscriptions.some(
+                (ins) =>
+                  ins.id === initIns.id ||
+                  (ins.classeId === initIns.classeId && isStudentMatchingInscription(ins, initIns))
+              );
+              if (!alreadyExists) {
+                currentInscriptions.push(initIns);
+              }
+            });
+
+            merged = currentInscriptions as unknown as T[];
+          }
+
+          if (suffix === "assignments") {
+            let currentAssignments = (merged as unknown as Devoir[]).filter(
+              (a) =>
+                a.classeId !== "cls_gs_tle_sciences" &&
+                a.classeId !== "cls_gs_tle_litterature" &&
+                !a.id.includes("gs_")
+            );
+
+            initialAssignments.forEach((initAsg) => {
+              const alreadyExists = currentAssignments.some((a) => a.id === initAsg.id);
+              if (!alreadyExists) {
+                currentAssignments.push(initAsg);
+              }
+            });
+
+            merged = currentAssignments as unknown as T[];
+          }
+
+          if (suffix === "users") {
+            let currentUsers = (merged as unknown as User[]).filter(
+              (u) =>
+                u.etablissementId !== "etab_gs_alfasle" &&
+                !u.etablissementName?.toLowerCase().includes("groupe scolaire alfasle")
+            );
+
+            initialUsers.forEach((initU) => {
+              const alreadyExists = currentUsers.some(
+                (u) => u.id === initU.id || u.email.toLowerCase() === initU.email.toLowerCase()
+              );
+              if (!alreadyExists) {
+                currentUsers.push(initU);
+              }
+            });
+
+            merged = currentUsers as unknown as T[];
           }
 
           if (suffix === "courses") {

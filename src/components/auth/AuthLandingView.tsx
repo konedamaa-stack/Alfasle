@@ -439,18 +439,26 @@ export function AuthLandingView({
 
     // 5. Direct Student Fallback by Identifiant Élève
     if (!matchedUser && selectedRole === "STUDENT" && cleanId.length > 0) {
-      matchedUser = {
-        id: `u_student_${cleanId.replace(/[^a-z0-9]/g, "_")}`,
-        name: identifier.trim(),
-        username: cleanId,
-        email: identifier.includes("@") ? identifier.trim() : `${cleanId}@alfasle.edu`,
-        role: "STUDENT",
-        password: inputPass || "Madouu1966",
-        etablissementName: "هيئة التدريس - جامعة النور الإسلامية",
-        bio: `Élève de جامعة النور الإسلامية`,
-        avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
-        createdAt: new Date().toISOString(),
-      };
+      const isAlama = cleanId.includes("alama");
+      const alamaPreset = users.find((u) => u.id === "u_student_alama" || u.name === "DIAWARA ALAMA");
+
+      if (isAlama && alamaPreset) {
+        matchedUser = alamaPreset;
+      } else {
+        matchedUser = {
+          id: isAlama ? "u_student_alama" : `u_student_${cleanId.replace(/[^a-z0-9]/g, "_")}`,
+          name: isAlama ? "DIAWARA ALAMA" : identifier.trim(),
+          username: isAlama ? "alama" : cleanId,
+          email: identifier.includes("@") ? identifier.trim() : `${isAlama ? "alama" : cleanId}@alfasle.edu`,
+          role: "STUDENT",
+          password: inputPass || "Madouu1966",
+          etablissementId: "etab_1792343761588",
+          etablissementName: "هيئة التدريس - جامعة النور الإسلامية",
+          bio: `Élève de جامعة النور الإسلامية`,
+          avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
+          createdAt: new Date().toISOString(),
+        };
+      }
     }
 
     if (matchedUser) {
