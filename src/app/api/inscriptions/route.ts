@@ -132,7 +132,6 @@ export async function POST(request: Request) {
             status: newInscription.status,
             motivation: newInscription.motivation,
             activation_token: newInscription.activationToken,
-            email_confirmed: newInscription.emailConfirmed,
             applied_at: newInscription.appliedAt,
             created_at: newInscription.createdAt,
           },

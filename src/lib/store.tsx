@@ -31,6 +31,12 @@ import {
   mapClasseToRow,
   mapRowToEtablissement,
   mapEtablissementToRow,
+  mapRowToCours,
+  mapCoursToRow,
+  mapRowToDevoir,
+  mapDevoirToRow,
+  mapRowToInscription,
+  mapInscriptionToRow,
 } from "./supabase";
 import { isStudentMatchingInscription } from "./utils";
 
@@ -453,181 +459,194 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     loadInitialData("notifications", initialNotifications)
   );
 
-  // Synchronisation Cloud avec Supabase au chargement
-  useEffect(() => {
-    async function syncFromSupabase() {
-      if (!isSupabaseConfigured()) return;
-      try {
-        const [etabsRes, classesRes, coursesRes] = await Promise.all([
-          supabase.from("etablissements").select("*"),
-          supabase.from("classes").select("*"),
-          supabase.from("courses").select("*"),
-        ]);
+  // Synchronisation Cloud avec Supabase au chargement et en temps réel
+  const syncFromSupabase = React.useCallback(async () => {
+    if (!isSupabaseConfigured()) return;
+    try {
+      const [etabsRes, classesRes, coursesRes, assignmentsRes, inscriptionsRes] = await Promise.all([
+        supabase.from("etablissements").select("*"),
+        supabase.from("classes").select("*"),
+        supabase.from("courses").select("*"),
+        supabase.from("assignments").select("*"),
+        supabase.from("inscriptions").select("*"),
+      ]);
 
-        const demoEtabBlacklist = new Set(["etab_lycee_excellence", "etab_polytech_kone"]);
-        const demoClassBlacklist = new Set([
-          "cls_nextjs_mastery",
-          "cls_algo_data",
-          "cls_physique_chimie",
-          "cls_litterature_philo",
-          "cls_reseaux_telecoms",
-          "cls_cloud_distrib",
-          "cls_kouliyat_tc",
-          "cls_islam_tc",
-          "cls_gs_tle_d",
-          "cls_gs_2nde_c",
-        ]);
-        const demoCourseBlacklist = new Set([
-          "crs_nextjs_01",
-          "crs_nextjs_02",
-          "crs_algo_01",
-          "crs_algo_02",
-          "crs_physique_01",
-          "crs_chimie_01",
-          "crs_philo_01",
-          "crs_reseaux_01",
-          "crs_cloud_01",
-          "crs_kouliyat_intro",
-          "crs_islam_intro",
-          "crs_math_tle_d",
-          "crs_phys_2nde_c",
-        ]);
+      const demoEtabBlacklist = new Set(["etab_lycee_excellence", "etab_polytech_kone"]);
+      const demoClassBlacklist = new Set([
+        "cls_nextjs_mastery",
+        "cls_algo_data",
+        "cls_physique_chimie",
+        "cls_litterature_philo",
+        "cls_reseaux_telecoms",
+        "cls_cloud_distrib",
+        "cls_kouliyat_tc",
+        "cls_islam_tc",
+        "cls_gs_tle_d",
+        "cls_gs_2nde_c",
+      ]);
+      const demoCourseBlacklist = new Set([
+        "crs_nextjs_01",
+        "crs_nextjs_02",
+        "crs_algo_01",
+        "crs_algo_02",
+        "crs_physique_01",
+        "crs_chimie_01",
+        "crs_philo_01",
+        "crs_reseaux_01",
+        "crs_cloud_01",
+        "crs_kouliyat_intro",
+        "crs_islam_intro",
+        "crs_math_tle_d",
+        "crs_phys_2nde_c",
+      ]);
 
-        if (etabsRes.data && etabsRes.data.length > 0) {
-          const fetchedEtabs = etabsRes.data.map(mapRowToEtablissement);
-          setEtablissements((prev) => {
-            const map = new Map<string, Etablissement>();
-            prev.forEach((e) => {
-              if (!demoEtabBlacklist.has(e.id)) map.set(e.id, e);
-            });
-            fetchedEtabs.forEach((e) => {
-              if (!demoEtabBlacklist.has(e.id)) {
-                if (e.id === "etab_1792343761588" || e.name === "KOULIYAT" || e.subdomain === "kouliyat") {
-                  map.set(e.id, {
-                    ...e,
-                    name: "هيئة التدريس - جامعة النور الإسلامية",
-                    city: e.city || "DIVO",
-                    country: e.country || "Côte d'Ivoire",
-                    address: e.address || "Campus Universitaire An-Nour, Divo",
-                    description: "جامعة النور الإسلامية بمدينة ديفو - هيئة التدريس (Université Islamique An-Nour de Divo - U.I.N.D.).",
-                    logoUrl: "/logo-an-nour.png",
-                  });
-                } else {
-                  map.set(e.id, e);
-                }
-              }
-            });
-            return Array.from(map.values());
+      if (etabsRes.data && etabsRes.data.length > 0) {
+        const fetchedEtabs = etabsRes.data.map(mapRowToEtablissement);
+        setEtablissements((prev) => {
+          const map = new Map<string, Etablissement>();
+          prev.forEach((e) => {
+            if (!demoEtabBlacklist.has(e.id)) map.set(e.id, e);
           });
-        }
-
-        if (classesRes.data && classesRes.data.length > 0) {
-          const fetchedClasses = classesRes.data.map(mapRowToClasse);
-          setClasses((prev) => {
-            const map = new Map<string, Classe>();
-            prev.forEach((c) => {
-              if (
-                !demoClassBlacklist.has(c.id) &&
-                !c.id.includes("nextjs") &&
-                !c.id.includes("kouliyat") &&
-                !c.id.includes("islam") &&
-                !c.title?.toLowerCase().includes("next.js") &&
-                !c.title?.toLowerCase().includes("docker") &&
-                !c.title?.toLowerCase().includes("tronc commun") &&
-                !demoEtabBlacklist.has(c.etablissementId)
-              ) {
-                map.set(c.id, c);
+          fetchedEtabs.forEach((e) => {
+            if (!demoEtabBlacklist.has(e.id)) {
+              if (e.id === "etab_1792343761588" || e.name === "KOULIYAT" || e.subdomain === "kouliyat") {
+                map.set(e.id, {
+                  ...e,
+                  name: "هيئة التدريس - جامعة النور الإسلامية",
+                  city: e.city || "DIVO",
+                  country: e.country || "Côte d'Ivoire",
+                  address: e.address || "Campus Universitaire An-Nour, Divo",
+                  description: "جامعة النور الإسلامية بمدينة ديفو - هيئة التدريس (Université Islamique An-Nour de Divo - U.I.N.D.).",
+                  logoUrl: "/logo-an-nour.png",
+                });
+              } else {
+                map.set(e.id, e);
               }
-            });
-            fetchedClasses.forEach((c) => {
-              if (
-                !demoClassBlacklist.has(c.id) &&
-                !c.id.includes("nextjs") &&
-                !c.id.includes("kouliyat") &&
-                !c.id.includes("islam") &&
-                !c.title?.toLowerCase().includes("next.js") &&
-                !c.title?.toLowerCase().includes("docker") &&
-                !c.title?.toLowerCase().includes("tronc commun") &&
-                !demoEtabBlacklist.has(c.etablissementId)
-              ) {
-                map.set(c.id, c);
-              }
-            });
-            return Array.from(map.values());
-          });
-        }
-
-        if (coursesRes.data && coursesRes.data.length > 0) {
-          const fetchedCourses: Cours[] = coursesRes.data.map((row: any) => ({
-            id: row.id,
-            classeId: row.classe_id || row.classeId,
-            chapterTitle: row.chapter_title || row.chapterTitle || "Module Général",
-            title: row.title,
-            summary: row.summary || "",
-            content: row.content || "",
-            order: row.display_order ?? row.order ?? 1,
-            status: row.status || "PUBLISHED",
-            discipline: row.discipline || "",
-            teacherName: row.teacher_name || row.teacherName || "",
-            pdfUrl: row.pdf_url || row.pdfUrl || "",
-            pdfName: row.pdf_name || row.pdfName || "",
-            video: row.video_url
-              ? {
-                  id: `vid_${row.id}`,
-                  title: row.title,
-                  streamUrl: row.video_url,
-                  durationMinutes: row.video_duration || 30,
-                  status: "READY" as const,
-                }
-              : row.video,
-            resources: Array.isArray(row.resources)
-              ? row.resources
-              : (typeof row.resources === "string" && row.resources.startsWith("[")
-                  ? JSON.parse(row.resources)
-                  : []),
-            publishedAt: row.published_at || row.publishedAt || new Date().toISOString(),
-          }));
-
-          setCourses((prev) => {
-            const map = new Map<string, Cours>();
-            prev.forEach((c) => {
-              if (!demoCourseBlacklist.has(c.id) && !c.id.includes("nextjs") && !demoClassBlacklist.has(c.classeId)) {
-                map.set(c.id, c);
-              }
-            });
-            fetchedCourses.forEach((c) => {
-              if (!demoCourseBlacklist.has(c.id) && !c.id.includes("nextjs") && !demoClassBlacklist.has(c.classeId)) {
-                map.set(c.id, c);
-              }
-            });
-            return Array.from(map.values());
-          });
-        }
-
-        // Inscriptions Cloud & Full-Stack API Sync
-        try {
-          const apiRes = await fetch("/api/inscriptions");
-          if (apiRes.ok) {
-            const apiJson = await apiRes.json();
-            if (apiJson.data && Array.isArray(apiJson.data) && apiJson.data.length > 0) {
-              setInscriptions((prev) => {
-                const map = new Map<string, Inscription>();
-                prev.forEach((i) => map.set(i.id, i));
-                apiJson.data.forEach((i: Inscription) => map.set(i.id, i));
-                return Array.from(map.values());
-              });
             }
-          }
-        } catch (_) {}
-      } catch (err) {
-        console.warn("Supabase initial sync:", err);
+          });
+          return Array.from(map.values());
+        });
       }
-    }
 
-    syncFromSupabase();
+      if (classesRes.data && classesRes.data.length > 0) {
+        const fetchedClasses = classesRes.data.map(mapRowToClasse);
+        setClasses((prev) => {
+          const map = new Map<string, Classe>();
+          prev.forEach((c) => {
+            if (
+              !demoClassBlacklist.has(c.id) &&
+              !c.id.includes("nextjs") &&
+              !c.id.includes("kouliyat") &&
+              !c.id.includes("islam") &&
+              !c.title?.toLowerCase().includes("next.js") &&
+              !c.title?.toLowerCase().includes("docker") &&
+              !c.title?.toLowerCase().includes("tronc commun") &&
+              !demoEtabBlacklist.has(c.etablissementId)
+            ) {
+              map.set(c.id, c);
+            }
+          });
+          fetchedClasses.forEach((c) => {
+            if (
+              !demoClassBlacklist.has(c.id) &&
+              !c.id.includes("nextjs") &&
+              !c.id.includes("kouliyat") &&
+              !c.id.includes("islam") &&
+              !c.title?.toLowerCase().includes("next.js") &&
+              !c.title?.toLowerCase().includes("docker") &&
+              !c.title?.toLowerCase().includes("tronc commun") &&
+              !demoEtabBlacklist.has(c.etablissementId)
+            ) {
+              map.set(c.id, c);
+            }
+          });
+          return Array.from(map.values());
+        });
+      }
+
+      if (coursesRes.data && coursesRes.data.length > 0) {
+        const fetchedCourses: Cours[] = coursesRes.data.map(mapRowToCours);
+        setCourses((prev) => {
+          const map = new Map<string, Cours>();
+          prev.forEach((c) => {
+            if (!demoCourseBlacklist.has(c.id) && !c.id.includes("nextjs") && !demoClassBlacklist.has(c.classeId)) {
+              map.set(c.id, c);
+            }
+          });
+          fetchedCourses.forEach((c) => {
+            if (!demoCourseBlacklist.has(c.id) && !c.id.includes("nextjs") && !demoClassBlacklist.has(c.classeId)) {
+              map.set(c.id, c);
+            }
+          });
+          return Array.from(map.values());
+        });
+      }
+
+      if (assignmentsRes.data && assignmentsRes.data.length > 0) {
+        const fetchedAssignments: Devoir[] = assignmentsRes.data.map(mapRowToDevoir);
+        setAssignments((prev) => {
+          const map = new Map<string, Devoir>();
+          prev.forEach((a) => {
+            if (a.classeId !== "cls_gs_tle_sciences" && a.classeId !== "cls_gs_tle_litterature" && !a.id.includes("gs_")) {
+              map.set(a.id, a);
+            }
+          });
+          fetchedAssignments.forEach((a) => {
+            if (a.classeId !== "cls_gs_tle_sciences" && a.classeId !== "cls_gs_tle_litterature" && !a.id.includes("gs_")) {
+              map.set(a.id, a);
+            }
+          });
+          return Array.from(map.values());
+        });
+      }
+
+      if (inscriptionsRes.data && inscriptionsRes.data.length > 0) {
+        const fetchedInscriptions: Inscription[] = inscriptionsRes.data.map(mapRowToInscription);
+        setInscriptions((prev) => {
+          const map = new Map<string, Inscription>();
+          prev.forEach((i) => {
+            if (i.etablissementId !== "etab_gs_alfasle" && !i.etablissementName?.toLowerCase().includes("groupe scolaire alfasle")) {
+              map.set(i.id, i);
+            }
+          });
+          fetchedInscriptions.forEach((i) => {
+            if (i.etablissementId !== "etab_gs_alfasle" && !i.etablissementName?.toLowerCase().includes("groupe scolaire alfasle")) {
+              map.set(i.id, i);
+            }
+          });
+          return Array.from(map.values());
+        });
+      }
+    } catch (err) {
+      console.warn("Supabase initial sync:", err);
+    }
   }, []);
 
-  // Real-time automatic synchronization via BroadcastChannel (cross-tab / cross-window)
+  // Initialisation et chargement des données Cloud
+  useEffect(() => {
+    syncFromSupabase();
+  }, [syncFromSupabase]);
+
+  // Synchronisation temps réel MULTI-NAVIGATEURS (Chrome, Firefox, Edge, Opera, Mobile)
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+    const realtimeChannel = supabase
+      .channel("alfasle_cloud_realtime_sync")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public" },
+        () => {
+          syncFromSupabase();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(realtimeChannel);
+    };
+  }, [syncFromSupabase]);
+
+  // Synchronisation temps réel intra-navigateur (multi-onglets même navigateur)
   useEffect(() => {
     if (typeof window === "undefined") return;
     let channel: BroadcastChannel | null = null;
@@ -1072,6 +1091,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     setInscriptions((prev) => [newInscription, ...prev]);
 
+    if (isSupabaseConfigured()) {
+      supabase.from("inscriptions").upsert(mapInscriptionToRow(newInscription)).then();
+    }
+
     // Update class counters
     setClasses((prev) =>
       prev.map((c) => {
@@ -1196,6 +1219,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     };
 
     setInscriptions((prev) => [newInscription, ...prev]);
+
+    if (isSupabaseConfigured()) {
+      supabase.from("inscriptions").upsert(mapInscriptionToRow(newInscription)).then();
+    }
 
     // Update class counters
     setClasses((prev) =>
@@ -1337,6 +1364,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         channel.postMessage({ type: "NEW_INSCRIPTION", inscription: newInscription });
         channel.close();
       } catch (_) {}
+
+      // Direct Supabase Cloud persistence
+      if (isSupabaseConfigured()) {
+        supabase.from("inscriptions").upsert(mapInscriptionToRow(newInscription)).then();
+      }
 
       // Asynchronous Full-Stack API persistence
       fetch("/api/inscriptions", {
@@ -1611,6 +1643,20 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       },
       ...n,
     ]);
+
+    // 5. Cloud Supabase Persistence
+    if (isSupabaseConfigured()) {
+      supabase
+        .from("inscriptions")
+        .update({
+          status: "APPROVED",
+          user_id: createdUserId || null,
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: currentUser.name || "Super Admin",
+        })
+        .eq("id", inscriptionId)
+        .then();
+    }
   };
 
   const rejectInscription = (inscriptionId: string) => {
@@ -1634,6 +1680,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         return ins;
       })
     );
+
+    if (isSupabaseConfigured()) {
+      supabase
+        .from("inscriptions")
+        .update({
+          status: "REJECTED",
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: currentUser.name || "Super Admin",
+        })
+        .eq("id", inscriptionId)
+        .then();
+    }
   };
 
   // Courses
@@ -1738,10 +1796,34 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           : c
       )
     );
+
+    if (isSupabaseConfigured()) {
+      supabase
+        .from("assignments")
+        .upsert(mapDevoirToRow(newAssignment))
+        .then(
+          ({ error }: any) => {
+            if (error) console.error("Erreur sauvegarde devoir Supabase:", error);
+          },
+          (err: any) => console.error("Erreur réseau Supabase devoir:", err)
+        );
+    }
   };
 
   const deleteAssignment = (id: string) => {
     setAssignments((prev) => prev.filter((a) => a.id !== id));
+    if (isSupabaseConfigured()) {
+      supabase
+        .from("assignments")
+        .delete()
+        .eq("id", id)
+        .then(
+          ({ error }: any) => {
+            if (error) console.error("Erreur suppression devoir Supabase:", error);
+          },
+          (err: any) => console.error("Erreur réseau Supabase suppression:", err)
+        );
+    }
   };
 
   // Submissions & Grading
