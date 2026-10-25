@@ -253,6 +253,13 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
               }
             });
 
+            currentClasses = currentClasses.map((c) => {
+              if (c.id === "cls_nour_etudes_arabes" && (!c.enrolledCount || c.enrolledCount < 1)) {
+                return { ...c, enrolledCount: 1 };
+              }
+              return c;
+            });
+
             merged = currentClasses as unknown as T[];
           }
 
@@ -528,6 +535,34 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         });
       }
 
+      let fetchedInscriptions: Inscription[] = [];
+      if (inscriptionsRes.data && inscriptionsRes.data.length > 0) {
+        fetchedInscriptions = inscriptionsRes.data.map(mapRowToInscription);
+        setInscriptions((prev) => {
+          const map = new Map<string, Inscription>();
+          prev.forEach((i) => {
+            if (i.etablissementId !== "etab_gs_alfasle" && !i.etablissementName?.toLowerCase().includes("groupe scolaire alfasle")) {
+              map.set(i.id, i);
+            }
+          });
+          fetchedInscriptions.forEach((i) => {
+            if (i.etablissementId !== "etab_gs_alfasle" && !i.etablissementName?.toLowerCase().includes("groupe scolaire alfasle")) {
+              map.set(i.id, i);
+            }
+          });
+          return Array.from(map.values());
+        });
+      }
+
+      // Compute approved student enrollments per class
+      const classEnrollmentMap = new Map<string, number>();
+      const allActiveInscriptions = fetchedInscriptions.length > 0 ? fetchedInscriptions : initialInscriptions;
+      allActiveInscriptions.forEach((ins) => {
+        if (ins.role === "STUDENT" && (ins.status === "APPROVED" || ins.status === "CONFIRMED")) {
+          classEnrollmentMap.set(ins.classeId, (classEnrollmentMap.get(ins.classeId) || 0) + 1);
+        }
+      });
+
       if (classesRes.data && classesRes.data.length > 0) {
         const fetchedClasses = classesRes.data.map(mapRowToClasse);
         setClasses((prev) => {
@@ -543,7 +578,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
               !c.title?.toLowerCase().includes("tronc commun") &&
               !demoEtabBlacklist.has(c.etablissementId)
             ) {
-              map.set(c.id, c);
+              const enrolled = Math.max(c.enrolledCount || 0, classEnrollmentMap.get(c.id) || 0);
+              map.set(c.id, { ...c, enrolledCount: enrolled });
             }
           });
           fetchedClasses.forEach((c) => {
@@ -557,7 +593,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
               !c.title?.toLowerCase().includes("tronc commun") &&
               !demoEtabBlacklist.has(c.etablissementId)
             ) {
-              map.set(c.id, c);
+              const enrolled = Math.max(c.enrolledCount || 0, classEnrollmentMap.get(c.id) || 0);
+              map.set(c.id, { ...c, enrolledCount: enrolled });
             }
           });
           return Array.from(map.values());
@@ -594,24 +631,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           fetchedAssignments.forEach((a) => {
             if (a.classeId !== "cls_gs_tle_sciences" && a.classeId !== "cls_gs_tle_litterature" && !a.id.includes("gs_")) {
               map.set(a.id, a);
-            }
-          });
-          return Array.from(map.values());
-        });
-      }
-
-      if (inscriptionsRes.data && inscriptionsRes.data.length > 0) {
-        const fetchedInscriptions: Inscription[] = inscriptionsRes.data.map(mapRowToInscription);
-        setInscriptions((prev) => {
-          const map = new Map<string, Inscription>();
-          prev.forEach((i) => {
-            if (i.etablissementId !== "etab_gs_alfasle" && !i.etablissementName?.toLowerCase().includes("groupe scolaire alfasle")) {
-              map.set(i.id, i);
-            }
-          });
-          fetchedInscriptions.forEach((i) => {
-            if (i.etablissementId !== "etab_gs_alfasle" && !i.etablissementName?.toLowerCase().includes("groupe scolaire alfasle")) {
-              map.set(i.id, i);
             }
           });
           return Array.from(map.values());

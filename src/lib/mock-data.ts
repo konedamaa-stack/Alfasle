@@ -23,7 +23,7 @@ export const initialEtablissements: Etablissement[] = [
     maxStudentsQuota: 500,
     maxClassesQuota: 20,
     classesCount: 2,
-    studentsCount: 0,
+    studentsCount: 1,
     createdAt: "2026-09-01T08:00:00Z",
   },
   {
@@ -135,6 +135,7 @@ export const initialClasses: Classe[] = [
       "العقيدة الإسلامية (Aqida)",
     ],
     capacity: 60,
+    enrolledCount: 1,
     enrollmentMode: "OPEN",
     status: "ACTIVE",
     teacherId: "u_dir_kone",

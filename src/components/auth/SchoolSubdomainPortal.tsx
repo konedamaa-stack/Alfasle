@@ -55,8 +55,43 @@ export function SchoolSubdomainPortal({
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   // Classes specific to this establishment
-  const schoolClasses = classes.filter((c) => c.etablissementId === etablissement.id);
-  const enrolledCount = schoolClasses.reduce((acc, c) => acc + (c.enrolledCount || 0), 0);
+  const schoolClasses = classes.filter(
+    (c) =>
+      c.etablissementId === etablissement.id ||
+      c.etablissementId === etablissement.subdomain ||
+      (etablissement.name && c.etablissementName?.toLowerCase().trim() === etablissement.name.toLowerCase().trim())
+  );
+  const schoolClassIds = new Set(schoolClasses.map((c) => c.id));
+
+  // Count approved student inscriptions for this establishment or any of its classes
+  const approvedStudentsInscriptions = inscriptions.filter(
+    (i) =>
+      (i.etablissementId === etablissement.id ||
+        i.etablissementId === etablissement.subdomain ||
+        (etablissement.name && i.etablissementName?.toLowerCase().trim() === etablissement.name.toLowerCase().trim()) ||
+        schoolClassIds.has(i.classeId)) &&
+      i.role === "STUDENT" &&
+      (i.status === "APPROVED" || i.status === "CONFIRMED")
+  );
+
+  // Count active students in users belonging to this establishment
+  const schoolStudentsUsers = users.filter(
+    (u) =>
+      u.role === "STUDENT" &&
+      (u.etablissementId === etablissement.id ||
+        (etablissement.name && u.etablissementName === etablissement.name) ||
+        u.etablissementId === etablissement.subdomain)
+  );
+
+  // Sum from classes
+  const classesEnrolledSum = schoolClasses.reduce((acc, c) => acc + (c.enrolledCount || 0), 0);
+
+  // Compute real enrolled count (at least the real approved students or enrolled counts)
+  const enrolledCount = Math.max(
+    approvedStudentsInscriptions.length,
+    schoolStudentsUsers.length,
+    classesEnrolledSum
+  );
 
   const handleRoleSelect = (role: UserRole) => {
     setSelectedRole(role);
@@ -68,8 +103,15 @@ export function SchoolSubdomainPortal({
       setIdentifier("sarah.mansouri@alfasle.edu");
       setPassword("Madouu1966");
     } else if (role === "STUDENT") {
-      setIdentifier("KONE");
-      setPassword("Madouu1966");
+      const schoolStudent = users.find(
+        (u) =>
+          u.role === "STUDENT" &&
+          (u.etablissementId === etablissement.id ||
+            u.etablissementId === etablissement.subdomain ||
+            (etablissement.name && u.etablissementName === etablissement.name))
+      );
+      setIdentifier(schoolStudent?.email || schoolStudent?.username || "alama@alfasle.edu");
+      setPassword(schoolStudent?.password || "Madouu1966");
     } else if (role === "PARENT") {
       setIdentifier("parent.kone@gmail.com");
       setPassword("Madouu1966");
@@ -479,21 +521,32 @@ export function SchoolSubdomainPortal({
               </div>
 
               {/* School Metrics */}
-              <div className="p-3.5 rounded-2xl bg-slate-50 backdrop-blur-md border border-slate-200 space-y-2 text-xs">
-                <div className="flex items-center justify-between text-orange-50 font-medium">
-                  <span>Classes disponibles sur ce campus :</span>
-                  <span className="font-bold bg-white/25 px-2 py-0.5 rounded-full border border-slate-200 text-slate-900">
+              <div className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-amber-200/60 shadow-md space-y-2.5 text-xs">
+                <div className="flex items-center justify-between text-slate-700 font-semibold">
+                  <span className="flex items-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5 text-orange-600" />
+                    Classes disponibles sur ce campus :
+                  </span>
+                  <span className="font-bold bg-orange-50 text-orange-800 px-2.5 py-0.5 rounded-full border border-orange-200 shadow-xs">
                     {schoolClasses.length} Classes
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-orange-100 font-medium">
-                  <span>Effectif inscrits :</span>
-                  <span className="font-bold text-slate-900">{enrolledCount} Élèves</span>
+                <div className="flex items-center justify-between text-slate-700 font-semibold">
+                  <span className="flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-emerald-600" />
+                    Effectif inscrits :
+                  </span>
+                  <span className="font-bold bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded-full border border-emerald-200 shadow-xs">
+                    {enrolledCount} Élève{enrolledCount > 1 ? "s" : ""}
+                  </span>
                 </div>
                 {etablissement.directorName && (
-                  <div className="pt-1 border-t border-slate-200 flex items-center justify-between text-[11px] text-orange-100">
-                    <span>Directeur :</span>
-                    <span className="font-semibold text-slate-900">{etablissement.directorName}</span>
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-600">
+                    <span className="flex items-center gap-1.5">
+                      <Shield className="w-3.5 h-3.5 text-slate-500" />
+                      Directeur :
+                    </span>
+                    <span className="font-bold text-slate-900">{etablissement.directorName}</span>
                   </div>
                 )}
               </div>
