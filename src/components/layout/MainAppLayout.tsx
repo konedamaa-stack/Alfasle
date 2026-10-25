@@ -41,7 +41,9 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTabState] = useState<NavTab>(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("alfasle_active_tab") as NavTab;
+      const saved =
+        (localStorage.getItem("alfasle_v100_purged_active_tab") as NavTab) ||
+        (localStorage.getItem("alfasle_active_tab") as NavTab);
       if (saved) {
         if ((saved === "superadmin" || saved === "etablissements") && currentUser.role !== "SUPER_ADMIN") {
           return "dashboard";
@@ -57,6 +59,7 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
       setActiveTabState("dashboard");
       if (typeof window !== "undefined") {
         localStorage.setItem("alfasle_active_tab", "dashboard");
+        localStorage.setItem("alfasle_v100_purged_active_tab", "dashboard");
       }
     }
   }, [currentUser.role, activeTab]);
@@ -68,6 +71,7 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
     }
     if (typeof window !== "undefined") {
       localStorage.setItem("alfasle_active_tab", validTab);
+      localStorage.setItem("alfasle_v100_purged_active_tab", validTab);
     }
     setActiveTabState(validTab);
     setIsMobileMenuOpen(false);

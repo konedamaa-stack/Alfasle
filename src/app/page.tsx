@@ -1,4 +1,3 @@
-import { School } from "lucide-react";
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -12,7 +11,23 @@ import { Etablissement } from "@/types";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
-  const [showLandingView, setShowLandingView] = useState<boolean>(true);
+  const [showLandingView, setShowLandingView] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const isSessionActive =
+          localStorage.getItem("alfasle_session_active") === "true" ||
+          localStorage.getItem("alfasle_v100_purged_session_active") === "true";
+        if (isSessionActive) return false;
+
+        const savedUser = localStorage.getItem("alfasle_v100_purged_currentUser");
+        if (savedUser) {
+          const parsed = JSON.parse(savedUser);
+          if (parsed && parsed.id && parsed.role) return false;
+        }
+      } catch (_) {}
+    }
+    return true;
+  });
   const [showSuperAdminView, setShowSuperAdminView] = useState<boolean>(false);
   const [selectedSubdomainSchool, setSelectedSubdomainSchool] = useState<Etablissement | null>(null);
   const [isJoinClassOpen, setIsJoinClassOpen] = useState(false);
@@ -21,8 +36,13 @@ export default function Home() {
     setMounted(true);
     if (typeof window !== "undefined") {
       try {
-        const isSessionActive = localStorage.getItem("alfasle_session_active");
-        if (isSessionActive === "true") {
+        const isSessionActive =
+          localStorage.getItem("alfasle_session_active") === "true" ||
+          localStorage.getItem("alfasle_v100_purged_session_active") === "true";
+        const savedUser = localStorage.getItem("alfasle_v100_purged_currentUser");
+        const hasUser = savedUser ? Boolean(JSON.parse(savedUser)?.id) : false;
+
+        if (isSessionActive || hasUser) {
           setShowLandingView(false);
         }
       } catch (_) {}
@@ -33,6 +53,7 @@ export default function Home() {
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem("alfasle_session_active", "true");
+        localStorage.setItem("alfasle_v100_purged_session_active", "true");
       } catch (_) {}
     }
     setShowLandingView(false);
@@ -42,6 +63,9 @@ export default function Home() {
     if (typeof window !== "undefined") {
       try {
         localStorage.removeItem("alfasle_session_active");
+        localStorage.removeItem("alfasle_v100_purged_session_active");
+        localStorage.removeItem("alfasle_active_tab");
+        localStorage.removeItem("alfasle_v100_purged_active_tab");
       } catch (_) {}
     }
     setShowLandingView(true);

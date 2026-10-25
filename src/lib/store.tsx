@@ -124,23 +124,36 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 const STORAGE_PREFIX = "alfasle_v100_purged_";
 
+const PRESERVED_EXACT_KEYS = new Set([
+  "alfasle_session_active",
+  "alfasle_active_tab",
+  "alfasle_user_role",
+  "alfasle_theme",
+  "alfasle_selected_school",
+]);
+
 function cleanLegacyStorage() {
   if (typeof window !== "undefined") {
     try {
       const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
+        if (!k) continue;
+        if (PRESERVED_EXACT_KEYS.has(k)) continue;
+        if (k.startsWith(STORAGE_PREFIX)) continue;
+
         if (
-          k &&
-          (k.startsWith("alfasle_") ||
-            k.includes("active_tab") ||
-            k.includes("classes") ||
-            k.includes("courses") ||
-            k.includes("inscriptions"))
+          k.startsWith("alfasle_v9") ||
+          k.startsWith("alfasle_v8") ||
+          k.startsWith("alfasle_demo_") ||
+          k === "classes" ||
+          k === "courses" ||
+          k === "inscriptions" ||
+          k === "users" ||
+          k === "assignments" ||
+          k === "submissions"
         ) {
-          if (!k.startsWith(STORAGE_PREFIX)) {
-            keysToRemove.push(k);
-          }
+          keysToRemove.push(k);
         }
       }
       keysToRemove.forEach((k) => localStorage.removeItem(k));
