@@ -112,6 +112,7 @@ export const initialClasses: Classe[] = [
     category: "الدراسات الإسلامية",
     disciplines: [
       "اللغة العربية (Langue Arabe)",
+      "Informatique",
       "القرآن الكريم والتفسير (Coran & Tafsir)",
       "الحديث الشريف وعلومه (Hadith)",
       "الفقه الإسلامي وأصوله (Fiqh)",
@@ -140,6 +141,7 @@ export const initialClasses: Classe[] = [
       "القواعد الفقهية (Règles Juridiques)",
       "الأحوال الشخصية والمواريث (Successions)",
       "القانون الخاص المقارن",
+      "Informatique",
       "اللغة العربية (Arabe)",
     ],
     capacity: 50,
@@ -161,6 +163,7 @@ export const initialClasses: Classe[] = [
     category: "Études Islamiques",
     disciplines: [
       "اللغة العربية",
+      "Informatique",
       "القرآن والتفسير",
       "الحديث الشريف",
       "الفقه الإسلامي",
@@ -179,8 +182,166 @@ export const initialClasses: Classe[] = [
 // Inscriptions / Candidatures complètement vierges (0 candidatures)
 export const initialInscriptions: Inscription[] = [];
 
-// Cours complètement vierges (0 cours)
-export const initialCourses: Cours[] = [];
+// Cours modèles pré-configurés avec les titres par matière
+export const initialCourses: Cours[] = [
+  // --- Cours Informatique (Module 1 : Organisation des fichiers) ---
+  {
+    id: "crs_info_01",
+    classeId: "cls_nour_etudes_arabes",
+    discipline: "Informatique",
+    title: "Créer un dossier",
+    chapterTitle: "Module 1 : Organisation et gestion des fichiers",
+    summary: "Apprenez pas à pas à créer, renommer et structurer vos dossiers pour classer vos documents.",
+    content: `### 💻 Bienvenue dans votre cours d'Informatique !
+
+Dans cette première leçon pratique, vous allez apprendre à créer un dossier pour organiser méthodiquement vos cours et vos travaux d'études.
+
+---
+
+#### 📌 Pourquoi créer des dossiers ?
+Un dossier permet de regrouper plusieurs fichiers selon une matière (ex: *Informatique*, *Fiqh*, *Langue Arabe*) afin de retrouver facilement vos devoirs et ne rien perdre.
+
+---
+
+#### 🛠️ Les 4 étapes pour créer un dossier :
+1. **Accédez au bureau ou à l'Explorateur de fichiers** :
+   - Placez le curseur de votre souris sur un espace vide de votre écran ou dans votre explorateur.
+2. **Ouvrez le menu contextuel** :
+   - Faites un **clic droit** avec la souris.
+3. **Sélectionnez Nouveau > Dossier** :
+   - Dans le menu qui s'affiche, glissez sur **Nouveau**, puis cliquez sur **Dossier**.
+4. **Nommez votre dossier** :
+   - Tapez immédiatement le nom de votre choix (ex : \`Mes Cours AlFasle\`).
+   - Appuyez sur la touche **Entrée (Enter)** de votre clavier pour valider.
+
+💡 **Astuce de pro** : Vous pouvez également utiliser le raccourci clavier universel : **Ctrl + Maj + N** !`,
+    order: 1,
+    status: "PUBLISHED",
+    publishedAt: "2026-09-01T08:00:00Z",
+  },
+  {
+    id: "crs_info_02",
+    classeId: "cls_nour_etudes_arabes",
+    discipline: "Informatique",
+    title: "Enregistrer un fichier",
+    chapterTitle: "Module 1 : Organisation et gestion des fichiers",
+    summary: "Maîtrisez la sauvegarde sécurisée de vos devoirs et documents sans risque de perdre votre travail.",
+    content: `### 💾 Leçon 2 : Comment enregistrer un fichier
+
+Après avoir rédigé un devoir ou pris des notes de cours, la sauvegarde est l'étape la plus importante.
+
+---
+
+#### 🎯 Objectifs de la leçon :
+- Savoir enregistrer un document pour la première fois.
+- Choisir le bon dossier de destination.
+- Utiliser le raccourci de sauvegarde rapide.
+
+---
+
+#### 🛠️ Les étapes clés :
+1. **Ouvrir le menu d'enregistrement** :
+   - En haut à gauche de votre logiciel (Word, LibreOffice, Bloc-notes...), cliquez sur le menu **Fichier**.
+   - Cliquez sur **Enregistrer sous** (permet de choisir le dossier de votre choix).
+2. **Sélectionner l'emplacement** :
+   - Naviguez jusqu'au dossier créé à la Leçon 1 (\`Mes Cours AlFasle\`).
+3. **Donner un nom explicite** :
+   - Écrivez un nom clair (ex : \`Devoir_Informatique_Alama\`).
+4. **Valider** :
+   - Cliquez sur le bouton **Enregistrer**.
+
+⚡ **Raccourci indispensable** : Pendant que vous travaillez, appuyez régulièrement sur **Ctrl + S** pour sauvegarder instantanément vos modifications !`,
+    order: 2,
+    status: "PUBLISHED",
+    publishedAt: "2026-09-01T08:00:00Z",
+  },
+
+  // --- Cours Informatique pour la classe Charia ---
+  {
+    id: "crs_info_charia_01",
+    classeId: "cls_nour_charia",
+    discipline: "Informatique",
+    title: "Créer un dossier",
+    chapterTitle: "Module 1 : Organisation et gestion des fichiers",
+    summary: "Apprenez à créer et organiser vos dossiers pour archiver vos documents juridiques et cours.",
+    content: `### 💻 Bienvenue dans votre cours d'Informatique !
+
+Dans cette leçon pratique, apprenez à structurer votre espace de travail en créant des dossiers organisés par matière.
+
+1. Faites un clic droit sur votre bureau.
+2. Choisissez **Nouveau > Dossier**.
+3. Nommez le dossier \`Cours_Charia_2026\` et validez avec **Entrée**.`,
+    order: 1,
+    status: "PUBLISHED",
+    publishedAt: "2026-09-01T08:00:00Z",
+  },
+  {
+    id: "crs_info_charia_02",
+    classeId: "cls_nour_charia",
+    discipline: "Informatique",
+    title: "Enregistrer un fichier",
+    chapterTitle: "Module 1 : Organisation et gestion des fichiers",
+    summary: "Comment enregistrer vos travaux de recherche et devoirs dans vos dossiers dédiés.",
+    content: `### 💾 Leçon 2 : Enregistrer un fichier
+
+Apprenez à sauvegarder efficacement vos recherches et mémoires juridiques.
+
+1. Cliquez sur **Fichier > Enregistrer sous**.
+2. Choisissez votre dossier de travail.
+3. Donnez un nom clair à votre document et cliquez sur **Enregistrer**.
+4. Raccourci rapide : **Ctrl + S**.`,
+    order: 2,
+    status: "PUBLISHED",
+    publishedAt: "2026-09-01T08:00:00Z",
+  },
+
+  // --- Cours Arabe (المجلد) ---
+  {
+    id: "crs_arabe_01",
+    classeId: "cls_nour_etudes_arabes",
+    discipline: "اللغة العربية (Langue Arabe)",
+    title: "المجلد (مقدمة في علوم اللغة العربية)",
+    chapterTitle: "الفصل الأول : أسس النحو والصرف",
+    summary: "درس شامل في مبادئ وقواعد النحو والإعراب في اللغة العربية.",
+    content: `بسم الله الرحمن الرحيم
+
+مرحباً بكم في درس اللغة العربية (المجلد).
+
+في هذا الدرس سنتعرف على أقسام الكلمة في اللغة العربية :
+1. **الاسم** : ما دل على معنى في نفسه غير مقترن بزمان (مثل: كتاب، طالب، جامعة).
+2. **الفعل** : ما دل على حدث مقترن بزمان معين (ماضٍ، مضارع، أمر).
+3. **الحرف** : ما لا يظهر معناه كاملاً إلا مع غيره (مثل: في، إلى، على).
+
+تابعوا الشرح والتمارين المرفقة لإتقان هذه المبادئ الأساسية.`,
+    order: 1,
+    status: "PUBLISHED",
+    publishedAt: "2026-09-01T08:00:00Z",
+  },
+
+  // --- Cours Ousoul al-Fiqh pour la classe Charia ---
+  {
+    id: "crs_ousoul_01",
+    classeId: "cls_nour_charia",
+    discipline: "أصول الفقه (Ousoul al-Fiqh)",
+    title: "مدخل إلى علم أصول الفقه",
+    chapterTitle: "المقدمات المنهجية",
+    summary: "التعريف بعلم أصول الفقه، موضوعه وفائدته ومصادره التشريعية الكبرى.",
+    content: `بسم الله الرحمن الرحيم
+
+### الدرس الأول : مدخل إلى علم أصول الفقه
+
+**أصول الفقه** هو العلم بالقواعد والبحوث التي يتوصل بها إلى استفادة الأحكام الشرعية العملية من أدلتها التفصيلية.
+
+#### الأدلة المتفق عليها :
+1. **القرآن الكريم** : المصدر الأول للتشريع.
+2. **السنة النبوية** : المصدر الثاني المبين والمفصل لما جاء في الكتاب.
+3. **الإجماع** : اتفاق مجتهدي الأمة في عصر من العصور على حكم شرعي.
+4. **القياس** : إلحاق واقعة لا نص فيها بواقعة ورد فيها نص لحكم جامع بينهما في العلة.`,
+    order: 1,
+    status: "PUBLISHED",
+    publishedAt: "2026-09-01T08:00:00Z",
+  },
+];
 
 // Devoirs complètement vierges (0 devoirs)
 export const initialAssignments: Devoir[] = [];

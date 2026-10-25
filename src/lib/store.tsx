@@ -276,7 +276,7 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
               "crs_math_tle_d",
               "crs_phys_2nde_c",
             ]);
-            merged = (merged as unknown as Cours[]).filter(
+            let currentCourses = (merged as unknown as Cours[]).filter(
               (crs) =>
                 !demoCourseIds.has(crs.id) &&
                 crs.classeId !== "cls_gs_tle_sciences" &&
@@ -288,7 +288,20 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
                 !crs.classeId?.includes("nextjs") &&
                 !crs.title?.toLowerCase().includes("next.js") &&
                 !crs.title?.toLowerCase().includes("introduction")
-            ) as unknown as T[];
+            );
+
+            initialCourses.forEach((initCrs) => {
+              const alreadyExists = currentCourses.some(
+                (c) =>
+                  c.id === initCrs.id ||
+                  (c.classeId === initCrs.classeId && c.title.toLowerCase() === initCrs.title.toLowerCase())
+              );
+              if (!alreadyExists) {
+                currentCourses.push(initCrs);
+              }
+            });
+
+            merged = currentCourses as unknown as T[];
           }
 
           return merged;

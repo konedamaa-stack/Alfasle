@@ -9,12 +9,14 @@ interface CreateCourseModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultClassId?: string;
+  defaultDiscipline?: string;
 }
 
 export function CreateCourseModal({
   isOpen,
   onClose,
   defaultClassId,
+  defaultDiscipline,
 }: CreateCourseModalProps) {
   const { classes, createCourse, currentUser } = useStore();
   const { toast } = useToast();
@@ -24,7 +26,9 @@ export function CreateCourseModal({
   const selectedClass = classes.find((c) => c.id === classeId);
   const classDisciplines = selectedClass?.disciplines || (selectedClass?.category ? [selectedClass.category] : []);
 
-  const [discipline, setDiscipline] = useState(classDisciplines[0] || "Informatique");
+  const [discipline, setDiscipline] = useState(
+    defaultDiscipline || classDisciplines[0] || "Informatique"
+  );
   const [customDiscipline, setCustomDiscipline] = useState("");
   const [chapterTitle, setChapterTitle] = useState("Module 1 : Fondations");
   const [title, setTitle] = useState("");
@@ -40,13 +44,17 @@ export function CreateCourseModal({
   const [pdfInputMode, setPdfInputMode] = useState<"UPLOAD" | "LINK">("UPLOAD");
 
   React.useEffect(() => {
+    if (defaultDiscipline) {
+      setDiscipline(defaultDiscipline);
+      return;
+    }
     if (selectedClass) {
       const discs = selectedClass.disciplines || (selectedClass.category ? [selectedClass.category] : []);
       if (discs.length > 0 && !discs.includes(discipline)) {
         setDiscipline(discs[0]);
       }
     }
-  }, [classeId, selectedClass]);
+  }, [classeId, selectedClass, defaultDiscipline]);
 
   if (!isOpen) return null;
 

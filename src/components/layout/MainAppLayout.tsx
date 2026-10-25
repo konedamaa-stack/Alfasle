@@ -78,6 +78,8 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
   const [createClassDefaultEtab, setCreateClassDefaultEtab] = useState<string | undefined>(undefined);
   const [isJoinClassOpen, setIsJoinClassOpen] = useState(false);
   const [isCreateCourseOpen, setIsCreateCourseOpen] = useState(false);
+  const [createCourseDefaultDiscipline, setCreateCourseDefaultDiscipline] =
+    useState<string | undefined>(undefined);
   const [isCreateAssignmentOpen, setIsCreateAssignmentOpen] = useState(false);
 
   const [selectedSubmissionForGrading, setSelectedSubmissionForGrading] =
@@ -250,7 +252,10 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
           {/* COURSES & LESSONS */}
           {activeTab === "courses" && (
             <CourseViewer
-              onOpenCreateCourse={() => setIsCreateCourseOpen(true)}
+              onOpenCreateCourse={(defaultDisc) => {
+                setCreateCourseDefaultDiscipline(defaultDisc);
+                setIsCreateCourseOpen(true);
+              }}
               selectedClassId={selectedClassForCourses}
             />
           )}
@@ -314,7 +319,12 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
 
       <CreateCourseModal
         isOpen={isCreateCourseOpen}
-        onClose={() => setIsCreateCourseOpen(false)}
+        onClose={() => {
+          setIsCreateCourseOpen(false);
+          setCreateCourseDefaultDiscipline(undefined);
+        }}
+        defaultClassId={selectedClassForCourses}
+        defaultDiscipline={createCourseDefaultDiscipline}
       />
 
       <CreateAssignmentModal

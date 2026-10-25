@@ -23,13 +23,50 @@ import {
   File,
   Eye,
   GraduationCap,
+  ChevronLeft,
+  Search,
+  ArrowRight,
+  Check,
 } from "lucide-react";
 import { getVideoEmbedInfo, getPdfEmbedInfo, isStudentMatchingInscription } from "@/lib/utils";
 import { triggerDownload } from "@/lib/download";
 import { ConfirmModal, ConfirmVariant } from "@/components/common/ConfirmModal";
 
+export function getDisciplineIcon(name: string): string {
+  const n = (name || "").toLowerCase();
+  if (n.includes("informatique") || n.includes("info") || n.includes("numérique") || n.includes("ordinateur")) return "💻";
+  if (n.includes("arabe") || n.includes("عرب")) return "📖";
+  if (n.includes("coran") || n.includes("قرآن") || n.includes("tafsir") || n.includes("تفسير")) return "📜";
+  if (n.includes("hadith") || n.includes("حديث")) return "📜";
+  if (
+    n.includes("fiqh") ||
+    n.includes("فقه") ||
+    n.includes("charia") ||
+    n.includes("شريعة") ||
+    n.includes("loi") ||
+    n.includes("droit") ||
+    n.includes("قواعد") ||
+    n.includes("jurisprudence")
+  )
+    return "⚖️";
+  if (n.includes("sira") || n.includes("سيرة") || n.includes("histoire") || n.includes("تاريخ")) return "🕌";
+  if (n.includes("aqida") || n.includes("عقيدة") || n.includes("croyance")) return "🌟";
+  if (n.includes("math") || n.includes("رياضيات") || n.includes("calcul")) return "📐";
+  if (n.includes("physique") || n.includes("chimie") || n.includes("science")) return "🔬";
+  if (n.includes("anglais") || n.includes("francais") || n.includes("langue")) return "🌐";
+  return "📚";
+}
+
+export function isDisciplineMatch(courseDiscipline?: string, filterDiscipline?: string): boolean {
+  if (!filterDiscipline || filterDiscipline === "ALL") return true;
+  if (!courseDiscipline) return false;
+  const c = courseDiscipline.trim().toLowerCase();
+  const f = filterDiscipline.trim().toLowerCase();
+  return c === f || c.includes(f) || f.includes(c);
+}
+
 interface CourseViewerProps {
-  onOpenCreateCourse: () => void;
+  onOpenCreateCourse: (defaultDiscipline?: string) => void;
   selectedClassId?: string;
 }
 
@@ -89,25 +126,58 @@ export function CourseViewer({
   }, [accessibleClasses, activeClassId, isStudent, studentInscription]);
 
   const [selectedDisciplineFilter, setSelectedDisciplineFilter] = useState<string>("ALL");
+  const [titleSearch, setTitleSearch] = useState<string>("");
 
   const activeClass = accessibleClasses.find((c) => c.id === activeClassId);
   const classDisciplines = activeClass?.disciplines || (activeClass?.category ? [activeClass.category] : []);
 
-  const classCourses = courses.filter((c) => {
-    const matchesClass = c.classeId === activeClassId;
-    const matchesDiscipline =
-      selectedDisciplineFilter === "ALL" ||
-      !c.discipline ||
-      c.discipline.toLowerCase() === selectedDisciplineFilter.toLowerCase();
-    return matchesClass && matchesDiscipline;
+  // Tous les cours publiés pour cette classe
+  const allClassCourses = courses.filter((c) => c.classeId === activeClassId);
+
+  // Cours filtrés par matière sélectionnée
+  const classCourses = allClassCourses.filter((c) =>
+    isDisciplineMatch(c.discipline, selectedDisciplineFilter)
+  );
+
+  // Cours filtrés par recherche textuelle de titre
+  const visibleCourses = classCourses.filter((c) => {
+    if (!titleSearch.trim()) return true;
+    const q = titleSearch.toLowerCase().trim();
+    return (
+      c.title.toLowerCase().includes(q) ||
+      (c.chapterTitle && c.chapterTitle.toLowerCase().includes(q)) ||
+      (c.summary && c.summary.toLowerCase().includes(q))
+    );
   });
 
   const [selectedCourseId, setSelectedCourseId] = useState<string>(
-    classCourses[0]?.id || ""
+    classCourses[0]?.id || allClassCourses[0]?.id || ""
   );
 
   const activeCourse =
-    classCourses.find((c) => c.id === selectedCourseId) || classCourses[0];
+    visibleCourses.find((c) => c.id === selectedCourseId) ||
+    classCourses.find((c) => c.id === selectedCourseId) ||
+    allClassCourses.find((c) => c.id === selectedCourseId) ||
+    classCourses[0] ||
+    allClassCourses[0];
+
+  // Sélectionner une matière et charger automatiquement son premier titre disponible
+  const handleSelectDiscipline = (disc: string) => {
+    setSelectedDisciplineFilter(disc);
+    setTitleSearch("");
+    const matching = allClassCourses.filter((c) => isDisciplineMatch(c.discipline, disc));
+    if (matching.length > 0) {
+      setSelectedCourseId(matching[0].id);
+    }
+  };
+
+  // Navigation séquentielle entre les titres
+  const activeCourseIndex = visibleCourses.findIndex((c) => c.id === activeCourse?.id);
+  const previousCourse = activeCourseIndex > 0 ? visibleCourses[activeCourseIndex - 1] : null;
+  const nextCourse =
+    activeCourseIndex >= 0 && activeCourseIndex < visibleCourses.length - 1
+      ? visibleCourses[activeCourseIndex + 1]
+      : null;
 
   const canEditCourse =
     currentUser.role === "TEACHER" ||
@@ -260,8 +330,8 @@ export function CourseViewer({
 
           {canEditCourse && (
             <button
-              onClick={onOpenCreateCourse}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-black shadow-md shadow-purple-600/20 transition-all transform hover:-translate-y-0.5"
+              onClick={() => onOpenCreateCourse()}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-black shadow-md shadow-purple-600/20 transition-all transform hover:-translate-y-0.5 cursor-pointer"
             >
               <PlusCircle className="w-4 h-4 text-white" />
               <span>➕ Ajouter un Nouveau Cours</span>
@@ -278,7 +348,7 @@ export function CourseViewer({
             Vous n&apos;êtes pas encore inscrit dans une classe validée. Un élève ne peut accéder qu&apos;aux cours et leçons vidéo de sa propre classe unique.
           </p>
         </div>
-      ) : classCourses.length === 0 ? (
+      ) : allClassCourses.length === 0 ? (
         <div className="py-20 text-center glass-panel rounded-2xl border border-slate-200 space-y-3 bg-white">
           <BookOpen className="w-12 h-12 text-slate-400 mx-auto" />
           <h3 className="text-base font-bold text-slate-900">Aucun cours publié pour cette classe</h3>
@@ -289,15 +359,111 @@ export function CourseViewer({
           </p>
           {canEditCourse && (
             <button
-              onClick={onOpenCreateCourse}
-              className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-colors shadow-sm"
+              onClick={() => onOpenCreateCourse(selectedDisciplineFilter !== "ALL" ? selectedDisciplineFilter : undefined)}
+              className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-colors shadow-sm cursor-pointer"
             >
               Créer le Premier Cours
             </button>
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="space-y-6">
+          {/* ========================================================================= */}
+          {/* 1. BARRE DE SÉLECTION DE LA MATIÈRE (DISCIPLINE)                          */}
+          {/* ========================================================================= */}
+          {classDisciplines.length > 0 && (
+            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="p-2 rounded-xl bg-indigo-50 text-indigo-700">
+                    <Layers className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                      <span>1. Choisissez votre Matière / Discipline :</span>
+                      {selectedDisciplineFilter !== "ALL" && (
+                        <span className="px-2.5 py-0.5 rounded-lg bg-indigo-100 text-indigo-800 text-[11px] font-bold">
+                          {getDisciplineIcon(selectedDisciplineFilter)} {selectedDisciplineFilter}
+                        </span>
+                      )}
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      Cliquez sur une matière pour faire apparaître tous ses titres de leçons et choisir ce que vous souhaitez étudier.
+                    </p>
+                  </div>
+                </div>
+
+                {selectedDisciplineFilter !== "ALL" && (
+                  <button
+                    type="button"
+                    onClick={() => handleSelectDiscipline("ALL")}
+                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 self-start sm:self-auto cursor-pointer"
+                  >
+                    <span>✕ Afficher toutes les matières</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Onglets Matières */}
+              <div className="flex flex-wrap gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => handleSelectDiscipline("ALL")}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                    selectedDisciplineFilter === "ALL"
+                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/25 scale-[1.02]"
+                      : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200"
+                  }`}
+                >
+                  <span>✨ Toutes les Matières</span>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                      selectedDisciplineFilter === "ALL"
+                        ? "bg-white/20 text-white"
+                        : "bg-slate-200 text-slate-700"
+                    }`}
+                  >
+                    {allClassCourses.length}
+                  </span>
+                </button>
+
+                {classDisciplines.map((d) => {
+                  const icon = getDisciplineIcon(d);
+                  const count = allClassCourses.filter((c) => isDisciplineMatch(c.discipline, d)).length;
+                  const isSelected = selectedDisciplineFilter.toLowerCase() === d.toLowerCase();
+
+                  return (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => handleSelectDiscipline(d)}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                        isSelected
+                          ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/25 ring-2 ring-indigo-500/30 scale-[1.02]"
+                          : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 hover:border-slate-300"
+                      }`}
+                    >
+                      <span className="text-sm">{icon}</span>
+                      <span>{d}</span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                          isSelected
+                            ? "bg-white/20 text-white"
+                            : count > 0
+                            ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                            : "bg-slate-200/70 text-slate-500"
+                        }`}
+                      >
+                        {count} {count > 1 ? "titres" : "titre"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Main Course Content & Video (8 cols) */}
           <div className="lg:col-span-8 space-y-6">
             {activeCourse && (
@@ -454,20 +620,65 @@ export function CourseViewer({
 
                 {/* Course Header Details */}
                 <div className="p-6 sm:p-8 space-y-6">
+                  {/* Previous / Next navigation bar between lesson titles */}
+                  {visibleCourses.length > 1 && (
+                    <div className="flex items-center justify-between pb-4 border-b border-slate-100 text-xs">
+                      <button
+                        type="button"
+                        disabled={!previousCourse}
+                        onClick={() => previousCourse && setSelectedCourseId(previousCourse.id)}
+                        className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold transition-all ${
+                          previousCourse
+                            ? "bg-slate-100 hover:bg-slate-200 text-slate-800 cursor-pointer shadow-sm hover:scale-[1.02]"
+                            : "opacity-40 cursor-not-allowed text-slate-400 bg-slate-50"
+                        }`}
+                        title={previousCourse ? `Aller au titre précédent : ${previousCourse.title}` : undefined}
+                      >
+                        <ChevronLeft className="w-4 h-4 text-indigo-600" />
+                        <span className="hidden sm:inline">Titre précédent</span>
+                        <span className="sm:hidden">Précédent</span>
+                      </button>
+
+                      <div className="text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                        <span>Titre</span>
+                        <span className="px-2.5 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 font-extrabold font-mono">
+                          {activeCourseIndex >= 0 ? activeCourseIndex + 1 : 1} / {visibleCourses.length}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        disabled={!nextCourse}
+                        onClick={() => nextCourse && setSelectedCourseId(nextCourse.id)}
+                        className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold transition-all ${
+                          nextCourse
+                            ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20 cursor-pointer hover:scale-[1.02]"
+                            : "opacity-40 cursor-not-allowed text-slate-400 bg-slate-50"
+                        }`}
+                        title={nextCourse ? `Passer au titre suivant : ${nextCourse.title}` : undefined}
+                      >
+                        <span className="hidden sm:inline">Titre suivant</span>
+                        <span className="sm:hidden">Suivant</span>
+                        <ChevronRight className="w-4 h-4 text-white" />
+                      </button>
+                    </div>
+                  )}
+
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="flex flex-wrap items-center gap-2">
                         {activeCourse.discipline && (
-                          <span className="px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-bold">
-                            📚 {activeCourse.discipline}
+                          <span className="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-800 border border-indigo-200 text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                            <span>{getDisciplineIcon(activeCourse.discipline)}</span>
+                            <span>{activeCourse.discipline}</span>
                           </span>
                         )}
-                        <span className="px-2.5 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold">
+                        <span className="px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold">
                           {activeCourse.chapterTitle || "Chapitre"}
                         </span>
                         {activeCourse.video && (
-                          <span className="px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-semibold flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-indigo-600" /> {activeCourse.video.durationMinutes} min
+                          <span className="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-semibold flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5 text-indigo-600" /> {activeCourse.video.durationMinutes} min
                           </span>
                         )}
                       </div>
@@ -476,14 +687,14 @@ export function CourseViewer({
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleOpenEdit(activeCourse)}
-                            className="px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+                            className="px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
                           >
                             <Edit className="w-3.5 h-3.5 text-purple-600" />
                             <span>Modifier ce Cours</span>
                           </button>
                           <button
                             onClick={handleDeleteActiveCourse}
-                            className="p-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-all shadow-sm"
+                            className="p-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-all shadow-sm cursor-pointer"
                             title="Supprimer la leçon"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -496,12 +707,14 @@ export function CourseViewer({
                       {activeCourse.title}
                     </h1>
                     {activeCourse.summary && (
-                      <p className="text-sm text-slate-600 italic">{activeCourse.summary}</p>
+                      <p className="text-sm text-slate-600 italic bg-slate-50/80 p-3 rounded-xl border border-slate-100">
+                        {activeCourse.summary}
+                      </p>
                     )}
                   </div>
 
                   {/* Markdown Content */}
-                  <div className="pt-6 border-t border-slate-200 text-slate-800 text-sm leading-relaxed space-y-4 whitespace-pre-line bg-slate-50 p-5 rounded-xl border border-slate-200 font-sans">
+                  <div className="pt-6 border-t border-slate-200 text-slate-800 text-sm leading-relaxed space-y-4 whitespace-pre-line bg-slate-50 p-6 rounded-2xl border border-slate-200 font-sans shadow-inner">
                     {activeCourse.content}
                   </div>
 
@@ -546,118 +759,193 @@ export function CourseViewer({
             )}
           </div>
 
-          {/* Chapters & Course Playlist Sidebar (4 cols) */}
+          {/* ========================================================================= */}
+          {/* 2. TABLEAU DES TITRES DISPONIBLES À ÉTUDIER (4 cols)                       */}
+          {/* ========================================================================= */}
           <div className="lg:col-span-4 glass-panel rounded-2xl p-5 border border-slate-200 space-y-4 bg-white shadow-sm">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <div className="flex items-center gap-2">
-                <Layers className="w-4 h-4 text-indigo-600" />
-                <h3 className="text-sm font-bold text-slate-900">Programme du Cours</h3>
+                <BookOpen className="w-4 h-4 text-indigo-600" />
+                <div>
+                  <h3 className="text-sm font-extrabold text-slate-900 tracking-tight">
+                    2. Titres à Étudier
+                  </h3>
+                  <p className="text-[10px] text-slate-500 truncate max-w-[190px]">
+                    {selectedDisciplineFilter === "ALL"
+                      ? "Toutes les matières"
+                      : `${getDisciplineIcon(selectedDisciplineFilter)} ${selectedDisciplineFilter}`}
+                  </p>
+                </div>
               </div>
-              <span className="text-[11px] font-semibold text-slate-500">
-                {classCourses.length} leçon{classCourses.length > 1 ? "s" : ""}
+              <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700">
+                {visibleCourses.length} {visibleCourses.length > 1 ? "titres" : "titre"}
               </span>
             </div>
 
-            {/* Discipline Filter Tabs if multiple disciplines exist */}
-            {classDisciplines.length > 1 && (
-              <div className="space-y-1.5 pb-2 border-b border-slate-200">
-                <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider">
-                  Matières / Disciplines :
-                </span>
-                <div className="flex flex-wrap gap-1">
+            {/* Quick search input within titles */}
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+              <input
+                type="text"
+                placeholder="Rechercher un titre (ex: dossier, fichier...)"
+                value={titleSearch}
+                onChange={(e) => setTitleSearch(e.target.value)}
+                className="w-full pl-8 pr-7 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+              />
+              {titleSearch && (
+                <button
+                  type="button"
+                  onClick={() => setTitleSearch("")}
+                  className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
+                  title="Effacer la recherche"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Courses / Titles List */}
+            {visibleCourses.length === 0 ? (
+              <div className="py-10 px-4 text-center rounded-2xl bg-slate-50 border border-dashed border-slate-200 space-y-2.5">
+                <div className="text-3xl">{getDisciplineIcon(selectedDisciplineFilter)}</div>
+                <p className="text-xs font-bold text-slate-800">
+                  {titleSearch
+                    ? "Aucun titre ne correspond à votre recherche"
+                    : `Aucun titre dans « ${selectedDisciplineFilter} »`}
+                </p>
+                <p className="text-[11px] text-slate-500 leading-relaxed max-w-xs mx-auto">
+                  {titleSearch
+                    ? "Essayez avec d'autres mots-clés ou effacez la recherche."
+                    : "L'enseignant n'a pas encore publié de leçon pour cette matière. Choisissez une autre matière ci-dessus."}
+                </p>
+
+                {canEditCourse ? (
                   <button
                     type="button"
-                    onClick={() => setSelectedDisciplineFilter("ALL")}
-                    className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold transition-all ${
-                      selectedDisciplineFilter === "ALL"
-                        ? "bg-indigo-600 text-white shadow-sm"
-                        : "bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200"
-                    }`}
+                    onClick={() =>
+                      onOpenCreateCourse(
+                        selectedDisciplineFilter !== "ALL" ? selectedDisciplineFilter : undefined
+                      )
+                    }
+                    className="mt-2 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
                   >
-                    Toutes ({courses.filter((c) => c.classeId === activeClassId).length})
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    <span>+ Ajouter un titre à {selectedDisciplineFilter}</span>
                   </button>
-                  {classDisciplines.map((d) => {
-                    const count = courses.filter(
-                      (c) => c.classeId === activeClassId && c.discipline?.toLowerCase() === d.toLowerCase()
-                    ).length;
-                    return (
-                      <button
-                        key={d}
-                        type="button"
-                        onClick={() => setSelectedDisciplineFilter(d)}
-                        className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold transition-all ${
-                          selectedDisciplineFilter.toLowerCase() === d.toLowerCase()
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleSelectDiscipline("ALL")}
+                    className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50 text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    <span>Voir toutes les matières</span>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-[620px] overflow-y-auto pr-0.5">
+                {visibleCourses.map((c, index) => {
+                  const isCurrent = c.id === activeCourse?.id;
+                  const icon = getDisciplineIcon(c.discipline || "");
+
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => setSelectedCourseId(c.id)}
+                      className={`w-full p-3.5 rounded-2xl text-left transition-all flex items-start gap-3 cursor-pointer group ${
+                        isCurrent
+                          ? "bg-indigo-50/90 border-2 border-indigo-600 text-slate-900 shadow-md shadow-indigo-600/10 ring-2 ring-indigo-500/20"
+                          : "bg-white hover:bg-slate-50/90 border border-slate-200 hover:border-indigo-300 text-slate-700 hover:shadow-sm"
+                      }`}
+                    >
+                      {/* Number badge */}
+                      <span
+                        className={`w-7 h-7 rounded-xl text-xs font-black flex items-center justify-center shrink-0 mt-0.5 transition-colors font-mono ${
+                          isCurrent
                             ? "bg-indigo-600 text-white shadow-sm"
-                            : "bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+                            : "bg-slate-100 text-slate-600 border border-slate-200 group-hover:bg-indigo-50 group-hover:text-indigo-700"
                         }`}
                       >
-                        {d} ({count})
-                      </button>
-                    );
-                  })}
-                </div>
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+
+                      {/* Content details */}
+                      <div className="space-y-1.5 flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {c.discipline && (
+                            <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[9px] font-bold flex items-center gap-1">
+                              <span>{icon}</span>
+                              <span className="truncate max-w-[120px]">{c.discipline}</span>
+                            </span>
+                          )}
+                          {isCurrent && (
+                            <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[9px] font-black flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                              En cours d&apos;étude
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Titre du cours */}
+                        <h4
+                          className={`text-xs font-extrabold leading-snug line-clamp-2 transition-colors ${
+                            isCurrent
+                              ? "text-indigo-950 font-black text-sm"
+                              : "text-slate-900 group-hover:text-indigo-600"
+                          }`}
+                        >
+                          {c.title}
+                        </h4>
+
+                        {/* Chapter title if present */}
+                        {c.chapterTitle && (
+                          <p className="text-[10px] text-slate-500 line-clamp-1 italic">
+                            {c.chapterTitle}
+                          </p>
+                        )}
+
+                        {/* Meta info & Action */}
+                        <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100 text-[10px] text-slate-500">
+                          {c.video ? (
+                            <span className="flex items-center gap-1 text-purple-600 font-bold">
+                              <Video className="w-3 h-3" /> Vidéo ({c.video.durationMinutes} min)
+                            </span>
+                          ) : c.pdfUrl ? (
+                            <span className="flex items-center gap-1 text-rose-600 font-bold">
+                              <FileText className="w-3 h-3" /> Support PDF
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1 text-slate-500 font-medium">
+                              <FileText className="w-3 h-3" /> Cours rédigé
+                            </span>
+                          )}
+
+                          <span
+                            className={`font-bold flex items-center gap-0.5 ${
+                              isCurrent
+                                ? "text-indigo-600 font-extrabold"
+                                : "text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition-all"
+                            }`}
+                          >
+                            <span>{isCurrent ? "Sélectionné" : "Choisir"}</span>
+                            <ChevronRight className="w-3 h-3" />
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             )}
 
-            <div className="space-y-2">
-              {classCourses.map((c, index) => {
-                const isCurrent = c.id === activeCourse?.id;
-                return (
-                  <button
-                    key={c.id}
-                    onClick={() => setSelectedCourseId(c.id)}
-                    className={`w-full p-3.5 rounded-xl text-left transition-all flex items-start gap-3 ${
-                      isCurrent
-                        ? "bg-indigo-50 border border-indigo-200 text-slate-900 shadow-sm"
-                        : "bg-white hover:bg-slate-50 border border-slate-200 text-slate-700"
-                    }`}
-                  >
-                    <span
-                      className={`w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 mt-0.5 ${
-                        isCurrent
-                          ? "bg-indigo-600 text-white"
-                          : "bg-slate-100 text-slate-600 border border-slate-200"
-                      }`}
-                    >
-                      {index + 1}
-                    </span>
-
-                    <div className="space-y-1 flex-1">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {c.discipline && (
-                          <span className="px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 text-[9px] font-semibold">
-                            {c.discipline}
-                          </span>
-                        )}
-                        <p className="text-xs font-bold leading-snug line-clamp-2">{c.title}</p>
-                      </div>
-                      <div className="flex items-center gap-2 text-[10px] text-slate-500">
-                        {c.video ? (
-                          <span className="flex items-center gap-1 text-purple-600 font-medium">
-                            <Video className="w-3 h-3" /> Vidéo ({c.video.durationMinutes} min)
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1 text-slate-500">
-                            <FileText className="w-3 h-3" /> Lecture
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <ChevronRight
-                      className={`w-4 h-4 shrink-0 transition-transform ${
-                        isCurrent ? "text-indigo-600 translate-x-0.5" : "text-slate-400"
-                      }`}
-                    />
-                  </button>
-                );
-              })}
-            </div>
-
             {canEditCourse && (
               <button
-                onClick={onOpenCreateCourse}
-                className="w-full mt-3 py-3 px-4 rounded-2xl border-2 border-dashed border-purple-300 hover:border-purple-500 bg-purple-50/70 hover:bg-purple-100/70 text-purple-700 text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm"
+                onClick={() =>
+                  onOpenCreateCourse(
+                    selectedDisciplineFilter !== "ALL" ? selectedDisciplineFilter : undefined
+                  )
+                }
+                className="w-full mt-2 py-3 px-4 rounded-xl border border-dashed border-purple-300 hover:border-purple-500 bg-purple-50/70 hover:bg-purple-100/70 text-purple-700 text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
               >
                 <PlusCircle className="w-4 h-4 text-purple-600" />
                 <span>+ Ajouter une Leçon à cette Classe</span>
@@ -665,6 +953,7 @@ export function CourseViewer({
             )}
           </div>
         </div>
+      </div>
       )}
 
       {/* ========================================================================= */}
