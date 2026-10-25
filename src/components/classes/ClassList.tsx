@@ -352,6 +352,14 @@ export function ClassList({
           filteredClasses.map((cls) => {
             const studentStatus = getStudentStatusForClass(cls.id);
             const isFull = (cls.enrolledCount || 0) >= cls.capacity;
+            const hasOtherClass = currentUser.role === "STUDENT"
+              ? inscriptions.find(
+                  (i) =>
+                    i.userId === currentUser.id &&
+                    i.classeId !== cls.id &&
+                    (i.status === "APPROVED" || i.status === "PENDING" || i.status === "CONFIRMED")
+                )
+              : null;
 
             return (
               <div
@@ -530,6 +538,14 @@ export function ClassList({
                         ) : studentStatus === "REJECTED" ? (
                           <div className="w-full py-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-medium text-center">
                             Demande non retenue
+                          </div>
+                        ) : hasOtherClass ? (
+                          <div
+                            className="w-full py-2 px-3 rounded-xl bg-slate-100 text-slate-500 border border-slate-200 text-[11px] font-medium flex items-center justify-center gap-1.5 text-center cursor-not-allowed"
+                            title={`Règle AlFasle : Un élève ne peut s'inscrire que dans une seule classe. Vous êtes déjà rattaché(e) à « ${hasOtherClass.classeTitle} » (${hasOtherClass.etablissementName}).`}
+                          >
+                            <AlertCircle className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span className="truncate">Déjà inscrit à « {hasOtherClass.classeTitle} »</span>
                           </div>
                         ) : (
                           <button

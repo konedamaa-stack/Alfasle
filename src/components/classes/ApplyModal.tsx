@@ -22,11 +22,15 @@ export function ApplyModal({ targetClass, isOpen, onClose }: ApplyModalProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    applyToClass(targetClass.id, motivation);
+    const res = applyToClass(targetClass.id, motivation);
+    if (res && !res.success) {
+      toast.error("Inscription impossible", res.message);
+      return;
+    }
     setSubmitted(true);
     toast.success(
       "Enregistrement effectué avec succès",
-      `Votre préinscription pour la classe « ${targetClass.title} » a été enregistrée.`
+      res?.message || `Votre préinscription pour la classe « ${targetClass.title} » a été enregistrée.`
     );
     setTimeout(() => {
       setSubmitted(false);
@@ -68,6 +72,15 @@ export function ApplyModal({ targetClass, isOpen, onClose }: ApplyModalProps) {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-5 space-y-4">
+            {currentUser.role === "STUDENT" && (
+              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-slate-800 text-xs flex items-center gap-2">
+                <span className="text-sm">📌</span>
+                <span className="text-[11px] font-medium leading-tight">
+                  <strong className="text-emerald-800">Règle de scolarité :</strong> Un élève ne peut s&apos;inscrire que dans 1 seule classe unique.
+                </span>
+              </div>
+            )}
+
             <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-1.5">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-400">Enseignant responsable :</span>

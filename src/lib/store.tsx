@@ -58,7 +58,7 @@ interface StoreContextType {
 
   // Inscriptions & Pré-inscriptions
   inscriptions: Inscription[];
-  applyToClass: (classeId: string, motivation?: string) => void;
+  applyToClass: (classeId: string, motivation?: string) => { success: boolean; message: string; inscription?: Inscription };
   joinClassByCode: (classCode: string, motivation?: string) => { success: boolean; message: string; classe?: Classe };
   submitPreRegistration: (data: {
     userName: string;
@@ -70,7 +70,7 @@ interface StoreContextType {
     subject?: string;
     diplomaOrBio?: string;
     motivation?: string;
-  }) => { success: boolean; message: string; inscription: Inscription };
+  }) => { success: boolean; message: string; inscription?: Inscription };
   approveInscription: (inscriptionId: string) => void;
   rejectInscription: (inscriptionId: string) => void;
 
@@ -945,14 +945,47 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Inscriptions
+  // Inscriptions (Règle stricte : 1 seule classe par élève)
   const applyToClass = (classeId: string, motivation?: string) => {
     const targetClass = classes.find((c) => c.id === classeId);
-    if (!targetClass) return;
+    if (!targetClass) {
+      return { success: false, message: "Classe introuvable." };
+    }
 
-    // Check if already applied
+    // Un élève ne peut s'inscrire que dans UNE SEULE classe
+    if (currentUser.role === "STUDENT") {
+      const existingStudentEnrollment = inscriptions.find(
+        (i) =>
+          i.userId === currentUser.id &&
+          (i.status === "APPROVED" || i.status === "PENDING" || i.status === "CONFIRMED")
+      );
+
+      if (existingStudentEnrollment) {
+        if (existingStudentEnrollment.classeId === classeId) {
+          return {
+            success: false,
+            message:
+              existingStudentEnrollment.status === "APPROVED"
+                ? `Vous êtes déjà inscrit(e) et actif(ve) dans la classe « ${existingStudentEnrollment.classeTitle} ».`
+                : `Votre candidature pour « ${existingStudentEnrollment.classeTitle} » est déjà en cours de validation.`,
+          };
+        } else {
+          return {
+            success: false,
+            message: `Règle de scolarité : Un élève ne peut s'inscrire que dans UNE SEULE classe. Vous êtes déjà rattaché(e) ou en attente pour la classe « ${existingStudentEnrollment.classeTitle} » (${existingStudentEnrollment.etablissementName}).`,
+          };
+        }
+      }
+    }
+
+    // Check if already applied (enseignant ou profil général)
     const existing = inscriptions.find((i) => i.classeId === classeId && i.userId === currentUser.id);
-    if (existing) return;
+    if (existing) {
+      return {
+        success: false,
+        message: `Une inscription existe déjà pour cette classe.`,
+      };
+    }
 
     const isAutoApprove = targetClass.enrollmentMode === "OPEN";
 
@@ -1002,6 +1035,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       },
       ...prev,
     ]);
+
+    return {
+      success: true,
+      message: isAutoApprove
+        ? `Félicitations ! Vous avez rejoint la classe « ${targetClass.title} ». Vos cours sont disponibles.`
+        : `Votre demande pour « ${targetClass.title} » a été transmise à la direction pour validation.`,
+      inscription: newInscription,
+    };
   };
 
   // Rejoindre une classe avec code unique (ex: AF-DEV-101, AF-MATH-202)
@@ -1016,6 +1057,38 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         success: false,
         message: `Aucune classe trouvée avec le code « ${cleanCode} ». Veuillez vérifier le code fourni par votre établissement ou professeur.`,
       };
+    }
+
+    // Un élève ne peut s'inscrire que dans UNE SEULE classe
+    if (currentUser.role === "STUDENT") {
+      const existingStudentEnrollment = inscriptions.find(
+        (i) =>
+          i.userId === currentUser.id &&
+          (i.status === "APPROVED" || i.status === "PENDING" || i.status === "CONFIRMED")
+      );
+
+      if (existingStudentEnrollment) {
+        if (existingStudentEnrollment.classeId === targetClass.id) {
+          if (existingStudentEnrollment.status === "APPROVED") {
+            return {
+              success: true,
+              message: `Vous êtes déjà inscrit et actif dans la classe « ${targetClass.title} ». Vos cours sont immédiatement disponibles !`,
+              classe: targetClass,
+            };
+          } else {
+            return {
+              success: false,
+              message: `Votre demande d'inscription pour « ${targetClass.title} » est actuellement en cours de traitement.`,
+              classe: targetClass,
+            };
+          }
+        } else {
+          return {
+            success: false,
+            message: `Règle de scolarité : Un élève ne peut s'inscrire que dans UNE SEULE classe. Vous êtes déjà rattaché(e) à la classe « ${existingStudentEnrollment.classeTitle} » (${existingStudentEnrollment.etablissementName}).`,
+          };
+        }
+      }
     }
 
     const existing = inscriptions.find(
@@ -1120,6 +1193,32 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     diplomaOrBio?: string;
     motivation?: string;
   }) => {
+    // Règle stricte AlFasle : Un élève ne peut s'inscrire que dans UNE SEULE classe
+    if (data.role === "STUDENT") {
+      const cleanEmail = data.userEmail.trim().toLowerCase();
+      const cleanPhone = data.userPhone?.trim();
+      const cleanName = data.userName.trim().toLowerCase();
+
+      const existingStudent = inscriptions.find((i) => {
+        if (i.role !== "STUDENT") return false;
+        if (i.status !== "PENDING" && i.status !== "APPROVED" && i.status !== "CONFIRMED") return false;
+        const sameEmail = Boolean(cleanEmail && i.userEmail && i.userEmail.toLowerCase() === cleanEmail);
+        const samePhone = Boolean(cleanPhone && i.userPhone && i.userPhone === cleanPhone);
+        const sameName = Boolean(cleanName && i.userName && i.userName.trim().toLowerCase() === cleanName);
+        return sameEmail || (samePhone && sameName);
+      });
+
+      if (existingStudent) {
+        const isSameClass = existingStudent.classeId === data.classeId;
+        return {
+          success: false,
+          message: isSameClass
+            ? `Vous avez déjà soumis une inscription pour « ${existingStudent.classeTitle} » (${existingStudent.status === "PENDING" ? "en attente de validation" : "validée"}). Un élève ne peut s'inscrire qu'une seule fois.`
+            : `Règle de l'établissement : Un élève ne peut s'inscrire que dans UNE SEULE classe. Une inscription existe déjà pour la classe « ${existingStudent.classeTitle} » (${existingStudent.etablissementName}).`,
+        };
+      }
+    }
+
     const targetClass = classes.find((c) => c.id === data.classeId);
     const targetEtab =
       etablissements.find(

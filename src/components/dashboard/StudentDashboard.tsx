@@ -97,12 +97,14 @@ export function StudentDashboard({
 
       {/* 4 Stat Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Metric 1: My Classes */}
+        {/* Metric 1: My Class */}
         <div className="glass-card rounded-2xl p-5 border border-slate-200 flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-medium text-slate-500">Classes Rejointes</p>
-            <p className="text-2xl font-bold text-slate-900">{myClasses.length}</p>
-            <p className="text-[11px] text-emerald-600 font-medium">Inscriptions actives</p>
+            <p className="text-xs font-medium text-slate-500">Ma Classe</p>
+            <p className="text-2xl font-bold text-slate-900">{myClasses.length > 0 ? "1" : "0"}</p>
+            <p className="text-[11px] text-emerald-600 font-medium truncate max-w-[140px]">
+              {myClasses.length > 0 ? myClasses[0].title : "1 classe autorisée"}
+            </p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
             <GraduationCap className="w-6 h-6" />
@@ -282,15 +284,21 @@ export function StudentDashboard({
       <div className="glass-panel rounded-2xl p-6 border border-slate-200 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-base font-bold text-slate-900">Mes Classes & Formations</h3>
-            <p className="text-xs text-slate-500">Accédez directement à vos supports de formation</p>
+            <h3 className="text-base font-bold text-slate-900">Ma Classe & Formation</h3>
+            <p className="text-xs text-slate-500">
+              {myClasses.length > 0
+                ? "Classe unique attribuée • Accédez directement à vos supports de cours"
+                : "Choisissez votre classe unique pour démarrer vos études"}
+            </p>
           </div>
-          <button
-            onClick={() => onNavigate("catalog")}
-            className="text-xs text-indigo-600 hover:text-indigo-700 flex items-center gap-1 font-semibold cursor-pointer"
-          >
-            Rejoindre d'autres classes <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+          {myClasses.length === 0 && (
+            <button
+              onClick={() => onNavigate("catalog")}
+              className="text-xs text-indigo-600 hover:text-indigo-700 flex items-center gap-1 font-semibold cursor-pointer"
+            >
+              Choisir ma classe <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -99,8 +99,17 @@ export function JoinClassModal({
       return;
     }
 
-    applyToClass(cls.id, motivation || `Inscription via le catalogue établissement`);
-    const successMsg = `Votre inscription pour « ${cls.title} » (${cls.etablissementName}) a été enregistrée avec succès !`;
+    const res = applyToClass(cls.id, motivation || `Inscription via le catalogue établissement`);
+    if (res && !res.success) {
+      setStatusFeedback({
+        type: "error",
+        message: res.message,
+      });
+      toast.error("Inscription impossible", res.message);
+      return;
+    }
+
+    const successMsg = res?.message || `Votre inscription pour « ${cls.title} » (${cls.etablissementName}) a été enregistrée avec succès !`;
     setStatusFeedback({
       type: "success",
       message: successMsg,
@@ -217,6 +226,27 @@ export function JoinClassModal({
 
         {/* Content area */}
         <div className="p-6 overflow-y-auto flex-1 space-y-5 bg-white">
+          {/* Active enrollment banner for students */}
+          {currentUser.role === "STUDENT" && (() => {
+            const currentStudentEnrollment = inscriptions.find(
+              (i) =>
+                i.userId === currentUser.id &&
+                (i.status === "APPROVED" || i.status === "PENDING" || i.status === "CONFIRMED")
+            );
+            if (!currentStudentEnrollment) return null;
+            return (
+              <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-amber-900">Règle de scolarité : Inscription limitée à 1 seule classe</p>
+                  <p className="text-[11px] text-amber-800 mt-0.5">
+                    Vous êtes actuellement {currentStudentEnrollment.status === "APPROVED" ? "inscrit(e)" : "en attente"} pour la classe <strong>« {currentStudentEnrollment.classeTitle} »</strong> ({currentStudentEnrollment.etablissementName}).
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Status feedback box */}
           {statusFeedback.type && (
             <div
@@ -405,6 +435,18 @@ export function JoinClassModal({
                       ) : isPending ? (
                         <span className="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-bold">
                           En attente
+                        </span>
+                      ) : currentUser.role === "STUDENT" && inscriptions.some(
+                          (i) =>
+                            i.userId === currentUser.id &&
+                            i.classeId !== cls.id &&
+                            (i.status === "APPROVED" || i.status === "PENDING" || i.status === "CONFIRMED")
+                        ) ? (
+                        <span
+                          className="px-2.5 py-1.5 rounded-xl bg-slate-100 text-slate-500 border border-slate-200 text-[10px] font-medium text-center"
+                          title="Un élève ne peut s'inscrire que dans une seule classe"
+                        >
+                          1 classe max
                         </span>
                       ) : (
                         <button

@@ -48,7 +48,7 @@ export function PreRegistrationModal({
   defaultEstablishmentId,
   defaultRole = "STUDENT",
 }: PreRegistrationModalProps) {
-  const { etablissements, classes, courses, submitPreRegistration, createClass } = useStore();
+  const { etablissements, classes, courses, inscriptions, submitPreRegistration, createClass } = useStore();
   const { toast } = useToast();
 
   const [role, setRole] = useState<InscriptionRole>(defaultRole);
@@ -305,20 +305,43 @@ export function PreRegistrationModal({
       return;
     }
 
-    const chosenCourse = courses.find((c) => c.id === selectedCourseId);
     const chosenClassObj = classes.find((c) => c.id === targetClassId);
 
     const cleanSlug = userName.trim().toLowerCase().replace(/[^a-z0-9]/g, "") || "candidat";
     const effectiveEmail = userEmail.trim() || `${cleanSlug}.${Date.now().toString().slice(-4)}@alfasle.edu`;
     setUserEmail(effectiveEmail);
 
+    // Validation préalable : Un élève ne peut s'inscrire que dans UNE SEULE classe
+    if (role === "STUDENT") {
+      const normEmail = effectiveEmail.trim().toLowerCase();
+      const normPhone = userPhone.trim();
+      const normName = userName.trim().toLowerCase();
+
+      const existingStudentEnrollment = inscriptions.find((i) => {
+        if (i.role !== "STUDENT") return false;
+        if (i.status !== "PENDING" && i.status !== "APPROVED" && i.status !== "CONFIRMED") return false;
+        const sameEmail = Boolean(normEmail && i.userEmail && i.userEmail.toLowerCase() === normEmail);
+        const samePhone = Boolean(normPhone && i.userPhone && i.userPhone === normPhone);
+        const sameName = Boolean(normName && i.userName && i.userName.trim().toLowerCase() === normName);
+        return sameEmail || (samePhone && sameName);
+      });
+
+      if (existingStudentEnrollment) {
+        const isSame = existingStudentEnrollment.classeId === targetClassId;
+        const msg = isSame
+          ? `Vous avez déjà soumis une préinscription pour « ${existingStudentEnrollment.classeTitle} » (${existingStudentEnrollment.status === "PENDING" ? "en attente de validation" : "validée"}). Un élève ne peut s'inscrire qu'une seule fois.`
+          : `Règle de l'établissement : Un élève ne peut s'inscrire que dans UNE SEULE classe. Vous êtes déjà rattaché(e) ou en attente pour la classe « ${existingStudentEnrollment.classeTitle} » (${existingStudentEnrollment.etablissementName}).`;
+        setErrorMsg(msg);
+        toast.error("Inscription impossible", msg);
+        return;
+      }
+    }
+
     const finalSubject =
       role === "TEACHER"
         ? subject === "Autre spécialité"
           ? customSubject.trim() || "Spécialité générale"
-          : subject || chosenCourse?.discipline || "Discipline générale"
-        : chosenCourse
-        ? `${chosenCourse.discipline ? chosenCourse.discipline + " : " : ""}${chosenCourse.title}`
+          : subject || "Discipline générale"
         : chosenClassObj?.disciplines?.[0] || undefined;
 
     const resolvedEstId =
@@ -669,21 +692,17 @@ export function PreRegistrationModal({
                 ) : (
                   <div className="space-y-1.5 animate-fadeIn">
                     <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                      <Award className="w-3.5 h-3.5 text-indigo-600" />
-                      Filière / Option visée (Optionnel)
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      Règle de scolarité
                     </label>
-                    <select
-                      value={selectedCourseId}
-                      onChange={(e) => setSelectedCourseId(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer shadow-sm"
-                    >
-                      <option value="">-- Cursus complet & général --</option>
-                      {classCourses.map((crs) => (
-                        <option key={crs.id} value={crs.id}>
-                          📖 {crs.discipline ? `[${crs.discipline}] ` : ""}{crs.title}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-200 text-slate-800 text-xs space-y-0.5">
+                      <p className="font-bold text-emerald-800 flex items-center gap-1 text-[11px]">
+                        <span>📌</span> Inscription à 1 seule classe
+                      </p>
+                      <p className="text-[11px] text-slate-600 leading-tight">
+                        L&apos;élève est rattaché(e) à une classe unique. Cette inscription débloque automatiquement l&apos;ensemble des cours et devoirs du cursus.
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -716,55 +735,47 @@ export function PreRegistrationModal({
 
                 {classCourses.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                    {classCourses.map((crs) => {
-                      const isSelected = selectedCourseId === crs.id;
-                      return (
-                        <div
-                          key={crs.id}
-                          onClick={() => setSelectedCourseId(isSelected ? "" : crs.id)}
-                          className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
-                            isSelected
-                              ? "bg-indigo-50 border-indigo-300 text-slate-900 shadow-sm"
-                              : "bg-white border-slate-200 hover:border-slate-300 text-slate-800 hover:bg-slate-50/50 shadow-sm"
-                          }`}
-                        >
-                          <div className="space-y-1">
-                            <div className="flex items-center justify-between text-[10px]">
-                              <span className="px-2 py-0.5 rounded-md bg-indigo-50 font-bold text-indigo-700">
-                                {crs.discipline || "Matière"}
-                              </span>
-                              <div className="flex items-center gap-1.5">
-                                {crs.video && (
-                                  <span className="text-emerald-700 flex items-center gap-0.5 font-semibold">
-                                    <span>🎥</span> Vidéo
-                                  </span>
-                                )}
-                                {crs.pdfUrl && (
-                                  <span className="text-amber-700 flex items-center gap-0.5 font-semibold">
-                                    <span>📄</span> PDF
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <h5 className="text-xs font-bold text-slate-900 line-clamp-1">
-                              {crs.title}
-                            </h5>
-                            {crs.chapterTitle && (
-                              <p className="text-[10px] text-slate-500 line-clamp-1">
-                                {crs.chapterTitle}
-                              </p>
-                            )}
-                          </div>
-
-                          <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
-                            <span>Prof: {crs.teacherName || selectedClass?.teacherName || "Équipe pédagogique"}</span>
-                            <span className={isSelected ? "text-indigo-600 font-bold" : "text-slate-400"}>
-                              {isSelected ? "✓ Option choisie" : "Cliquer pour cibler +"}
+                    {classCourses.map((crs) => (
+                      <div
+                        key={crs.id}
+                        className="p-3 rounded-xl border border-slate-200 bg-white hover:border-slate-300 text-slate-800 shadow-sm flex flex-col justify-between transition-colors"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-[10px]">
+                            <span className="px-2 py-0.5 rounded-md bg-indigo-50 font-bold text-indigo-700">
+                              {crs.discipline || "Matière"}
                             </span>
+                            <div className="flex items-center gap-1.5">
+                              {crs.video && (
+                                <span className="text-emerald-700 flex items-center gap-0.5 font-semibold">
+                                  <span>🎥</span> Vidéo
+                                </span>
+                              )}
+                              {crs.pdfUrl && (
+                                <span className="text-amber-700 flex items-center gap-0.5 font-semibold">
+                                  <span>📄</span> PDF
+                                </span>
+                              )}
+                            </div>
                           </div>
+                          <h5 className="text-xs font-bold text-slate-900 line-clamp-1">
+                            {crs.title}
+                          </h5>
+                          {crs.chapterTitle && (
+                            <p className="text-[10px] text-slate-500 line-clamp-1">
+                              {crs.chapterTitle}
+                            </p>
+                          )}
                         </div>
-                      );
-                    })}
+
+                        <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                          <span>Prof: {crs.teacherName || selectedClass?.teacherName || "Équipe pédagogique"}</span>
+                          <span className="text-emerald-700 font-semibold flex items-center gap-0.5">
+                            ✓ Inclus dans la classe
+                          </span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <div className="p-3.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs space-y-2.5 shadow-sm">
