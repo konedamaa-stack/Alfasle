@@ -30,7 +30,7 @@ interface AssignmentListProps {
 }
 
 export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) {
-  const { currentUser, assignments, submissions, classes, deleteAssignment } = useStore();
+  const { currentUser, assignments, submissions, classes, inscriptions, deleteAssignment } = useStore();
 
   const isEducator =
     currentUser.role === "TEACHER" ||
@@ -74,9 +74,24 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
   };
 
   const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
+  const isStudent = currentUser.role === "STUDENT";
   const userEtabId = currentUser.etablissementId;
 
+  // Récupérer la classe approuvée de l'élève (1 seule classe autorisée)
+  const studentApprovedInscriptions = isStudent
+    ? inscriptions.filter(
+        (i) =>
+          (i.userId === currentUser.id ||
+            (currentUser.email && i.userEmail?.toLowerCase() === currentUser.email.toLowerCase())) &&
+          i.status === "APPROVED"
+      )
+    : [];
+  const studentClassIds = new Set(studentApprovedInscriptions.map((i) => i.classeId));
+
   const accessibleClasses = classes.filter((c) => {
+    if (isStudent) {
+      return studentClassIds.has(c.id);
+    }
     if (isSuperAdmin) return true;
     if (userEtabId) {
       return (
@@ -138,19 +153,28 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
-          <span className="text-xs text-slate-500 font-medium">Filtrer par classe :</span>
-          <select
-            value={selectedClassId}
-            onChange={(e) => setSelectedClassId(e.target.value)}
-            className="px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-500"
-          >
-            <option value="ALL">Toutes les classes ({accessibleClasses.length})</option>
-            {accessibleClasses.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.title}
-              </option>
-            ))}
-          </select>
+          {isStudent ? (
+            <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs font-semibold">
+              <span>🏫</span>
+              <span>{accessibleClasses[0]?.title || "Ma Classe unique"}</span>
+            </div>
+          ) : (
+            <>
+              <span className="text-xs text-slate-500 font-medium">Filtrer par classe :</span>
+              <select
+                value={selectedClassId}
+                onChange={(e) => setSelectedClassId(e.target.value)}
+                className="px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-500 cursor-pointer"
+              >
+                <option value="ALL">Toutes les classes ({accessibleClasses.length})</option>
+                {accessibleClasses.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.title}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
         </div>
       </div>
 

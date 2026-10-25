@@ -36,13 +36,31 @@ export function CourseViewer({
   onOpenCreateCourse,
   selectedClassId,
 }: CourseViewerProps) {
-  const { courses, classes, currentUser, updateCourse, deleteCourse } = useStore();
+  const { courses, classes, currentUser, inscriptions, updateCourse, deleteCourse } = useStore();
 
   const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
+  const isStudent = currentUser.role === "STUDENT";
   const userEtabId = currentUser.etablissementId;
 
-  // Classes accessibles pour l'établissement de l'utilisateur
+  // Récupérer la classe approuvée de l'élève (1 seule classe autorisée)
+  const studentApprovedInscriptions = isStudent
+    ? inscriptions.filter(
+        (i) =>
+          (i.userId === currentUser.id ||
+            (currentUser.email && i.userEmail?.toLowerCase() === currentUser.email.toLowerCase())) &&
+          i.status === "APPROVED"
+      )
+    : [];
+  const studentClassIds = new Set(studentApprovedInscriptions.map((i) => i.classeId));
+
+  // Classes accessibles :
+  // - Pour un élève : STRICTEMENT sa classe unique où il est inscrit
+  // - Pour Super Admin : toutes les classes
+  // - Pour Enseignant / Directeur : classes de son établissement
   const accessibleClasses = classes.filter((c) => {
+    if (isStudent) {
+      return studentClassIds.has(c.id);
+    }
     if (isSuperAdmin) return true;
     if (userEtabId) {
       return (
@@ -54,7 +72,9 @@ export function CourseViewer({
   });
 
   const [activeClassId, setActiveClassId] = useState<string>(
-    selectedClassId || (accessibleClasses[0]?.id || "")
+    selectedClassId && accessibleClasses.some((c) => c.id === selectedClassId)
+      ? selectedClassId
+      : accessibleClasses[0]?.id || ""
   );
 
   React.useEffect(() => {
@@ -196,30 +216,42 @@ export function CourseViewer({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-600 font-semibold hidden md:inline">Classe :</span>
-            <select
-              value={activeClassId}
-              onChange={(e) => {
-                setActiveClassId(e.target.value);
-                const nextCourses = courses.filter((c) => c.classeId === e.target.value);
-                if (nextCourses.length > 0) setSelectedCourseId(nextCourses[0].id);
-              }}
-              className="px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl text-slate-900 font-bold focus:outline-none focus:border-purple-500 shadow-sm cursor-pointer"
-            >
-              {accessibleClasses.length === 0 ? (
-                <option value="" disabled>
-                  ⚠️ Aucune classe pour cet établissement
-                </option>
-              ) : (
-                accessibleClasses.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    🏫 {c.title} ({c.classCode || c.level})
-                  </option>
-                ))
+          {isStudent ? (
+            <div className="flex items-center gap-2 px-3.5 py-2.5 bg-purple-50 border border-purple-200 rounded-xl text-purple-900 text-xs font-bold shadow-sm">
+              <span>🏫</span>
+              <span>{activeClass ? activeClass.title : "Ma Classe unique"}</span>
+              {activeClass?.classCode && (
+                <span className="text-[10px] px-2 py-0.5 rounded-md bg-purple-200/70 text-purple-800 font-mono">
+                  {activeClass.classCode}
+                </span>
               )}
-            </select>
-          </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-600 font-semibold hidden md:inline">Classe :</span>
+              <select
+                value={activeClassId}
+                onChange={(e) => {
+                  setActiveClassId(e.target.value);
+                  const nextCourses = courses.filter((c) => c.classeId === e.target.value);
+                  if (nextCourses.length > 0) setSelectedCourseId(nextCourses[0].id);
+                }}
+                className="px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl text-slate-900 font-bold focus:outline-none focus:border-purple-500 shadow-sm cursor-pointer"
+              >
+                {accessibleClasses.length === 0 ? (
+                  <option value="" disabled>
+                    ⚠️ Aucune classe pour cet établissement
+                  </option>
+                ) : (
+                  accessibleClasses.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      🏫 {c.title} ({c.classCode || c.level})
+                    </option>
+                  ))
+                )}
+              </select>
+            </div>
+          )}
 
           {canEditCourse && (
             <button
@@ -233,7 +265,15 @@ export function CourseViewer({
         </div>
       </div>
 
-      {classCourses.length === 0 ? (
+      {isStudent && accessibleClasses.length === 0 ? (
+        <div className="py-20 text-center glass-panel rounded-2xl border border-slate-200 space-y-3 bg-white p-6 shadow-sm">
+          <GraduationCap className="w-14 h-14 text-indigo-400 mx-auto" />
+          <h3 className="text-base font-bold text-slate-900">Aucun cours disponible</h3>
+          <p className="text-xs text-slate-600 max-w-md mx-auto">
+            Vous n&apos;êtes pas encore inscrit dans une classe validée. Un élève ne peut accéder qu&apos;aux cours et leçons vidéo de sa propre classe unique.
+          </p>
+        </div>
+      ) : classCourses.length === 0 ? (
         <div className="py-20 text-center glass-panel rounded-2xl border border-slate-200 space-y-3 bg-white">
           <BookOpen className="w-12 h-12 text-slate-400 mx-auto" />
           <h3 className="text-base font-bold text-slate-900">Aucun cours publié pour cette classe</h3>

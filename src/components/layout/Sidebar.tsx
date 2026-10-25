@@ -143,7 +143,7 @@ export function Sidebar({
       case "STUDENT":
         return [
           { id: "dashboard", label: "Mon Espace", icon: <LayoutDashboard className="w-4 h-4" /> },
-          { id: "classes", label: "Mes Classes Inscrites", icon: <GraduationCap className="w-4 h-4" /> },
+          { id: "classes", label: "Ma Classe Inscrite", icon: <GraduationCap className="w-4 h-4" /> },
           { id: "catalog", label: "Catalogue des Classes", icon: <Compass className="w-4 h-4" /> },
           { id: "courses", label: "Mes Cours & Leçons", icon: <BookOpen className="w-4 h-4" /> },
           {
