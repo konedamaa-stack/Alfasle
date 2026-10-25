@@ -32,6 +32,7 @@ import {
 import { getVideoEmbedInfo, getPdfEmbedInfo, isStudentMatchingInscription } from "@/lib/utils";
 import { triggerDownload } from "@/lib/download";
 import { ConfirmModal, ConfirmVariant } from "@/components/common/ConfirmModal";
+import { SkeletonLoader } from "@/components/common/SkeletonLoader";
 
 export function getDisciplineIcon(name: string): string {
   const n = (name || "").toLowerCase();
@@ -126,6 +127,23 @@ export function CourseViewer({
     }
   }, [accessibleClasses, activeClassId, isStudent, studentInscription]);
 
+  // Loading states for skeleton transitions
+  const [isClassLoading, setIsClassLoading] = useState<boolean>(true);
+  const [isFilterLoading, setIsFilterLoading] = useState<boolean>(false);
+  const [isCourseSwitchLoading, setIsCourseSwitchLoading] = useState<boolean>(false);
+
+  // Mobile navigation tab ("VIEWER" = Leçon & Contenu, "TITLES" = Liste des titres & disciplines)
+  const [mobileTab, setMobileTab] = useState<"VIEWER" | "TITLES">("VIEWER");
+
+  // Transition fluide avec squelette de chargement au montage ou changement de classe
+  React.useEffect(() => {
+    setIsClassLoading(true);
+    const timer = setTimeout(() => {
+      setIsClassLoading(false);
+    }, 280);
+    return () => clearTimeout(timer);
+  }, [activeClassId]);
+
   const [selectedDisciplineFilter, setSelectedDisciplineFilter] = useState<string>("ALL");
   const [titleSearch, setTitleSearch] = useState<string>("");
 
@@ -162,14 +180,32 @@ export function CourseViewer({
     classCourses[0] ||
     allClassCourses[0];
 
-  // Sélectionner une matière et charger automatiquement son premier titre disponible
+  // Sélectionner une matière et charger automatiquement son premier titre disponible avec skeleton
   const handleSelectDiscipline = (disc: string) => {
+    setIsFilterLoading(true);
     setSelectedDisciplineFilter(disc);
     setTitleSearch("");
     const matching = allClassCourses.filter((c) => isDisciplineMatch(c.discipline, disc));
     if (matching.length > 0) {
       setSelectedCourseId(matching[0].id);
     }
+    setTimeout(() => {
+      setIsFilterLoading(false);
+    }, 200);
+  };
+
+  // Sélectionner un cours (titre) avec transition fluide et bascule automatique sur mobile vers le lecteur
+  const handleSelectCourse = (courseId: string) => {
+    if (courseId === selectedCourseId) {
+      setMobileTab("VIEWER");
+      return;
+    }
+    setIsCourseSwitchLoading(true);
+    setSelectedCourseId(courseId);
+    setMobileTab("VIEWER");
+    setTimeout(() => {
+      setIsCourseSwitchLoading(false);
+    }, 180);
   };
 
   // Navigation séquentielle entre les titres
@@ -406,69 +442,142 @@ export function CourseViewer({
               </div>
 
               {/* Onglets Matières */}
-              <div className="flex flex-wrap gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => handleSelectDiscipline("ALL")}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                    selectedDisciplineFilter === "ALL"
-                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/25 scale-[1.02]"
-                      : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200"
-                  }`}
-                >
-                  <span>✨ Toutes les Matières</span>
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+              {isClassLoading ? (
+                <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-1 scrollbar-none animate-pulse">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="h-9 w-28 sm:w-36 rounded-xl bg-slate-200/80 shrink-0" />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-1 scrollbar-none sm:flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => handleSelectDiscipline("ALL")}
+                    className={`shrink-0 snap-start px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                       selectedDisciplineFilter === "ALL"
-                        ? "bg-white/20 text-white"
-                        : "bg-slate-200 text-slate-700"
+                        ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/25 scale-[1.02]"
+                        : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200"
                     }`}
                   >
-                    {allClassCourses.length}
-                  </span>
-                </button>
-
-                {classDisciplines.map((d) => {
-                  const icon = getDisciplineIcon(d);
-                  const count = allClassCourses.filter((c) => isDisciplineMatch(c.discipline, d)).length;
-                  const isSelected = selectedDisciplineFilter.toLowerCase() === d.toLowerCase();
-
-                  return (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => handleSelectDiscipline(d)}
-                      className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                        isSelected
-                          ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/25 ring-2 ring-indigo-500/30 scale-[1.02]"
-                          : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 hover:border-slate-300"
+                    <span>✨ Toutes les Matières</span>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                        selectedDisciplineFilter === "ALL"
+                          ? "bg-white/20 text-white"
+                          : "bg-slate-200 text-slate-700"
                       }`}
                     >
-                      <span className="text-sm">{icon}</span>
-                      <span>{d}</span>
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                      {allClassCourses.length}
+                    </span>
+                  </button>
+
+                  {classDisciplines.map((d) => {
+                    const icon = getDisciplineIcon(d);
+                    const count = allClassCourses.filter((c) => isDisciplineMatch(c.discipline, d)).length;
+                    const isSelected = selectedDisciplineFilter.toLowerCase() === d.toLowerCase();
+
+                    return (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => handleSelectDiscipline(d)}
+                        className={`shrink-0 snap-start px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                           isSelected
-                            ? "bg-white/20 text-white"
-                            : count > 0
-                            ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
-                            : "bg-slate-200/70 text-slate-500"
+                            ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/25 ring-2 ring-indigo-500/30 scale-[1.02]"
+                            : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 hover:border-slate-300"
                         }`}
                       >
-                        {count} {count > 1 ? "titres" : "titre"}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+                        <span className="text-sm">{icon}</span>
+                        <span>{d}</span>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                            isSelected
+                              ? "bg-white/20 text-white"
+                              : count > 0
+                              ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                              : "bg-slate-200/70 text-slate-500"
+                          }`}
+                        >
+                          {count} {count > 1 ? "titres" : "titre"}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
+          {/* ========================================================================= */}
+          {/* SÉLECTEUR D'ONGLET MOBILE (Visible uniquement sur mobile / tablette < lg) */}
+          {/* ========================================================================= */}
+          <div className="lg:hidden bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setMobileTab("TITLES")}
+              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                mobileTab === "TITLES"
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
+                  : "text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100"
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Titres & Matières</span>
+              <span
+                className={`text-[10px] px-1.5 py-0.5 rounded-full font-black ${
+                  mobileTab === "TITLES" ? "bg-white/25 text-white" : "bg-slate-200 text-slate-700"
+                }`}
+              >
+                {visibleCourses.length}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setMobileTab("VIEWER")}
+              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                mobileTab === "VIEWER"
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
+                  : "text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100"
+              }`}
+            >
+              <GraduationCap className="w-3.5 h-3.5" />
+              <span className="truncate max-w-[130px] sm:max-w-none">
+                {activeCourse ? activeCourse.title : "Leçon en cours"}
+              </span>
+            </button>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Main Course Content & Video (8 cols) */}
-          <div className="lg:col-span-8 space-y-6">
+          <div className={`space-y-6 lg:col-span-8 ${mobileTab === "TITLES" ? "hidden lg:block" : "block"}`}>
+            {/* Bannière de retour rapide vers la liste des titres sur mobile */}
             {activeCourse && (
-              <div className="glass-panel rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white">
+              <div className="lg:hidden flex items-center justify-between p-3 rounded-2xl bg-indigo-50 border border-indigo-200/80 shadow-sm text-xs">
+                <div className="flex items-center gap-2 min-w-0 pr-2">
+                  <span className="text-lg">{getDisciplineIcon(activeCourse.discipline || "")}</span>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black text-indigo-700 uppercase tracking-wide">
+                      {activeCourse.discipline || "Leçon active"}
+                    </p>
+                    <p className="text-xs font-black text-slate-900 truncate">{activeCourse.title}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMobileTab("TITLES")}
+                  className="shrink-0 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition-all cursor-pointer"
+                >
+                  <span>Changer ({visibleCourses.length})</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
+            {isClassLoading || isCourseSwitchLoading ? (
+              <SkeletonLoader type="course-viewer" />
+            ) : activeCourse ? (
+              <div className="glass-panel rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white animate-fadeIn">
                 {/* Media Switcher Header if course has both Video and PDF */}
                 {(() => {
                   const hasVideo = Boolean(activeCourse.video?.streamUrl);
@@ -610,7 +719,7 @@ export function CourseViewer({
                           <iframe
                             src={effectivePdfUrl}
                             title={effectivePdfName}
-                            className="w-full h-[580px] sm:h-[680px] bg-white border-0"
+                            className="w-full h-[380px] sm:h-[500px] md:h-[620px] lg:h-[680px] bg-white border-0"
                             allow="autoplay"
                           />
                         </div>
@@ -627,7 +736,7 @@ export function CourseViewer({
                       <button
                         type="button"
                         disabled={!previousCourse}
-                        onClick={() => previousCourse && setSelectedCourseId(previousCourse.id)}
+                        onClick={() => previousCourse && handleSelectCourse(previousCourse.id)}
                         className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold transition-all ${
                           previousCourse
                             ? "bg-slate-100 hover:bg-slate-200 text-slate-800 cursor-pointer shadow-sm hover:scale-[1.02]"
@@ -650,7 +759,7 @@ export function CourseViewer({
                       <button
                         type="button"
                         disabled={!nextCourse}
-                        onClick={() => nextCourse && setSelectedCourseId(nextCourse.id)}
+                        onClick={() => nextCourse && handleSelectCourse(nextCourse.id)}
                         className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold transition-all ${
                           nextCourse
                             ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20 cursor-pointer hover:scale-[1.02]"
@@ -757,13 +866,26 @@ export function CourseViewer({
                   )}
                 </div>
               </div>
+            ) : (
+              <div className="py-16 text-center glass-panel rounded-2xl border border-slate-200 bg-white p-6 space-y-3">
+                <BookOpen className="w-12 h-12 text-slate-300 mx-auto" />
+                <h3 className="text-sm font-bold text-slate-800">Aucune leçon sélectionnée</h3>
+                <p className="text-xs text-slate-500">Choisissez un titre dans la liste pour commencer l&apos;étude.</p>
+                <button
+                  type="button"
+                  onClick={() => setMobileTab("TITLES")}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold shadow-sm cursor-pointer"
+                >
+                  Voir les titres disponibles
+                </button>
+              </div>
             )}
           </div>
 
           {/* ========================================================================= */}
           {/* 2. TABLEAU DES TITRES DISPONIBLES À ÉTUDIER (4 cols)                       */}
           {/* ========================================================================= */}
-          <div className="lg:col-span-4 glass-panel rounded-2xl p-5 border border-slate-200 space-y-4 bg-white shadow-sm">
+          <div className={`lg:col-span-4 glass-panel rounded-2xl p-4 sm:p-5 border border-slate-200 space-y-4 bg-white shadow-sm ${mobileTab === "VIEWER" ? "hidden lg:block" : "block"}`}>
             {/* Header */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <div className="flex items-center gap-2">
@@ -783,6 +905,24 @@ export function CourseViewer({
                 {visibleCourses.length} {visibleCourses.length > 1 ? "titres" : "titre"}
               </span>
             </div>
+
+            {/* Rappel leçon en cours sur mobile pour revenir en 1 clic */}
+            {activeCourse && (
+              <div className="lg:hidden flex items-center justify-between p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs shadow-sm">
+                <div className="flex items-center gap-2 min-w-0 pr-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <span className="text-emerald-900 font-bold truncate">En cours : {activeCourse.title}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMobileTab("VIEWER")}
+                  className="shrink-0 text-emerald-800 font-black text-[11px] hover:underline cursor-pointer flex items-center gap-0.5"
+                >
+                  <span>Voir le cours</span>
+                  <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
+            )}
 
             {/* SÉLECTEUR & FILTRE DES DISCIPLINES DIRECTEMENT DANS CE TABLEAU */}
             <div className="space-y-2 p-3 rounded-xl bg-slate-50 border border-slate-200/90 shadow-inner">
@@ -823,11 +963,11 @@ export function CourseViewer({
               </div>
 
               {/* Pastilles / Badges de filtrage rapide en 1 clic */}
-              <div className="flex flex-wrap gap-1 pt-1">
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full scrollbar-none flex-nowrap sm:flex-wrap">
                 <button
                   type="button"
                   onClick={() => handleSelectDiscipline("ALL")}
-                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                  className={`shrink-0 snap-start px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
                     selectedDisciplineFilter === "ALL"
                       ? "bg-indigo-600 text-white shadow-sm"
                       : "bg-white text-slate-700 hover:bg-slate-200 border border-slate-200"
@@ -848,7 +988,7 @@ export function CourseViewer({
                       key={d}
                       type="button"
                       onClick={() => handleSelectDiscipline(d)}
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                      className={`shrink-0 snap-start px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
                         isSelected
                           ? "bg-indigo-600 text-white shadow-sm"
                           : "bg-white text-slate-700 hover:bg-indigo-50 border border-slate-200"
@@ -892,8 +1032,16 @@ export function CourseViewer({
               )}
             </div>
 
-            {/* Courses / Titles List */}
-            {visibleCourses.length === 0 ? (
+            {/* Courses / Titles List with Skeleton Loader */}
+            {isClassLoading || isFilterLoading ? (
+              <div className="space-y-3 py-1">
+                <div className="flex items-center gap-2 text-xs font-bold text-indigo-700 animate-pulse px-1">
+                  <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Chargement des leçons et des titres...</span>
+                </div>
+                <SkeletonLoader type="course-list" rows={4} />
+              </div>
+            ) : visibleCourses.length === 0 ? (
               <div className="py-10 px-4 text-center rounded-2xl bg-slate-50 border border-dashed border-slate-200 space-y-2.5">
                 <div className="text-3xl">{getDisciplineIcon(selectedDisciplineFilter)}</div>
                 <p className="text-xs font-bold text-slate-800">
@@ -939,7 +1087,7 @@ export function CourseViewer({
                   return (
                     <button
                       key={c.id}
-                      onClick={() => setSelectedCourseId(c.id)}
+                      onClick={() => handleSelectCourse(c.id)}
                       className={`w-full p-3.5 rounded-2xl text-left transition-all flex items-start gap-3 cursor-pointer group ${
                         isCurrent
                           ? "bg-indigo-50/90 border-2 border-indigo-600 text-slate-900 shadow-md shadow-indigo-600/10 ring-2 ring-indigo-500/20"
@@ -1022,7 +1170,7 @@ export function CourseViewer({
                                 : "text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition-all"
                             }`}
                           >
-                            <span>{isCurrent ? "Sélectionné" : "Choisir"}</span>
+                            <span>{isCurrent ? "Sélectionné" : "Étudier ce titre"}</span>
                             <ChevronRight className="w-3 h-3" />
                           </span>
                         </div>
