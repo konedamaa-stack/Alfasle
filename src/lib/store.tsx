@@ -204,16 +204,28 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
               "cls_gs_tle_d",
               "cls_gs_2nde_c",
             ]);
-            merged = (merged as unknown as Classe[]).filter(
+            let currentClasses = (merged as unknown as Classe[]).filter(
               (c) =>
                 !demoIds.has(c.id) &&
                 !c.id.includes("nextjs") &&
-                !c.id.includes("kouliyat") &&
-                !c.id.includes("islam") &&
                 !c.title?.toLowerCase().includes("next.js") &&
                 !c.title?.toLowerCase().includes("docker") &&
                 !c.title?.toLowerCase().includes("tronc commun")
-            ) as unknown as T[];
+            );
+
+            // Garantir que chaque campus possède immédiatement ses classes officielles modèles
+            initialClasses.forEach((initCls) => {
+              const alreadyExists = currentClasses.some(
+                (c) =>
+                  c.id === initCls.id ||
+                  (c.etablissementId === initCls.etablissementId && c.title === initCls.title)
+              );
+              if (!alreadyExists) {
+                currentClasses.push(initCls);
+              }
+            });
+
+            merged = currentClasses as unknown as T[];
           }
 
           if (suffix === "courses") {

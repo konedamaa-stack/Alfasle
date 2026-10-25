@@ -17,7 +17,6 @@ import {
   FileText,
   Sparkles,
   CheckCircle2,
-  AlertCircle,
   Award,
 } from "lucide-react";
 import { AccountActivationModal } from "./AccountActivationModal";
@@ -109,6 +108,21 @@ export function PreRegistrationModal({
   // Selected class
   const selectedClass = classes.find((c) => c.id === classeId);
 
+  // Auto-génération transparente des classes si l'établissement sélectionné n'en possède pas encore
+  const isAutoGeneratingRef = React.useRef(false);
+  React.useEffect(() => {
+    if (!isOpen) return;
+    if (!establishmentId || establishmentId === "ALL") return;
+
+    if (availableClasses.length === 0 && !isAutoGeneratingRef.current) {
+      isAutoGeneratingRef.current = true;
+      handleGenerateDefaultClasses(establishmentId, false);
+      setTimeout(() => {
+        isAutoGeneratingRef.current = false;
+      }, 500);
+    }
+  }, [isOpen, establishmentId, availableClasses.length]);
+
   // Auto-select first class when changing establishment or reset if none available
   React.useEffect(() => {
     if (availableClasses.length > 0) {
@@ -129,7 +143,7 @@ export function PreRegistrationModal({
 
   if (!isOpen) return null;
 
-  const handleGenerateDefaultClasses = (targetEstId: string) => {
+  const handleGenerateDefaultClasses = (targetEstId: string, showToast = false) => {
     const targetEst = etablissements.find((e) => e.id === targetEstId || e.subdomain === targetEstId);
     const estName = targetEst?.name || "Campus";
     const isIslamic =
@@ -160,7 +174,7 @@ export function PreRegistrationModal({
         status: "ACTIVE",
       });
 
-      createClass({
+      const c2 = createClass({
         etablissementId: targetEst?.id || targetEstId,
         etablissementName: estName,
         classCode: `ISL-SHAR-${(Date.now() + 1).toString().slice(-3)}`,
@@ -183,10 +197,12 @@ export function PreRegistrationModal({
 
       setClasseId(c1.id);
       setCustomClassName("");
-      toast.success(
-        "Classes et matières créées !",
-        `Des classes islamiques avec leurs matières à étudier ont été générées pour ${estName}.`
-      );
+      if (showToast) {
+        toast.success(
+          "Classes et matières créées !",
+          `Des classes islamiques avec leurs matières à étudier ont été générées pour ${estName}.`
+        );
+      }
     } else {
       const c1 = createClass({
         etablissementId: targetEst?.id || targetEstId,
@@ -209,7 +225,7 @@ export function PreRegistrationModal({
         status: "ACTIVE",
       });
 
-      createClass({
+      const c2 = createClass({
         etablissementId: targetEst?.id || targetEstId,
         etablissementName: estName,
         classCode: `CLS-TL-${(Date.now() + 1).toString().slice(-3)}`,
@@ -232,10 +248,12 @@ export function PreRegistrationModal({
 
       setClasseId(c1.id);
       setCustomClassName("");
-      toast.success(
-        "Classes et matières créées !",
-        `Des classes complètes avec l'ensemble des matières ont été générées pour ${estName}.`
-      );
+      if (showToast) {
+        toast.success(
+          "Classes et matières créées !",
+          `Des classes complètes avec l'ensemble des matières ont été générées pour ${estName}.`
+        );
+      }
     }
   };
 
@@ -549,32 +567,6 @@ export function PreRegistrationModal({
                 </div>
               </div>
 
-              {availableClasses.length === 0 && (
-                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs space-y-3 animate-fadeIn">
-                  <div className="flex items-start gap-2.5">
-                    <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                    <div className="space-y-1">
-                      <p className="font-bold text-amber-900">
-                        Aucune classe n'est actuellement créée sur ce campus ({currentSelectedEst?.name || "l'établissement"}).
-                      </p>
-                      <p className="text-[11px] text-amber-800/80 leading-relaxed">
-                        Pour afficher les classes et les matières au programme, vous pouvez initialiser automatiquement les classes modèles ou saisir manuellement votre classe ci-dessous.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-amber-200">
-                    <button
-                      type="button"
-                      onClick={() => handleGenerateDefaultClasses(establishmentId)}
-                      className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <span>⚡ Initialiser les classes & matières pour cet établissement</span>
-                    </button>
-                    <span className="text-[11px] text-amber-800">ou indiquez votre classe dans le champ ci-dessous :</span>
-                  </div>
-                </div>
-              )}
 
               {/* Class & Subject Selectors */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -585,73 +577,63 @@ export function PreRegistrationModal({
                     <span className="text-rose-500">*</span>
                   </label>
 
-                  {availableClasses.length > 0 ? (
-                    <select
-                      value={classeId}
-                      onChange={(e) => {
-                        const selectedId = e.target.value;
-                        setClasseId(selectedId);
-                        setSelectedCourseId("");
-                        const chosenClass = classes.find((c) => c.id === selectedId);
-                        if (chosenClass?.etablissementId && establishmentId !== chosenClass.etablissementId) {
-                          setEstablishmentId(chosenClass.etablissementId);
-                        }
-                      }}
-                      required
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer shadow-sm"
-                    >
-                      <option value="">
-                        -- Choisissez une classe ({availableClasses.length} classe{availableClasses.length > 1 ? "s" : ""} disponible{availableClasses.length > 1 ? "s" : ""}) --
-                      </option>
+                  <select
+                    value={classeId}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      setClasseId(selectedId);
+                      setSelectedCourseId("");
+                      const chosenClass = classes.find((c) => c.id === selectedId);
+                      if (chosenClass?.etablissementId && establishmentId !== chosenClass.etablissementId) {
+                        setEstablishmentId(chosenClass.etablissementId);
+                      }
+                    }}
+                    required
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-indigo-500 transition-all cursor-pointer shadow-sm"
+                  >
+                    {availableClasses.length === 0 ? (
+                      <option value="">Chargement automatique des classes...</option>
+                    ) : (
+                      <>
+                        <option value="">
+                          -- Choisissez une classe ({availableClasses.length} classe{availableClasses.length > 1 ? "s" : ""} disponible{availableClasses.length > 1 ? "s" : ""}) --
+                        </option>
 
-                      {establishmentId === "ALL" ? (
-                        etablissements.map((est) => {
-                          const estClasses = classes.filter(
-                            (c) =>
-                              c.etablissementId === est.id ||
-                              c.etablissementId === est.subdomain ||
-                              (c.etablissementName && c.etablissementName.toLowerCase().includes(est.name.toLowerCase()))
-                          );
-                          if (estClasses.length === 0) return null;
-                          return (
-                            <optgroup key={est.id} label={`🏫 ${est.name} (${estClasses.length})`}>
-                              {estClasses.map((c) => {
-                                const cCourses = courses.filter((crs) => crs.classeId === c.id);
-                                return (
-                                  <option key={c.id} value={c.id}>
-                                    ✨ {c.title} ({c.classCode || c.level}) • {cCourses.length} cours • {c.enrolledCount || 0}/{c.capacity} élèves
-                                  </option>
-                                );
-                              })}
-                            </optgroup>
-                          );
-                        })
-                      ) : (
-                        availableClasses.map((c) => {
-                          const cCourses = courses.filter((crs) => crs.classeId === c.id);
-                          return (
-                            <option key={c.id} value={c.id}>
-                              ✨ {c.title} ({c.classCode || c.level}) • {cCourses.length} cours • {c.enrolledCount || 0}/{c.capacity} élèves
-                            </option>
-                          );
-                        })
-                      )}
-                    </select>
-                  ) : (
-                    <div className="space-y-1.5">
-                      <input
-                        type="text"
-                        required
-                        placeholder="Ex: Licence 1 Études Islamiques, Terminale S, 3ème A..."
-                        value={customClassName}
-                        onChange={(e) => setCustomClassName(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-indigo-200 text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all shadow-sm"
-                      />
-                      <p className="text-[10px] text-indigo-700">
-                        ✍️ Saisissez le nom de la classe. Elle sera automatiquement rattachée à cet établissement.
-                      </p>
-                    </div>
-                  )}
+                        {establishmentId === "ALL" ? (
+                          etablissements.map((est) => {
+                            const estClasses = classes.filter(
+                              (c) =>
+                                c.etablissementId === est.id ||
+                                c.etablissementId === est.subdomain ||
+                                (c.etablissementName && c.etablissementName.toLowerCase().includes(est.name.toLowerCase()))
+                            );
+                            if (estClasses.length === 0) return null;
+                            return (
+                              <optgroup key={est.id} label={`🏫 ${est.name} (${estClasses.length})`}>
+                                {estClasses.map((c) => {
+                                  const cCourses = courses.filter((crs) => crs.classeId === c.id);
+                                  return (
+                                    <option key={c.id} value={c.id}>
+                                      ✨ {c.title} ({c.classCode || c.level}) • {cCourses.length} cours • {c.enrolledCount || 0}/{c.capacity} élèves
+                                    </option>
+                                  );
+                                })}
+                              </optgroup>
+                            );
+                          })
+                        ) : (
+                          availableClasses.map((c) => {
+                            const cCourses = courses.filter((crs) => crs.classeId === c.id);
+                            return (
+                              <option key={c.id} value={c.id}>
+                                ✨ {c.title} ({c.classCode || c.level}) • {cCourses.length} cours • {c.enrolledCount || 0}/{c.capacity} élèves
+                              </option>
+                            );
+                          })
+                        )}
+                      </>
+                    )}
+                  </select>
                 </div>
 
                 {role === "TEACHER" ? (
@@ -812,7 +794,7 @@ export function PreRegistrationModal({
                       <p className="text-slate-500 text-[11px]">
                         {selectedClass
                           ? "Programme standard et polyvalent. Les cours et devoirs seront publiés par les professeurs dès le début des enseignements."
-                          : "Sélectionnez une classe ou initialisez les classes pour afficher la liste des matières à étudier."}
+                          : "Sélectionnez une classe pour afficher la liste des matières à étudier."}
                       </p>
                     )}
                   </div>
