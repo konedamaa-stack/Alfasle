@@ -27,6 +27,7 @@ import {
   Search,
   ArrowRight,
   Check,
+  Filter,
 } from "lucide-react";
 import { getVideoEmbedInfo, getPdfEmbedInfo, isStudentMatchingInscription } from "@/lib/utils";
 import { triggerDownload } from "@/lib/download";
@@ -763,6 +764,7 @@ export function CourseViewer({
           {/* 2. TABLEAU DES TITRES DISPONIBLES À ÉTUDIER (4 cols)                       */}
           {/* ========================================================================= */}
           <div className="lg:col-span-4 glass-panel rounded-2xl p-5 border border-slate-200 space-y-4 bg-white shadow-sm">
+            {/* Header */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-indigo-600" />
@@ -780,6 +782,92 @@ export function CourseViewer({
               <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700">
                 {visibleCourses.length} {visibleCourses.length > 1 ? "titres" : "titre"}
               </span>
+            </div>
+
+            {/* SÉLECTEUR & FILTRE DES DISCIPLINES DIRECTEMENT DANS CE TABLEAU */}
+            <div className="space-y-2 p-3 rounded-xl bg-slate-50 border border-slate-200/90 shadow-inner">
+              <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                <span className="flex items-center gap-1.5 text-indigo-700 font-extrabold">
+                  <Filter className="w-3.5 h-3.5" />
+                  <span>Filtrer par Matière / Discipline :</span>
+                </span>
+                {selectedDisciplineFilter !== "ALL" && (
+                  <button
+                    type="button"
+                    onClick={() => handleSelectDiscipline("ALL")}
+                    className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 underline cursor-pointer"
+                  >
+                    Voir tout ({allClassCourses.length})
+                  </button>
+                )}
+              </div>
+
+              {/* Menu déroulant sélecteur direct */}
+              <div className="relative">
+                <select
+                  value={selectedDisciplineFilter}
+                  onChange={(e) => handleSelectDiscipline(e.target.value)}
+                  className="w-full px-3 py-2 text-xs font-bold bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-sm cursor-pointer"
+                >
+                  <option value="ALL">✨ Toutes les matières ({allClassCourses.length} titres)</option>
+                  {classDisciplines.map((d) => {
+                    const icon = getDisciplineIcon(d);
+                    const count = allClassCourses.filter((c) => isDisciplineMatch(c.discipline, d)).length;
+                    return (
+                      <option key={d} value={d}>
+                        {icon} {d} ({count} {count > 1 ? "titres" : "titre"})
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              {/* Pastilles / Badges de filtrage rapide en 1 clic */}
+              <div className="flex flex-wrap gap-1 pt-1">
+                <button
+                  type="button"
+                  onClick={() => handleSelectDiscipline("ALL")}
+                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                    selectedDisciplineFilter === "ALL"
+                      ? "bg-indigo-600 text-white shadow-sm"
+                      : "bg-white text-slate-700 hover:bg-slate-200 border border-slate-200"
+                  }`}
+                  title="Afficher tous les cours de toutes les matières"
+                >
+                  <span>Toutes</span>
+                  <span className="text-[9px] opacity-80">({allClassCourses.length})</span>
+                </button>
+
+                {classDisciplines.map((d) => {
+                  const icon = getDisciplineIcon(d);
+                  const count = allClassCourses.filter((c) => isDisciplineMatch(c.discipline, d)).length;
+                  const isSelected = selectedDisciplineFilter.toLowerCase() === d.toLowerCase();
+
+                  return (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => handleSelectDiscipline(d)}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                        isSelected
+                          ? "bg-indigo-600 text-white shadow-sm"
+                          : "bg-white text-slate-700 hover:bg-indigo-50 border border-slate-200"
+                      }`}
+                      title={`Filtrer uniquement sur ${d}`}
+                    >
+                      <span>{icon}</span>
+                      <span className="truncate max-w-[100px]">{d}</span>
+                      <span
+                        className={`text-[9px] px-1 rounded ${
+                          isSelected ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Quick search input within titles */}
@@ -873,7 +961,14 @@ export function CourseViewer({
                       <div className="space-y-1.5 flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {c.discipline && (
-                            <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[9px] font-bold flex items-center gap-1">
+                            <span
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSelectDiscipline(c.discipline!);
+                              }}
+                              className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-indigo-100 hover:text-indigo-800 text-slate-700 text-[9px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                              title={`Cliquer pour filtrer uniquement sur la matière : ${c.discipline}`}
+                            >
                               <span>{icon}</span>
                               <span className="truncate max-w-[120px]">{c.discipline}</span>
                             </span>
