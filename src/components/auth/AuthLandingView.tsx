@@ -86,7 +86,7 @@ export function AuthLandingView({
         "Pilotez l'ensemble des activités, établissements, classes et paramètres de votre système éducatif.",
       roleSubtitle: "connexion en tant que directeur d'établissement",
       espaceTitle: "Espace Directeur (KONE ADAMA)",
-      espaceDesc: "Direction du Groupe Scolaire AlFasle (Abidjan) & Supervision Pédagogique",
+      espaceDesc: "Direction de l'établissement هيئة التدريس - جامعة النور الإسلامية & Supervision Pédagogique",
       defaultLogin: "konedamaa@gmail.com",
       defaultPass: "Madouu1966",
       cardBg: "from-[#c8a98d] via-[#ae8463] to-[#865d3d]",
@@ -151,10 +151,10 @@ export function AuthLandingView({
           email: "konedamaa@gmail.com",
           password: "Madouu1966",
           role: "ADMIN",
-          bio: "Directeur & Administrateur Principal du Groupe Scolaire AlFasle.",
+          bio: "Directeur de l'établissement هيئة التدريس - جامعة النور الإسلامية.",
           avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
-          etablissementId: "etab_gs_alfasle",
-          etablissementName: "Groupe Scolaire AlFasle",
+          etablissementId: "etab_1792343761588",
+          etablissementName: "هيئة التدريس - جامعة النور الإسلامية",
           createdAt: new Date().toISOString(),
         };
       } else {
@@ -237,10 +237,10 @@ export function AuthLandingView({
             email: "konedamaa@gmail.com",
             password: "Madouu1966",
             role: "ADMIN",
-            bio: "Directeur & Administrateur Principal du Groupe Scolaire AlFasle.",
+            bio: "Directeur de l'établissement هيئة التدريس - جامعة النور الإسلامية.",
             avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
-            etablissementId: "etab_gs_alfasle",
-            etablissementName: "Groupe Scolaire AlFasle",
+            etablissementId: "etab_1792343761588",
+            etablissementName: "هيئة التدريس - جامعة النور الإسلامية",
             createdAt: new Date().toISOString(),
           };
         } else {
@@ -321,10 +321,10 @@ export function AuthLandingView({
             email: "sanogo@gmail.com",
             password: inputPass || "Madouu1966",
             role: "ADMIN",
-            bio: "Directeur & Administrateur d'Établissement.",
+            bio: "Directeur de l'établissement RAYATIL ISLAM.",
             avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
-            etablissementId: "etab_gs_alfasle",
-            etablissementName: "Groupe Scolaire AlFasle",
+            etablissementId: "etab_1790534921442",
+            etablissementName: "RAYATIL ISLAM",
             createdAt: new Date().toISOString(),
           };
         } else {
@@ -446,8 +446,8 @@ export function AuthLandingView({
         email: identifier.includes("@") ? identifier.trim() : `${cleanId}@alfasle.edu`,
         role: "STUDENT",
         password: inputPass || "Madouu1966",
-        etablissementName: "Groupe Scolaire AlFasle",
-        bio: `Élève AlFasle`,
+        etablissementName: "هيئة التدريس - جامعة النور الإسلامية",
+        bio: `Élève de جامعة النور الإسلامية`,
         avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
         createdAt: new Date().toISOString(),
       };

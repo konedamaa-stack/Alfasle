@@ -59,8 +59,8 @@ export function AccountActivationModal({
   const targetEmail = activeIns?.userEmail || emailOrToken || "candidat@gmail.com";
   const targetName = activeIns?.userName || "Candidat";
   const targetRole = activeIns?.role || "STUDENT";
-  const targetSchool = activeIns?.etablissementName || "Groupe Scolaire AlFasle";
-  const targetClass = activeIns?.classeTitle || "Classe AlFasle";
+  const targetSchool = activeIns?.etablissementName || "هيئة التدريس - جامعة النور الإسلامية";
+  const targetClass = activeIns?.classeTitle || "Classe";
 
   React.useEffect(() => {
     if (isOpen) {
@@ -162,7 +162,7 @@ export function AccountActivationModal({
                     Sujet : [AlFasle] Confirmation de votre pré-inscription & Activation de votre compte
                   </p>
                   <p className="text-[11px] text-slate-500">
-                    De : <strong>admissions@gs-alfasle.edu</strong> (Direction AlFasle)
+                    De : <strong>admissions@an-nour.alfasle.xyz</strong> (Direction)
                   </p>
                 </div>
 

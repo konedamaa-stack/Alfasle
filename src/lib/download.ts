@@ -77,9 +77,9 @@ export function triggerDownload(options: DownloadFileOptions) {
       <body>
         <table>
           <tr>
-            <th colspan="2" style="font-size: 14pt; background-color: #047857;">GROUPE SCOLAIRE ALFASLE - DONNÉES DU DEVOIR</th>
+            <th colspan="2" style="font-size: 14pt; background-color: #047857;">ALFASLE — DONNÉES DU DEVOIR</th>
           </tr>
-          <tr><td style="font-weight:bold; background-color:#f0fdf4;">Établissement</td><td>Groupe Scolaire AlFasle</td></tr>
+          <tr><td style="font-weight:bold; background-color:#f0fdf4;">Établissement</td><td>Établissement Scolaire AlFasle</td></tr>
           <tr><td style="font-weight:bold; background-color:#f0fdf4;">Classe</td><td>${classeStr}</td></tr>
           <tr><td style="font-weight:bold; background-color:#f0fdf4;">Devoir</td><td>${titleHeader}</td></tr>
           <tr><td style="font-weight:bold; background-color:#f0fdf4;">Élève / Auteur</td><td>${author}</td></tr>
@@ -119,9 +119,9 @@ export function triggerDownload(options: DownloadFileOptions) {
         </style>
       </head>
       <body>
-        <h1>Groupe Scolaire AlFasle — Copie Numérique</h1>
+        <h1>AlFasle — Copie Numérique</h1>
         <div class="meta">
-          <div class="meta-item"><span class="label">Établissement :</span> Groupe Scolaire AlFasle</div>
+          <div class="meta-item"><span class="label">Établissement :</span> Établissement Scolaire AlFasle</div>
           <div class="meta-item"><span class="label">Classe :</span> ${classeStr}</div>
           <div class="meta-item"><span class="label">Devoir :</span> ${titleHeader}</div>
           <div class="meta-item"><span class="label">Élève :</span> ${author}</div>
@@ -141,9 +141,9 @@ export function triggerDownload(options: DownloadFileOptions) {
 
   // 3. Document PDF / Texte structuré
   const textContent = `===============================================================
-GROUPE SCOLAIRE ALFASLE — COPIE OFFICIELLE DU DEVOIR
+ALFASLE — COPIE OFFICIELLE DU DEVOIR
 ===============================================================
-Établissement   : Groupe Scolaire AlFasle
+Établissement   : Établissement Scolaire AlFasle
 Classe          : ${classeStr}
 Devoir          : ${titleHeader}
 Élève           : ${author}

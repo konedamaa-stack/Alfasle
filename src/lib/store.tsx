@@ -159,36 +159,51 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
             if (!hasSuperAdmin && initialData[0]) {
               merged.unshift(initialData[0]);
             }
-            merged = (merged as unknown as User[]).map((u) => {
-              if (u.etablissementName === "KOULIYAT" || u.etablissementId === "etab_1792343761588") {
-                return {
-                  ...u,
-                  etablissementName: "هيئة التدريس - جامعة النور الإسلامية",
-                };
-              }
-              return u;
-            }) as unknown as T[];
+            merged = (merged as unknown as User[])
+              .filter(
+                (u) =>
+                  (u.id !== "u_admin_kone" &&
+                    u.etablissementId !== "etab_gs_alfasle" &&
+                    !u.etablissementName?.toLowerCase().includes("groupe scolaire alfasle")) ||
+                  u.role === "SUPER_ADMIN"
+              )
+              .map((u) => {
+                if (u.etablissementName === "KOULIYAT" || u.etablissementId === "etab_1792343761588") {
+                  return {
+                    ...u,
+                    etablissementName: "هيئة التدريس - جامعة النور الإسلامية",
+                  };
+                }
+                return u;
+              }) as unknown as T[];
           }
 
           if (suffix === "etablissements") {
-            merged = (merged as unknown as Etablissement[]).map((e) => {
-              if (
-                e.id === "etab_1792343761588" ||
-                e.name === "KOULIYAT" ||
-                e.subdomain === "kouliyat"
-              ) {
-                return {
-                  ...e,
-                  name: "هيئة التدريس - جامعة النور الإسلامية",
-                  city: e.city || "DIVO",
-                  country: e.country || "Côte d'Ivoire",
-                  address: e.address || "Campus Universitaire An-Nour, Divo",
-                  description: "جامعة النور الإسلامية بمدينة ديفو - هيئة التدريس (Université Islamique An-Nour de Divo - U.I.N.D.).",
-                  logoUrl: "/logo-an-nour.png",
-                };
-              }
-              return e;
-            }) as unknown as T[];
+            merged = (merged as unknown as Etablissement[])
+              .filter(
+                (e) =>
+                  e.id !== "etab_gs_alfasle" &&
+                  e.subdomain !== "gs-alfasle" &&
+                  !e.name?.toLowerCase().includes("groupe scolaire alfasle")
+              )
+              .map((e) => {
+                if (
+                  e.id === "etab_1792343761588" ||
+                  e.name === "KOULIYAT" ||
+                  e.subdomain === "kouliyat"
+                ) {
+                  return {
+                    ...e,
+                    name: "هيئة التدريس - جامعة النور الإسلامية",
+                    city: e.city || "DIVO",
+                    country: e.country || "Côte d'Ivoire",
+                    address: e.address || "Campus Universitaire An-Nour, Divo",
+                    description: "جامعة النور الإسلامية بمدينة ديفو - هيئة التدريس (Université Islamique An-Nour de Divo - U.I.N.D.).",
+                    logoUrl: "/logo-an-nour.png",
+                  };
+                }
+                return e;
+              }) as unknown as T[];
           }
 
           if (suffix === "classes") {
@@ -203,10 +218,16 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
               "cls_islam_tc",
               "cls_gs_tle_d",
               "cls_gs_2nde_c",
+              "cls_gs_tle_sciences",
+              "cls_gs_tle_litterature",
             ]);
             let currentClasses = (merged as unknown as Classe[]).filter(
               (c) =>
                 !demoIds.has(c.id) &&
+                c.etablissementId !== "etab_gs_alfasle" &&
+                c.etablissementId !== "gs-alfasle" &&
+                !c.etablissementName?.toLowerCase().includes("groupe scolaire alfasle") &&
+                !c.id.includes("gs_tle") &&
                 !c.id.includes("nextjs") &&
                 !c.title?.toLowerCase().includes("next.js") &&
                 !c.title?.toLowerCase().includes("docker") &&
@@ -226,6 +247,15 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
             });
 
             merged = currentClasses as unknown as T[];
+          }
+
+          if (suffix === "inscriptions") {
+            merged = (merged as unknown as Inscription[]).filter(
+              (i) =>
+                i.etablissementId !== "etab_gs_alfasle" &&
+                i.etablissementId !== "gs-alfasle" &&
+                !i.etablissementName?.toLowerCase().includes("groupe scolaire alfasle")
+            ) as unknown as T[];
           }
 
           if (suffix === "courses") {
@@ -249,6 +279,9 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
             merged = (merged as unknown as Cours[]).filter(
               (crs) =>
                 !demoCourseIds.has(crs.id) &&
+                crs.classeId !== "cls_gs_tle_sciences" &&
+                crs.classeId !== "cls_gs_tle_litterature" &&
+                !crs.id.includes("gs_") &&
                 !crs.id.includes("nextjs") &&
                 !crs.id.includes("kouliyat") &&
                 !crs.id.includes("islam") &&
@@ -287,14 +320,18 @@ function loadInitialUser(defaultUser: User): User {
             };
             localStorage.setItem(`${STORAGE_PREFIX}currentUser`, JSON.stringify(parsed));
           }
-          // Mise à jour immédiate si l'établissement est KOULIYAT
+          // Mise à jour immédiate si l'établissement est KOULIYAT ou Groupe Scolaire AlFasle
           if (
             parsed.etablissementName === "KOULIYAT" ||
-            parsed.etablissementId === "etab_1792343761588"
+            parsed.etablissementId === "etab_1792343761588" ||
+            parsed.etablissementName === "Groupe Scolaire AlFasle" ||
+            parsed.etablissementId === "etab_gs_alfasle"
           ) {
             parsed = {
               ...parsed,
+              etablissementId: "etab_1792343761588",
               etablissementName: "هيئة التدريس - جامعة النور الإسلامية",
+              bio: "Directeur de l'établissement هيئة التدريس - جامعة النور الإسلامية.",
             };
             localStorage.setItem(`${STORAGE_PREFIX}currentUser`, JSON.stringify(parsed));
           }
@@ -1212,8 +1249,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         username: generatedUsername,
         password: data.newPassword,
         role: targetIns?.role || "STUDENT",
-        etablissementId: targetIns?.etablissementId || "etab_gs_alfasle",
-        etablissementName: targetIns?.etablissementName || "Groupe Scolaire AlFasle",
+        etablissementId: targetIns?.etablissementId || "etab_1792343761588",
+        etablissementName: targetIns?.etablissementName || "هيئة التدريس - جامعة النور الإسلامية",
         bio:
           targetIns?.diplomaOrBio ||
           (targetIns?.role === "TEACHER"
