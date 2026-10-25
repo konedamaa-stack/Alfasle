@@ -1654,6 +1654,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   // Assignments
   const createAssignment = (newAssignmentData: Omit<Devoir, "id" | "createdAt" | "submissionsCount" | "gradedCount">) => {
+    if (currentUser.role === "STUDENT") {
+      console.warn("Action interdite : Un élève ne peut pas créer de devoir.");
+      return;
+    }
     const newAssignment: Devoir = {
       ...newAssignmentData,
       id: `dev_${Date.now()}`,

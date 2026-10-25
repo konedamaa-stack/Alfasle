@@ -15,7 +15,7 @@ export function CreateAssignmentModal({
   onClose,
   defaultClassId,
 }: CreateAssignmentModalProps) {
-  const { classes, courses, createAssignment } = useStore();
+  const { currentUser, classes, courses, createAssignment } = useStore();
 
   const [classeId, setClasseId] = useState(defaultClassId || (classes[0]?.id || ""));
   const effectiveClasseId = classeId || defaultClassId || (classes[0]?.id || "");
@@ -39,7 +39,7 @@ export function CreateAssignmentModal({
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (!isOpen) return null;
+  if (!isOpen || currentUser.role === "STUDENT") return null;
 
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
