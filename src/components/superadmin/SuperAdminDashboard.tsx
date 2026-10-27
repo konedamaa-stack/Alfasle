@@ -385,14 +385,23 @@ export function SuperAdminDashboard({
       newCode.trim().toUpperCase() ||
       `ALF-${newType.substring(0, 3).toUpperCase()}-${Math.floor(10 + Math.random() * 90)}`;
 
+    const userSpecifiedSubdomain = newSubdomain.trim().toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-");
+    const nameSlug = newName.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-+|-+$/g, "");
+    const codeSlug = generatedCode.toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-");
+
     const autoSubdomain =
-      newSubdomain.trim().toLowerCase().replace(/[^a-z0-9]/g, "-") ||
-      newName.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-");
+      (userSpecifiedSubdomain && userSpecifiedSubdomain !== "-")
+        ? userSpecifiedSubdomain
+        : (nameSlug && nameSlug !== "-")
+        ? nameSlug
+        : (codeSlug && codeSlug !== "-")
+        ? codeSlug
+        : `campus-${Date.now().toString().slice(-4)}`;
 
     createEtablissement({
       name: newName,
       code: generatedCode,
-      subdomain: autoSubdomain || `campus-${Date.now().toString().slice(-4)}`,
+      subdomain: autoSubdomain,
       type: newType,
       city: newCity,
       country: newCountry,
@@ -452,10 +461,15 @@ export function SuperAdminDashboard({
     e.preventDefault();
     if (!editingEtab) return;
 
+    const cleanEditSubdomain =
+      editEtabSubdomain.trim().toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-").replace(/^-+|-+$/g, "") ||
+      editingEtab.code.toLowerCase().replace(/[^a-z0-9]/g, "") ||
+      `campus-${editingEtab.id.slice(-4)}`;
+
     updateEtablissement(editingEtab.id, {
       name: editEtabName.trim(),
       code: editEtabCode.trim().toUpperCase(),
-      subdomain: editEtabSubdomain.trim().toLowerCase().replace(/[^a-z0-9]/g, "-"),
+      subdomain: cleanEditSubdomain,
       type: editEtabType,
       city: editEtabCity.trim(),
       country: editEtabCountry.trim(),

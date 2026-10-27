@@ -122,7 +122,7 @@ interface StoreContextType {
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
-const STORAGE_PREFIX = "alfasle_v200_clean_";
+const STORAGE_PREFIX = "alfasle_v201_kouliyat_";
 
 const PRESERVED_EXACT_KEYS = new Set([
   "alfasle_session_active",
@@ -514,7 +514,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateEtablissement = (id: string, data: Partial<Etablissement>) => {
-    setEtablissements((prev) => prev.map((e) => (e.id === id ? { ...e, ...data } : e)));
+    setEtablissements((prev) => {
+      const next = prev.map((e) => (e.id === id ? { ...e, ...data } : e));
+      const target = next.find((e) => e.id === id);
+      if (target && isSupabaseConfigured()) {
+        supabase.from("etablissements").upsert(mapEtablissementToRow(target)).then(
+          ({ error }: any) => {
+            if (error) console.error("Erreur mise a jour etablissement Supabase:", error);
+          }
+        );
+      }
+      return next;
+    });
 
     if (data.name) {
       setClasses((prev) =>

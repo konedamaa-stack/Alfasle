@@ -1,9 +1,35 @@
 import { User, Etablissement, Classe, Inscription, Cours, Devoir, Soumission, AppNotification } from "@/types";
 
-// Établissements complètement vierges (0 établissements)
-export const initialEtablissements: Etablissement[] = [];
+// Établissement réel créé : جامعة النور الإسلامية (kouliyat)
+export const initialEtablissements: Etablissement[] = [
+  {
+    id: "etab_1793080550879",
+    name: "جامعة النور الإسلامية",
+    code: "DJA-001",
+    subdomain: "kouliyat",
+    type: "UNIVERSITE",
+    city: "DIVO",
+    country: "Côte d'Ivoire",
+    address: "DIVO",
+    phone: "0505617743",
+    email: "lamine@gmail.com",
+    description: "جامعة النور الإسلامية بمدينة ديفو (Université Islamique An-Nour de Divo - U.I.N.D.).",
+    logoUrl: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=150&auto=format&fit=crop&q=80",
+    coverImage: "https://images.unsplash.com/photo-1562774053-701939374585?w=800&auto=format&fit=crop&q=80",
+    directorName: "LAMINE",
+    directorEmail: "lamine@gmail.com",
+    directorPassword: "Madouu966",
+    status: "ACTIVE",
+    subscriptionPlan: "ENTERPRISE",
+    maxStudentsQuota: 500,
+    maxClassesQuota: 25,
+    classesCount: 0,
+    studentsCount: 0,
+    createdAt: "2026-10-27T05:55:50.879Z",
+  },
+];
 
-// Utilisateurs : UNIQUEMENT le compte Super Admin Master pour initialiser et administrer la plateforme
+// Utilisateurs : Super Admin Master + Directeur LAMINE
 export const initialUsers: User[] = [
   {
     id: "u_super_admin_root",
@@ -15,6 +41,19 @@ export const initialUsers: User[] = [
     bio: "Super Administrateur Global de la Plateforme AlFasle Multi-Établissements.",
     avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
     createdAt: "2026-10-27T00:00:00Z",
+  },
+  {
+    id: "u_dir_lamine",
+    name: "LAMINE (Directeur)",
+    username: "lamine",
+    email: "lamine@gmail.com",
+    password: "Madouu966",
+    role: "ADMIN",
+    etablissementId: "etab_1793080550879",
+    etablissementName: "جامعة النور الإسلامية",
+    bio: "Directeur de l'établissement جامعة النور الإسلامية.",
+    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+    createdAt: "2026-10-27T05:55:50.879Z",
   },
 ];
 
