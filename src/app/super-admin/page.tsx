@@ -22,13 +22,13 @@ export default function SuperAdminPage() {
     if (typeof window !== "undefined") {
       const isSession = localStorage.getItem("alfasle_session_active") === "true";
       const savedUserRole = localStorage.getItem("alfasle_user_role");
-      return isSession && (currentUser.role === "SUPER_ADMIN" || savedUserRole === "SUPER_ADMIN");
+      return isSession && (currentUser?.role === "SUPER_ADMIN" || savedUserRole === "SUPER_ADMIN");
     }
-    return currentUser.role === "SUPER_ADMIN";
+    return currentUser?.role === "SUPER_ADMIN";
   });
 
   useEffect(() => {
-    if (currentUser.role === "SUPER_ADMIN") {
+    if (currentUser?.role === "SUPER_ADMIN") {
       setIsAuthenticated(true);
     }
   }, [currentUser]);

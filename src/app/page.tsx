@@ -1,5 +1,7 @@
 "use client";
 
+import { School } from "lucide-react";
+
 import React, { useState, useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { MainAppLayout } from "@/components/layout/MainAppLayout";

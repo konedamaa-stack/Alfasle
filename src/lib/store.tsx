@@ -122,7 +122,7 @@ interface StoreContextType {
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
-const STORAGE_PREFIX = "alfasle_v100_purged_";
+const STORAGE_PREFIX = "alfasle_v200_clean_";
 
 const PRESERVED_EXACT_KEYS = new Set([
   "alfasle_session_active",
@@ -143,9 +143,7 @@ function cleanLegacyStorage() {
         if (k.startsWith(STORAGE_PREFIX)) continue;
 
         if (
-          k.startsWith("alfasle_v9") ||
-          k.startsWith("alfasle_v8") ||
-          k.startsWith("alfasle_demo_") ||
+          k.startsWith("alfasle") ||
           k === "classes" ||
           k === "courses" ||
           k === "inscriptions" ||
@@ -173,212 +171,12 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
         if (Array.isArray(parsed)) {
           let merged = [...parsed];
 
-          // Assurer que le compte Super Admin existe au minimum dans users et mise à jour KOULIYAT
+          // Assurer que le compte Super Admin Master existe toujours dans users
           if (suffix === "users") {
             const hasSuperAdmin = merged.some((u: any) => u.role === "SUPER_ADMIN");
             if (!hasSuperAdmin && initialData[0]) {
               merged.unshift(initialData[0]);
             }
-            merged = (merged as unknown as User[])
-              .filter(
-                (u) =>
-                  (u.id !== "u_admin_kone" &&
-                    u.etablissementId !== "etab_gs_alfasle" &&
-                    !u.etablissementName?.toLowerCase().includes("groupe scolaire alfasle")) ||
-                  u.role === "SUPER_ADMIN"
-              )
-              .map((u) => {
-                if (u.etablissementName === "KOULIYAT" || u.etablissementId === "etab_1792343761588") {
-                  return {
-                    ...u,
-                    etablissementName: "هيئة التدريس - جامعة النور الإسلامية",
-                  };
-                }
-                return u;
-              }) as unknown as T[];
-          }
-
-          if (suffix === "etablissements") {
-            merged = (merged as unknown as Etablissement[])
-              .filter(
-                (e) =>
-                  e.id !== "etab_gs_alfasle" &&
-                  e.subdomain !== "gs-alfasle" &&
-                  !e.name?.toLowerCase().includes("groupe scolaire alfasle")
-              )
-              .map((e) => {
-                if (
-                  e.id === "etab_1792343761588" ||
-                  e.name === "KOULIYAT" ||
-                  e.subdomain === "kouliyat"
-                ) {
-                  return {
-                    ...e,
-                    name: "هيئة التدريس - جامعة النور الإسلامية",
-                    city: e.city || "DIVO",
-                    country: e.country || "Côte d'Ivoire",
-                    address: e.address || "Campus Universitaire An-Nour, Divo",
-                    description: "جامعة النور الإسلامية بمدينة ديفو - هيئة التدريس (Université Islamique An-Nour de Divo - U.I.N.D.).",
-                    logoUrl: "/logo-an-nour.png",
-                  };
-                }
-                return e;
-              }) as unknown as T[];
-          }
-
-          if (suffix === "classes") {
-            const demoIds = new Set([
-              "cls_nextjs_mastery",
-              "cls_algo_data",
-              "cls_reseaux_telecoms",
-              "cls_cloud_distrib",
-              "cls_physique_chimie",
-              "cls_litterature_philo",
-              "cls_kouliyat_tc",
-              "cls_islam_tc",
-              "cls_gs_tle_d",
-              "cls_gs_2nde_c",
-              "cls_gs_tle_sciences",
-              "cls_gs_tle_litterature",
-            ]);
-            let currentClasses = (merged as unknown as Classe[]).filter(
-              (c) =>
-                !demoIds.has(c.id) &&
-                c.etablissementId !== "etab_gs_alfasle" &&
-                c.etablissementId !== "gs-alfasle" &&
-                !c.etablissementName?.toLowerCase().includes("groupe scolaire alfasle") &&
-                !c.id.includes("gs_tle") &&
-                !c.id.includes("nextjs") &&
-                !c.title?.toLowerCase().includes("next.js") &&
-                !c.title?.toLowerCase().includes("docker") &&
-                !c.title?.toLowerCase().includes("tronc commun")
-            );
-
-            // Garantir que chaque campus possède immédiatement ses classes officielles modèles
-            initialClasses.forEach((initCls) => {
-              const alreadyExists = currentClasses.some(
-                (c) =>
-                  c.id === initCls.id ||
-                  (c.etablissementId === initCls.etablissementId && c.title === initCls.title)
-              );
-              if (!alreadyExists) {
-                currentClasses.push(initCls);
-              }
-            });
-
-            currentClasses = currentClasses.map((c) => {
-              if (c.id === "cls_nour_etudes_arabes" && (!c.enrolledCount || c.enrolledCount < 1)) {
-                return { ...c, enrolledCount: 1 };
-              }
-              return c;
-            });
-
-            merged = currentClasses as unknown as T[];
-          }
-
-          if (suffix === "inscriptions") {
-            let currentInscriptions = (merged as unknown as Inscription[]).filter(
-              (i) =>
-                i.etablissementId !== "etab_gs_alfasle" &&
-                i.etablissementId !== "gs-alfasle" &&
-                !i.etablissementName?.toLowerCase().includes("groupe scolaire alfasle")
-            );
-
-            initialInscriptions.forEach((initIns) => {
-              const alreadyExists = currentInscriptions.some(
-                (ins) =>
-                  ins.id === initIns.id ||
-                  (ins.classeId === initIns.classeId && isStudentMatchingInscription(ins, initIns))
-              );
-              if (!alreadyExists) {
-                currentInscriptions.push(initIns);
-              }
-            });
-
-            merged = currentInscriptions as unknown as T[];
-          }
-
-          if (suffix === "assignments") {
-            let currentAssignments = (merged as unknown as Devoir[]).filter(
-              (a) =>
-                a.classeId !== "cls_gs_tle_sciences" &&
-                a.classeId !== "cls_gs_tle_litterature" &&
-                !a.id.includes("gs_")
-            );
-
-            initialAssignments.forEach((initAsg) => {
-              const alreadyExists = currentAssignments.some((a) => a.id === initAsg.id);
-              if (!alreadyExists) {
-                currentAssignments.push(initAsg);
-              }
-            });
-
-            merged = currentAssignments as unknown as T[];
-          }
-
-          if (suffix === "users") {
-            let currentUsers = (merged as unknown as User[]).filter(
-              (u) =>
-                u.etablissementId !== "etab_gs_alfasle" &&
-                !u.etablissementName?.toLowerCase().includes("groupe scolaire alfasle")
-            );
-
-            initialUsers.forEach((initU) => {
-              const alreadyExists = currentUsers.some(
-                (u) => u.id === initU.id || u.email.toLowerCase() === initU.email.toLowerCase()
-              );
-              if (!alreadyExists) {
-                currentUsers.push(initU);
-              }
-            });
-
-            merged = currentUsers as unknown as T[];
-          }
-
-          if (suffix === "courses") {
-            const demoCourseIds = new Set([
-              "crs_nextjs_01",
-              "crs_nextjs_02",
-              "crs_algo_01",
-              "crs_algo_02",
-              "crs_reseaux_01",
-              "crs_reseaux_02",
-              "crs_cloud_01",
-              "crs_cloud_02",
-              "crs_physique_01",
-              "crs_chimie_01",
-              "crs_philo_01",
-              "crs_kouliyat_intro",
-              "crs_islam_intro",
-              "crs_math_tle_d",
-              "crs_phys_2nde_c",
-            ]);
-            let currentCourses = (merged as unknown as Cours[]).filter(
-              (crs) =>
-                !demoCourseIds.has(crs.id) &&
-                crs.classeId !== "cls_gs_tle_sciences" &&
-                crs.classeId !== "cls_gs_tle_litterature" &&
-                !crs.id.includes("gs_") &&
-                !crs.id.includes("nextjs") &&
-                !crs.id.includes("kouliyat") &&
-                !crs.id.includes("islam") &&
-                !crs.classeId?.includes("nextjs") &&
-                !crs.title?.toLowerCase().includes("next.js") &&
-                !crs.title?.toLowerCase().includes("introduction")
-            );
-
-            initialCourses.forEach((initCrs) => {
-              const alreadyExists = currentCourses.some(
-                (c) =>
-                  c.id === initCrs.id ||
-                  (c.classeId === initCrs.classeId && c.title.toLowerCase() === initCrs.title.toLowerCase())
-              );
-              if (!alreadyExists) {
-                currentCourses.push(initCrs);
-              }
-            });
-
-            merged = currentCourses as unknown as T[];
           }
 
           return merged;
@@ -393,38 +191,12 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
 
 function loadInitialUser(defaultUser: User): User {
   if (typeof window !== "undefined") {
+    cleanLegacyStorage();
     try {
       const saved = localStorage.getItem(`${STORAGE_PREFIX}currentUser`);
       if (saved) {
-        let parsed = JSON.parse(saved);
+        const parsed = JSON.parse(saved);
         if (parsed && parsed.id && parsed.role) {
-          // Correction immédiate si sanogo a hérité du nom KONE ADAMA
-          if (
-            (parsed.email?.toLowerCase().includes("sanogo") || parsed.username?.toLowerCase() === "sanogo") &&
-            parsed.name?.includes("KONE")
-          ) {
-            parsed = {
-              ...parsed,
-              name: "M. SANOGO (Directeur)",
-              email: "sanogo@gmail.com",
-            };
-            localStorage.setItem(`${STORAGE_PREFIX}currentUser`, JSON.stringify(parsed));
-          }
-          // Mise à jour immédiate si l'établissement est KOULIYAT ou Groupe Scolaire AlFasle
-          if (
-            parsed.etablissementName === "KOULIYAT" ||
-            parsed.etablissementId === "etab_1792343761588" ||
-            parsed.etablissementName === "Groupe Scolaire AlFasle" ||
-            parsed.etablissementId === "etab_gs_alfasle"
-          ) {
-            parsed = {
-              ...parsed,
-              etablissementId: "etab_1792343761588",
-              etablissementName: "هيئة التدريس - جامعة النور الإسلامية",
-              bio: "Directeur de l'établissement هيئة التدريس - جامعة النور الإسلامية.",
-            };
-            localStorage.setItem(`${STORAGE_PREFIX}currentUser`, JSON.stringify(parsed));
-          }
           return parsed;
         }
       }
@@ -456,7 +228,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const [users, setUsers] = useState<User[]>(() => loadInitialData("users", initialUsers));
-  const [currentUser, setCurrentUser] = useState<User>(() => loadInitialUser(initialUsers[1])); // Default: Dr. Mahamadou DIAWARA (Directeur)
+  const [currentUser, setCurrentUser] = useState<User>(() => loadInitialUser(initialUsers[0])); // Default: Super Admin Master
   const [etablissements, setEtablissements] = useState<Etablissement[]>(() =>
     loadInitialData("etablissements", initialEtablissements)
   );
@@ -491,163 +263,42 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         supabase.from("inscriptions").select("*"),
       ]);
 
-      const demoEtabBlacklist = new Set(["etab_lycee_excellence", "etab_polytech_kone"]);
-      const demoClassBlacklist = new Set([
-        "cls_nextjs_mastery",
-        "cls_algo_data",
-        "cls_physique_chimie",
-        "cls_litterature_philo",
-        "cls_reseaux_telecoms",
-        "cls_cloud_distrib",
-        "cls_kouliyat_tc",
-        "cls_islam_tc",
-        "cls_gs_tle_d",
-        "cls_gs_2nde_c",
-      ]);
-      const demoCourseBlacklist = new Set([
-        "crs_nextjs_01",
-        "crs_nextjs_02",
-        "crs_algo_01",
-        "crs_algo_02",
-        "crs_physique_01",
-        "crs_chimie_01",
-        "crs_philo_01",
-        "crs_reseaux_01",
-        "crs_cloud_01",
-        "crs_kouliyat_intro",
-        "crs_islam_intro",
-        "crs_math_tle_d",
-        "crs_phys_2nde_c",
-      ]);
-
-      if (etabsRes.data && etabsRes.data.length > 0) {
+      if (etabsRes.data) {
         const fetchedEtabs = etabsRes.data.map(mapRowToEtablissement);
-        setEtablissements((prev) => {
-          const map = new Map<string, Etablissement>();
-          prev.forEach((e) => {
-            if (!demoEtabBlacklist.has(e.id)) map.set(e.id, e);
-          });
-          fetchedEtabs.forEach((e) => {
-            if (!demoEtabBlacklist.has(e.id)) {
-              if (e.id === "etab_1792343761588" || e.name === "KOULIYAT" || e.subdomain === "kouliyat") {
-                map.set(e.id, {
-                  ...e,
-                  name: "هيئة التدريس - جامعة النور الإسلامية",
-                  city: e.city || "DIVO",
-                  country: e.country || "Côte d'Ivoire",
-                  address: e.address || "Campus Universitaire An-Nour, Divo",
-                  description: "جامعة النور الإسلامية بمدينة ديفو - هيئة التدريس (Université Islamique An-Nour de Divo - U.I.N.D.).",
-                  logoUrl: "/logo-an-nour.png",
-                });
-              } else {
-                map.set(e.id, e);
-              }
-            }
-          });
-          return Array.from(map.values());
-        });
+        setEtablissements(fetchedEtabs);
       }
 
       let fetchedInscriptions: Inscription[] = [];
-      if (inscriptionsRes.data && inscriptionsRes.data.length > 0) {
+      if (inscriptionsRes.data) {
         fetchedInscriptions = inscriptionsRes.data.map(mapRowToInscription);
-        setInscriptions((prev) => {
-          const map = new Map<string, Inscription>();
-          prev.forEach((i) => {
-            if (i.etablissementId !== "etab_gs_alfasle" && !i.etablissementName?.toLowerCase().includes("groupe scolaire alfasle")) {
-              map.set(i.id, i);
-            }
-          });
-          fetchedInscriptions.forEach((i) => {
-            if (i.etablissementId !== "etab_gs_alfasle" && !i.etablissementName?.toLowerCase().includes("groupe scolaire alfasle")) {
-              map.set(i.id, i);
-            }
-          });
-          return Array.from(map.values());
-        });
+        setInscriptions(fetchedInscriptions);
       }
 
       // Compute approved student enrollments per class
       const classEnrollmentMap = new Map<string, number>();
-      const allActiveInscriptions = fetchedInscriptions.length > 0 ? fetchedInscriptions : initialInscriptions;
-      allActiveInscriptions.forEach((ins) => {
+      fetchedInscriptions.forEach((ins) => {
         if (ins.role === "STUDENT" && (ins.status === "APPROVED" || ins.status === "CONFIRMED")) {
           classEnrollmentMap.set(ins.classeId, (classEnrollmentMap.get(ins.classeId) || 0) + 1);
         }
       });
 
-      if (classesRes.data && classesRes.data.length > 0) {
-        const fetchedClasses = classesRes.data.map(mapRowToClasse);
-        setClasses((prev) => {
-          const map = new Map<string, Classe>();
-          prev.forEach((c) => {
-            if (
-              !demoClassBlacklist.has(c.id) &&
-              !c.id.includes("nextjs") &&
-              !c.id.includes("kouliyat") &&
-              !c.id.includes("islam") &&
-              !c.title?.toLowerCase().includes("next.js") &&
-              !c.title?.toLowerCase().includes("docker") &&
-              !c.title?.toLowerCase().includes("tronc commun") &&
-              !demoEtabBlacklist.has(c.etablissementId)
-            ) {
-              const enrolled = Math.max(c.enrolledCount || 0, classEnrollmentMap.get(c.id) || 0);
-              map.set(c.id, { ...c, enrolledCount: enrolled });
-            }
-          });
-          fetchedClasses.forEach((c) => {
-            if (
-              !demoClassBlacklist.has(c.id) &&
-              !c.id.includes("nextjs") &&
-              !c.id.includes("kouliyat") &&
-              !c.id.includes("islam") &&
-              !c.title?.toLowerCase().includes("next.js") &&
-              !c.title?.toLowerCase().includes("docker") &&
-              !c.title?.toLowerCase().includes("tronc commun") &&
-              !demoEtabBlacklist.has(c.etablissementId)
-            ) {
-              const enrolled = Math.max(c.enrolledCount || 0, classEnrollmentMap.get(c.id) || 0);
-              map.set(c.id, { ...c, enrolledCount: enrolled });
-            }
-          });
-          return Array.from(map.values());
+      if (classesRes.data) {
+        const fetchedClasses = classesRes.data.map((row: any) => {
+          const c = mapRowToClasse(row);
+          const enrolled = Math.max(c.enrolledCount || 0, classEnrollmentMap.get(c.id) || 0);
+          return { ...c, enrolledCount: enrolled };
         });
+        setClasses(fetchedClasses);
       }
 
-      if (coursesRes.data && coursesRes.data.length > 0) {
+      if (coursesRes.data) {
         const fetchedCourses: Cours[] = coursesRes.data.map(mapRowToCours);
-        setCourses((prev) => {
-          const map = new Map<string, Cours>();
-          prev.forEach((c) => {
-            if (!demoCourseBlacklist.has(c.id) && !c.id.includes("nextjs") && !demoClassBlacklist.has(c.classeId)) {
-              map.set(c.id, c);
-            }
-          });
-          fetchedCourses.forEach((c) => {
-            if (!demoCourseBlacklist.has(c.id) && !c.id.includes("nextjs") && !demoClassBlacklist.has(c.classeId)) {
-              map.set(c.id, c);
-            }
-          });
-          return Array.from(map.values());
-        });
+        setCourses(fetchedCourses);
       }
 
-      if (assignmentsRes.data && assignmentsRes.data.length > 0) {
+      if (assignmentsRes.data) {
         const fetchedAssignments: Devoir[] = assignmentsRes.data.map(mapRowToDevoir);
-        setAssignments((prev) => {
-          const map = new Map<string, Devoir>();
-          prev.forEach((a) => {
-            if (a.classeId !== "cls_gs_tle_sciences" && a.classeId !== "cls_gs_tle_litterature" && !a.id.includes("gs_")) {
-              map.set(a.id, a);
-            }
-          });
-          fetchedAssignments.forEach((a) => {
-            if (a.classeId !== "cls_gs_tle_sciences" && a.classeId !== "cls_gs_tle_litterature" && !a.id.includes("gs_")) {
-              map.set(a.id, a);
-            }
-          });
-          return Array.from(map.values());
-        });
+        setAssignments(fetchedAssignments);
       }
     } catch (err) {
       console.warn("Supabase initial sync:", err);

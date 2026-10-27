@@ -464,8 +464,8 @@ export function DirecteurDashboard({
 
     createClass({
       classCode: generatedCode,
-      etablissementId: currentEtab?.id || etablissements[0]?.id || "etab_lycee_excellence",
-      etablissementName: currentEtab?.name || etablissements[0]?.name || "Lycée d'Excellence AlFasle",
+      etablissementId: currentEtab?.id || etablissements[0]?.id || "",
+      etablissementName: currentEtab?.name || etablissements[0]?.name || "",
       title: newClassTitle.trim(),
       description: newClassDesc.trim() || `Classe officielle dispensée au sein de ${currentEtab?.name}.`,
       level: newClassLevel,
