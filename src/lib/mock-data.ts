@@ -57,8 +57,67 @@ export const initialUsers: User[] = [
   },
 ];
 
-// Classes complètement vierges (0 classes)
-export const initialClasses: Classe[] = [];
+// Classes officielles de جامعة النور الإسلامية pour les pré-inscriptions
+export const initialClasses: Classe[] = [
+  {
+    id: "cls_nour_etudes_arabes",
+    classCode: "ISL-ARB-01",
+    etablissementId: "etab_1793080550879",
+    etablissementName: "جامعة النور الإسلامية",
+    title: "شعبة الدراسات الإسلامية واللغة العربية",
+    description: "Formation complète en langue arabe, sciences du Coran, hadith et jurisprudence islamique.",
+    level: "Licence / Cursus Supérieur",
+    category: "الدراسات الإسلامية",
+    disciplines: [
+      "اللغة العربية (Langue Arabe)",
+      "Informatique",
+      "القرآن الكريم والتفسير (Coran & Tafsir)",
+      "الحديث الشريف وعلومه (Hadith)",
+      "الفقه الإسلامي وأصوله (Fiqh)",
+      "السيرة النبوية والتاريخ الإسلامي (Sira & Histoire)",
+      "العقيدة الإسلامية (Aqida)",
+    ],
+    capacity: 60,
+    enrolledCount: 0,
+    pendingCount: 0,
+    coursesCount: 0,
+    assignmentsCount: 0,
+    enrollmentMode: "OPEN",
+    status: "ACTIVE",
+    teacherId: "u_dir_lamine",
+    teacherName: "LAMINE (Directeur)",
+    createdAt: "2026-10-27T06:00:00Z",
+  },
+  {
+    id: "cls_nour_charia",
+    classCode: "ISL-SHAR-01",
+    etablissementId: "etab_1793080550879",
+    etablissementName: "جامعة النور الإسلامية",
+    title: "شعبة الشريعة والقانون والأصول",
+    description: "Spécialisation en droit islamique, jurisprudence comparée et législation.",
+    level: "Cursus Universitaire",
+    category: "الشريعة والقانون",
+    disciplines: [
+      "أصول الفقه (Ousoul al-Fiqh)",
+      "الفقه المقارن (Fiqh Comparé)",
+      "القواعد الفقهية (Règles Juridiques)",
+      "الأحوال الشخصية والمواريث (Successions)",
+      "القانون الخاص المقارن",
+      "Informatique",
+      "اللغة العربية (Arabe)",
+    ],
+    capacity: 50,
+    enrolledCount: 0,
+    pendingCount: 0,
+    coursesCount: 0,
+    assignmentsCount: 0,
+    enrollmentMode: "OPEN",
+    status: "ACTIVE",
+    teacherId: "u_dir_lamine",
+    teacherName: "LAMINE (Directeur)",
+    createdAt: "2026-10-27T06:00:00Z",
+  },
+];
 
 // Inscriptions / Candidatures complètement vierges (0 candidatures)
 export const initialInscriptions: Inscription[] = [];

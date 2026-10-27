@@ -122,7 +122,7 @@ interface StoreContextType {
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
-const STORAGE_PREFIX = "alfasle_v201_kouliyat_";
+const STORAGE_PREFIX = "alfasle_v202_classes_";
 
 const PRESERVED_EXACT_KEYS = new Set([
   "alfasle_session_active",

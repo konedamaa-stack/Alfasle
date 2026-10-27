@@ -76,10 +76,6 @@ export function mapClasseToRow(c: Classe): any {
     cover_image: c.coverImage,
     start_date: c.startDate,
     end_date: c.endDate,
-    enrolled_count: c.enrolledCount,
-    pending_count: c.pendingCount,
-    courses_count: c.coursesCount,
-    assignments_count: c.assignmentsCount,
     created_at: c.createdAt,
   };
 }
