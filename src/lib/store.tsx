@@ -328,28 +328,57 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       let fetchedInscriptions: Inscription[] = [];
       if (inscriptionsRes.data) {
         fetchedInscriptions = inscriptionsRes.data.map(mapRowToInscription);
+        const nowMs = Date.now();
         setInscriptions((prev) => {
           const fetchedIds = new Set(fetchedInscriptions.map((i) => i.id));
-          const localOnly = prev.filter((i) => !fetchedIds.has(i.id));
-          return [...fetchedInscriptions, ...localOnly];
+          // Garder uniquement les inscriptions créées localement il y a moins de 15 secondes (en cours d'envoi réseau)
+          const recentInFlight = prev.filter((i) => {
+            if (fetchedIds.has(i.id)) return false;
+            const createdMs = new Date(i.createdAt || i.appliedAt || 0).getTime();
+            return nowMs - createdMs < 15000;
+          });
+          return [...fetchedInscriptions, ...recentInFlight];
         });
 
-        // Synchroniser automatiquement la classe obligatoire choisie par chaque élève sur son profil User
+        // Synchroniser 100% les élèves avec Supabase (source unique de vérité entre tous les navigateurs)
         setUsers((prevUsers) => {
-          let updatedUsers = prevUsers.map((u) => {
+          // 1. Conserver les comptes non-élèves (SUPER_ADMIN, ADMIN, TEACHER, PARENT) + élèves créés il y a moins de 15s
+          const nonStudentOrRecentUsers = prevUsers.filter((u) => {
+            if (u.role !== "STUDENT") return true;
+            const matchesSupabase = fetchedInscriptions.some(
+              (ins) =>
+                ins.role === "STUDENT" &&
+                (ins.status === "APPROVED" || ins.status === "CONFIRMED" || ins.status === "PENDING") &&
+                isStudentMatchingInscription(u, ins)
+            );
+            if (matchesSupabase) return true;
+            const createdMs = new Date(u.createdAt || 0).getTime();
+            return nowMs - createdMs < 15000;
+          });
+
+          // 2. Mettre à jour chaque élève existant avec sa classe obligatoire et son mot de passe depuis Supabase
+          let updatedUsers = nonStudentOrRecentUsers.map((u) => {
             if (u.role !== "STUDENT") return u;
             const matchedIns = fetchedInscriptions.find((i) => isStudentMatchingInscription(u, i));
-            if (matchedIns && matchedIns.classeId) {
+            if (matchedIns) {
+              const cloudPassword =
+                matchedIns.reviewedBy && matchedIns.reviewedBy.startsWith("PWD:")
+                  ? matchedIns.reviewedBy.slice(4)
+                  : undefined;
               return {
                 ...u,
-                classeId: matchedIns.classeId,
+                phone: matchedIns.userPhone || u.phone,
+                password: cloudPassword || u.password || "Madouu1966@",
+                etablissementId: matchedIns.etablissementId || u.etablissementId,
+                etablissementName: matchedIns.etablissementName || u.etablissementName,
+                classeId: matchedIns.classeId || u.classeId,
                 classeTitle: matchedIns.classeTitle || u.classeTitle,
               };
             }
             return u;
           });
 
-          // S'assurer que tout élève validé (APPROVED / CONFIRMED) dans Supabase existe aussi dans users avec sa classe
+          // 3. Créer dans users tout élève validé (APPROVED / CONFIRMED) présent dans Supabase
           fetchedInscriptions.forEach((ins) => {
             if (ins.role === "STUDENT" && (ins.status === "APPROVED" || ins.status === "CONFIRMED")) {
               const exists = updatedUsers.some((u) => isStudentMatchingInscription(u, ins));
@@ -357,13 +386,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
                 const generatedUsername =
                   (ins.userEmail || ins.userName).split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "") ||
                   `eleve${Date.now().toString().slice(-4)}`;
+                const cloudPassword =
+                  ins.reviewedBy && ins.reviewedBy.startsWith("PWD:")
+                    ? ins.reviewedBy.slice(4)
+                    : "Madouu1966@";
                 updatedUsers.push({
                   id: ins.userId || `u_cand_${ins.id}`,
                   name: ins.userName,
                   email: ins.userEmail.toLowerCase(),
                   phone: ins.userPhone,
                   username: generatedUsername,
-                  password: "Madouu1966@",
+                  password: cloudPassword,
                   role: "STUDENT",
                   etablissementId: ins.etablissementId,
                   etablissementName: ins.etablissementName,
@@ -580,7 +613,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         createdAt: nowIso,
         appliedAt: nowIso,
         reviewedAt: nowIso,
-        reviewedBy: currentUser.name,
+        reviewedBy: newUser.password ? `PWD:${newUser.password}` : currentUser.name,
       };
       setInscriptions((prev) => [autoIns, ...prev]);
       if (isSupabaseConfigured()) {
@@ -611,9 +644,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       })
     );
 
-    if (enrichedData.classeId) {
+    if (enrichedData.classeId || enrichedData.password) {
       const targetUser = users.find((u) => u.id === id);
-      const clsTitle = enrichedData.classeTitle || targetClass?.title || "Classe choisie";
+      const clsId = enrichedData.classeId || targetUser?.classeId;
+      const clsTitle = enrichedData.classeTitle || targetClass?.title || targetUser?.classeTitle || "Classe choisie";
       setInscriptions((prev) => {
         const existingIdx = prev.findIndex(
           (i) => i.userId === id || (targetUser && isStudentMatchingInscription(i, targetUser))
@@ -624,8 +658,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             userId: id,
             userName: enrichedData.name || prev[existingIdx].userName,
             userEmail: enrichedData.email || prev[existingIdx].userEmail,
-            classeId: enrichedData.classeId!,
-            classeTitle: clsTitle,
+            classeId: clsId || prev[existingIdx].classeId,
+            classeTitle: clsTitle || prev[existingIdx].classeTitle,
+            reviewedBy: enrichedData.password
+              ? `PWD:${enrichedData.password}`
+              : prev[existingIdx].reviewedBy,
           };
           if (isSupabaseConfigured()) {
             supabase.from("inscriptions").upsert(mapInscriptionToRow(updatedIns)).then();
@@ -633,13 +670,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           const copy = [...prev];
           copy[existingIdx] = updatedIns;
           return copy;
-        } else if (targetUser) {
+        } else if (targetUser && clsId) {
           const nowIso = new Date().toISOString();
           const newIns: Inscription = {
             id: `ins_${Date.now()}`,
             etablissementId: targetUser.etablissementId || targetClass?.etablissementId,
             etablissementName: targetUser.etablissementName || targetClass?.etablissementName,
-            classeId: enrichedData.classeId!,
+            classeId: clsId,
             classeTitle: clsTitle,
             userId: id,
             userName: enrichedData.name || targetUser.name,
@@ -651,7 +688,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             createdAt: nowIso,
             appliedAt: nowIso,
             reviewedAt: nowIso,
-            reviewedBy: currentUser.name,
+            reviewedBy: (enrichedData.password || targetUser.password)
+              ? `PWD:${enrichedData.password || targetUser.password}`
+              : currentUser.name,
           };
           if (isSupabaseConfigured()) {
             supabase.from("inscriptions").upsert(mapInscriptionToRow(newIns)).then();
@@ -664,7 +703,20 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const deleteUser = (id: string) => {
+    const targetUser = users.find((u) => u.id === id);
     setUsers((prev) => prev.filter((u) => u.id !== id));
+    setInscriptions((prev) => {
+      const toDelete = prev.filter(
+        (i) => i.userId === id || (targetUser && isStudentMatchingInscription(i, targetUser))
+      );
+      if (isSupabaseConfigured() && toDelete.length > 0) {
+        toDelete.forEach((ins) => {
+          supabase.from("inscriptions").delete().eq("id", ins.id).then();
+        });
+      }
+      const deletedIds = new Set(toDelete.map((i) => i.id));
+      return prev.filter((i) => !deletedIds.has(i.id));
+    });
   };
 
   // Etablissement Management
@@ -1439,7 +1491,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         status: "APPROVED",
         emailConfirmed: true,
         reviewedAt: new Date().toISOString(),
-        reviewedBy: "Activation Email",
+        reviewedBy: data.newPassword ? `PWD:${data.newPassword}` : "Activation Email",
       };
 
       setInscriptions((prev) =>
