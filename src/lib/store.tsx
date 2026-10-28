@@ -315,7 +315,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       ]);
 
       if (etabsRes.data) {
-        const fetchedEtabs = etabsRes.data.map(mapRowToEtablissement);
+        const fetchedEtabs = etabsRes.data.map(mapRowToEtablissement).map((e) =>
+          // Migration: directeur LAMINE -> CHÉRIF (cherifladivo@gmail.com)
+          (e.directorEmail || "").toLowerCase() === "lamine@gmail.com" ||
+          (e.directorName || "").trim().toUpperCase() === "LAMINE"
+            ? { ...e, directorName: "CHÉRIF", directorEmail: "cherifladivo@gmail.com" }
+            : e
+        );
         setEtablissements(fetchedEtabs);
       }
 
