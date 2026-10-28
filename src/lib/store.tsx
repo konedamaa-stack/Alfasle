@@ -385,7 +385,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         const keysToRemove: string[] = [];
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
-          if (key && key.startsWith("alfasle")) {
+          if (
+            key &&
+            (key.startsWith("alfasle") ||
+              key.includes("active_tab") ||
+              key.includes("classes") ||
+              key.includes("courses") ||
+              key.includes("inscriptions") ||
+              key.includes("assignments") ||
+              key.includes("submissions") ||
+              key.includes("notifications"))
+          ) {
             keysToRemove.push(key);
           }
         }
@@ -394,6 +404,24 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         console.error("Erreur reset localStorage:", e);
       }
     }
+
+    if (isSupabaseConfigured()) {
+      Promise.all([
+        supabase.from("submissions").delete().neq("id", "non_existent_fake_id"),
+        supabase.from("corrections").delete().neq("id", "non_existent_fake_id"),
+        supabase.from("assignments").delete().neq("id", "non_existent_fake_id"),
+        supabase.from("courses").delete().neq("id", "non_existent_fake_id"),
+        supabase.from("inscriptions").delete().neq("id", "non_existent_fake_id"),
+        supabase.from("classes").delete().neq("id", "non_existent_fake_id"),
+        supabase.from("notifications").delete().neq("id", "non_existent_fake_id"),
+        supabase.from("etablissements").update({ classes_count: 0, students_count: 0 }).neq("id", "non_existent_fake_id"),
+      ]).then(() => {
+        if (typeof window !== "undefined") {
+          window.location.reload();
+        }
+      });
+    }
+
     setUsers(initialUsers);
     setEtablissements(initialEtablissements);
     setClasses(initialClasses);
@@ -709,7 +737,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setInscriptions([]);
     setAssignments([]);
     setSubmissions([]);
+    setNotifications([]);
     setUsers((prev) => prev.filter((u) => u.role === "ADMIN" || u.role === "SUPER_ADMIN"));
+
+    if (isSupabaseConfigured()) {
+      supabase.from("classes").delete().neq("id", "non_existent_fake_id").then();
+      supabase.from("courses").delete().neq("id", "non_existent_fake_id").then();
+      supabase.from("inscriptions").delete().neq("id", "non_existent_fake_id").then();
+      supabase.from("assignments").delete().neq("id", "non_existent_fake_id").then();
+      supabase.from("submissions").delete().neq("id", "non_existent_fake_id").then();
+      supabase.from("corrections").delete().neq("id", "non_existent_fake_id").then();
+      supabase.from("notifications").delete().neq("id", "non_existent_fake_id").then();
+      supabase.from("etablissements").update({ classes_count: 0, students_count: 0 }).neq("id", "non_existent_fake_id").then();
+    }
 
     if (typeof window !== "undefined") {
       try {
@@ -718,6 +758,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem(`${STORAGE_PREFIX}inscriptions`);
         localStorage.removeItem(`${STORAGE_PREFIX}assignments`);
         localStorage.removeItem(`${STORAGE_PREFIX}submissions`);
+        localStorage.removeItem(`${STORAGE_PREFIX}notifications`);
       } catch (_) {}
     }
   };
@@ -1120,6 +1161,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     if (existingUser) {
       activeUser = {
         ...existingUser,
+        phone: targetIns?.userPhone || existingUser.phone,
         password: data.newPassword,
         role: targetIns?.role || existingUser.role,
         etablissementId: targetIns?.etablissementId || existingUser.etablissementId,
@@ -1135,6 +1177,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         id: `u_act_${Date.now()}`,
         name: targetIns?.userName || targetEmail.split("@")[0],
         email: targetEmail,
+        phone: targetIns?.userPhone,
         username: generatedUsername,
         password: data.newPassword,
         role: targetIns?.role || "STUDENT",
@@ -1277,6 +1320,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         id: `u_cand_${Date.now()}`,
         name: targetIns.userName,
         email: targetIns.userEmail.toLowerCase(),
+        phone: targetIns.userPhone,
         username: generatedUsername,
         password: "Madouu1966@",
         role: targetIns.role || "STUDENT",

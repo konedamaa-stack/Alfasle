@@ -37,7 +37,7 @@ export function AuthLandingView({
   onOpenSuperAdmin,
   onSelectSubdomainSchool,
 }: AuthLandingViewProps) {
-  const { users, currentUser, setCurrentUser, etablissements, classes, resetStoreToDefaults } = useStore();
+  const { users, currentUser, setCurrentUser, etablissements, classes, inscriptions, resetStoreToDefaults } = useStore();
 
   const [selectedRole, setSelectedRole] = useState<UserRole>("ADMIN");
   const [identifier, setIdentifier] = useState("konedamaa@gmail.com");
@@ -218,7 +218,7 @@ export function AuthLandingView({
         cleanId === "konedma";
 
       if (isDirectorKone) {
-        if (inputPass && inputPass !== "Madouu1966" && inputPass !== "Madouu1966@" && inputPass !== "admin") {
+        if (!inputPass || (inputPass !== "Madouu1966" && inputPass !== "Madouu1966@" && inputPass !== "admin")) {
           setErrorMsg("Mot de passe incorrect pour le compte Directeur (utilisez Madouu1966).");
           return;
         }
@@ -260,11 +260,16 @@ export function AuthLandingView({
         return;
       }
 
-            const isDirectorDiawara =
+      const isDirectorDiawara =
         cleanId === "diawara@gmail.com" ||
         cleanId === "diawara";
 
       if (isDirectorDiawara) {
+        if (!inputPass || (inputPass !== "Madouu1966" && inputPass !== "Madouu1966@" && inputPass !== "admin")) {
+          setErrorMsg("Mot de passe incorrect pour le compte Directeur.");
+          return;
+        }
+
         let dirUser = users.find(
           (u) =>
             u.email.toLowerCase() === "diawara@gmail.com" ||
@@ -277,7 +282,7 @@ export function AuthLandingView({
             name: "Dr. Mahamadou DIAWARA",
             username: "diawara",
             email: "diawara@gmail.com",
-            password: inputPass || "Madouu1966",
+            password: "Madouu1966",
             role: "ADMIN",
             bio: "Directeur Général du Lycée d'Excellence AlFasle (Yamoussoukro).",
             avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
@@ -307,6 +312,11 @@ export function AuthLandingView({
         cleanId === "sanogo";
 
       if (isDirectorSanogo) {
+        if (!inputPass || (inputPass !== "Madouu1966" && inputPass !== "Madouu1966@" && inputPass !== "admin")) {
+          setErrorMsg("Mot de passe incorrect pour le compte Directeur.");
+          return;
+        }
+
         let dirUser = users.find(
           (u) =>
             u.email.toLowerCase() === "sanogo@gmail.com" ||
@@ -319,7 +329,7 @@ export function AuthLandingView({
             name: "M. SANOGO (Directeur)",
             username: "sanogo",
             email: "sanogo@gmail.com",
-            password: inputPass || "Madouu1966",
+            password: "Madouu1966",
             role: "ADMIN",
             bio: "Directeur de l'établissement RAYATIL ISLAM.",
             avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
@@ -346,7 +356,7 @@ export function AuthLandingView({
       }
     }
 
-    // Super Admin Master Shortcut (only when role is SUPER_ADMIN or user types superadmin / root)
+    // Super Admin Master Shortcut
     const isSuperAdmin =
       (selectedRole === "SUPER_ADMIN" || cleanId === "superadmin" || cleanId === "root") &&
       (cleanId === "konedamaa@gmail.com" ||
@@ -356,7 +366,7 @@ export function AuthLandingView({
         cleanId === "root");
 
     if (isSuperAdmin) {
-      if (inputPass && inputPass !== "Madouu1966" && inputPass !== "Madouu1966@" && inputPass !== "admin") {
+      if (!inputPass || (inputPass !== "Madouu1966" && inputPass !== "Madouu1966@" && inputPass !== "admin")) {
         setErrorMsg("Mot de passe incorrect pour le compte Super Admin Master.");
         return;
       }
@@ -395,95 +405,93 @@ export function AuthLandingView({
       return;
     }
 
-    // 1. Search for matching user: exact email or username match
-    let matchedUser = users.find(
-      (u) =>
-        u.email.toLowerCase() === cleanId ||
-        (u.username && u.username.toLowerCase() === cleanId)
-    );
+    const norm = (s: string) =>
+      s.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-    // 2. Exact match with role preference if not found
-    if (!matchedUser) {
-      matchedUser = users.find(
-        (u) =>
-          (u.email.toLowerCase() === cleanId ||
-            (u.username && u.username.toLowerCase() === cleanId)) &&
-          u.role === selectedRole
+    const normPhone = (p?: string) => (p || "").replace(/[^0-9]/g, "");
+    const normId = norm(cleanId);
+    const cleanDigits = normPhone(cleanId);
+    const isPotentialPhone = cleanDigits.length >= 6;
+
+    const phoneMatches = (p?: string) => {
+      if (!isPotentialPhone || !p) return false;
+      const uDigits = normPhone(p);
+      if (uDigits.length < 6) return false;
+      return (
+        cleanDigits === uDigits ||
+        cleanDigits.endsWith(uDigits) ||
+        uDigits.endsWith(cleanDigits)
       );
-    }
+    };
 
-    // 3. Name matches (exact, starts with, or includes)
-    if (!matchedUser) {
-      matchedUser = users.find((u) => u.name.toLowerCase() === cleanId);
-    }
-    if (!matchedUser) {
-      matchedUser = users.find(
-        (u) =>
-          u.name.toLowerCase().includes(cleanId) &&
-          (u.role === selectedRole || selectedRole === "ADMIN")
-      );
-    }
-    if (!matchedUser) {
-      matchedUser = users.find(
-        (u) =>
-          u.name.toLowerCase().includes(cleanId) ||
-          u.email.toLowerCase().includes(cleanId) ||
-          (u.username && u.username.toLowerCase() === cleanId)
-      );
-    }
-
-    // 4. Fallback: first user with the selected role if still not found
-    if (!matchedUser && cleanId.length === 0) {
-      matchedUser = users.find((u) => u.role === selectedRole);
-    }
-
-    // 5. Direct Student Fallback by Identifiant Élève
-    if (!matchedUser && selectedRole === "STUDENT" && cleanId.length > 0) {
-      const isAlama = cleanId.includes("alama");
-      const alamaPreset = users.find((u) => u.id === "u_student_alama" || u.name === "DIAWARA ALAMA");
-
-      if (isAlama && alamaPreset) {
-        matchedUser = alamaPreset;
-      } else {
-        matchedUser = {
-          id: isAlama ? "u_student_alama" : `u_student_${cleanId.replace(/[^a-z0-9]/g, "_")}`,
-          name: isAlama ? "DIAWARA ALAMA" : identifier.trim(),
-          username: isAlama ? "alama" : cleanId,
-          email: identifier.includes("@") ? identifier.trim() : `${isAlama ? "alama" : cleanId}@alfasle.edu`,
-          role: "STUDENT",
-          password: inputPass || "Madouu1966",
-          etablissementId: "etab_1792343761588",
-          etablissementName: "هيئة التدريس - جامعة النور الإسلامية",
-          bio: `Élève de جامعة النور الإسلامية`,
-          avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
-          createdAt: new Date().toISOString(),
-        };
+    // Checks if a user matches the identifier:
+    // 1. Exact email match
+    // 2. Exact username match
+    // 3. Exact full name match
+    // 4. Exact word match in full name (e.g. "KONE" or "FATOU" for "KONE FATOU")
+    // 5. Phone number match (direct on user or through inscriptions)
+    const matchesUser = (u: User) => {
+      if (norm(u.email) === normId) return true;
+      if (u.username && norm(u.username) === normId) return true;
+      if (norm(u.name) === normId) return true;
+      const nameWords = norm(u.name)
+        .replace(/[()[\],.:;!?"'-]/g, " ")
+        .split(/\s+/)
+        .filter(Boolean);
+      if (normId.length >= 2 && nameWords.some((w) => w === normId)) return true;
+      if (phoneMatches(u.phone)) return true;
+      if (
+        isPotentialPhone &&
+        inscriptions.some(
+          (ins) =>
+            (ins.userId === u.id || ins.userEmail.toLowerCase() === u.email.toLowerCase()) &&
+            phoneMatches(ins.userPhone)
+        )
+      ) {
+        return true;
       }
+      return false;
+    };
+
+    // 1. Search for matching candidates with selected role preference
+    let candidates = users.filter((u) => matchesUser(u) && u.role === selectedRole);
+
+    // 2. If no candidate found in selected role, search across all users
+    if (candidates.length === 0) {
+      candidates = users.filter((u) => matchesUser(u));
     }
 
-    if (matchedUser) {
-      // Validate password
-      const expectedPass = (matchedUser.password || "Madouu1966@").trim();
+    if (candidates.length === 0) {
+      setErrorMsg("Identifiant ou email introuvable. Veuillez vérifier vos identifiants ou contacter l'administration.");
+      return;
+    }
+
+    if (!inputPass) {
+      setErrorMsg("Veuillez saisir votre mot de passe.");
+      return;
+    }
+
+    // Among candidates matching the name, find the user whose password strictly matches
+    let matchedUser = candidates.find((u) => {
+      const expectedPass = (u.password || "Madouu1966@").trim();
       const isMasterPass = inputPass === "Madouu1966@" || inputPass === "admin";
-      const isCorrectPass = inputPass === expectedPass || isMasterPass;
+      return inputPass === expectedPass || isMasterPass;
+    });
 
-      if (inputPass && !isCorrectPass) {
-        setErrorMsg("Mot de passe incorrect pour cet identifiant.");
-        return;
-      }
-
-      setCurrentUser(matchedUser);
-
-      if (typeof window !== "undefined") {
-        try {
-          localStorage.setItem("alfasle_session_active", "true");
-          localStorage.setItem("alfasle_active_tab", "dashboard");
-        } catch (_) {}
-      }
-      onLoginSuccess();
-    } else {
-      setErrorMsg("Identifiant ou email introuvable. Veuillez vérifier ou créer le compte dans le Super Admin.");
+    if (!matchedUser) {
+      setErrorMsg("Mot de passe incorrect pour cet identifiant.");
+      return;
     }
+
+    setCurrentUser(matchedUser);
+
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("alfasle_session_active", "true");
+        localStorage.setItem("alfasle_active_tab", "dashboard");
+      } catch (_) {}
+    }
+    onLoginSuccess();
   };
 
   const handleDirectDemoLogin = (user: User) => {
@@ -729,7 +737,7 @@ export function AuthLandingView({
                 <div>
                   <label className="block text-slate-700 font-medium mb-1.5">
                     {selectedRole === "STUDENT"
-                      ? "Identifiant Élève *"
+                      ? "Identifiant, Nom, Prénom ou Téléphone *"
                       : selectedRole === "ADMIN"
                       ? "Identifiant Direction / Email *"
                       : selectedRole === "TEACHER"
@@ -745,8 +753,8 @@ export function AuthLandingView({
                     onChange={(e) => setIdentifier(e.target.value)}
                     placeholder={
                       selectedRole === "STUDENT"
-                        ? "Identifiant Élève (ex: KONE, matricule...)"
-                        : "ex: KONE ou admin@gmail.com"
+                        ? "ex: KONE, FATOU ou 0701020304"
+                        : "ex: KONE, téléphone ou admin@gmail.com"
                     }
                     className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs transition-all shadow-sm"
                   />

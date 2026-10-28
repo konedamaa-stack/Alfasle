@@ -7,6 +7,7 @@ export interface User {
   role: UserRole;
   password?: string;
   username?: string;
+  phone?: string;
   avatarUrl?: string;
   bio?: string;
   etablissementId?: string;

@@ -156,3 +156,15 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function DELETE() {
+  try {
+    memoryInscriptions = [];
+    if (isSupabaseConfigured()) {
+      await supabase.from("inscriptions").delete().neq("id", "non_existent_fake_id");
+    }
+    return NextResponse.json({ success: true, message: "Toutes les inscriptions ont été supprimées." });
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err?.message }, { status: 500 });
+  }
+}

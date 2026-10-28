@@ -138,7 +138,7 @@ export function SchoolSubdomainPortal({
         cleanId === "konedama";
 
       if (isDirectorKone) {
-        if (inputPass && inputPass !== "Madouu1966" && inputPass !== "Madouu1966@" && inputPass !== "admin") {
+        if (!inputPass || (inputPass !== "Madouu1966" && inputPass !== "Madouu1966@" && inputPass !== "admin")) {
           setErrorMsg("Mot de passe incorrect pour le compte Directeur (utilisez Madouu1966).");
           return;
         }
@@ -171,6 +171,11 @@ export function SchoolSubdomainPortal({
         cleanId === "sanogo";
 
       if (isDirectorSanogo) {
+        if (!inputPass || (inputPass !== "Madouu1966" && inputPass !== "Madouu1966@" && inputPass !== "admin")) {
+          setErrorMsg("Mot de passe incorrect pour le compte Directeur.");
+          return;
+        }
+
         let dirUser = users.find(
           (u) =>
             u.email.toLowerCase() === "sanogo@gmail.com" ||
@@ -184,7 +189,7 @@ export function SchoolSubdomainPortal({
             email: "sanogo@gmail.com",
             username: "sanogo",
             role: "ADMIN",
-            password: inputPass || "Madouu1966",
+            password: "Madouu1966",
             etablissementId: etablissement.id,
             etablissementName: etablissement.name,
             bio: `Directeur officiel de ${etablissement.name}`,
@@ -213,44 +218,36 @@ export function SchoolSubdomainPortal({
         (u) =>
           (u.email.toLowerCase() === cleanId ||
             (u.username && u.username.toLowerCase() === cleanId) ||
-            u.name.toLowerCase().includes(cleanId)) &&
+            u.name.toLowerCase() === cleanId) &&
           u.role === "ADMIN"
       );
 
-      if (!dirUser) {
-        dirUser = {
-          id: `u_dir_${etablissement.id}`,
-          name: etablissement.directorName || identifier.trim() || "Direction de l'Établissement",
-          email: identifier.includes("@")
-            ? identifier.trim()
-            : etablissement.directorEmail || `${etablissement.subdomain}.directeur@alfasle.edu`,
-          username: identifier.trim().toLowerCase(),
-          role: "ADMIN",
-          password: inputPass || "Madouu1966",
-          etablissementId: etablissement.id,
-          etablissementName: etablissement.name,
-          bio: `Directeur officiel de ${etablissement.name}`,
-          createdAt: new Date().toISOString(),
-        };
-      } else {
+      if (dirUser) {
+        const expectedPass = (dirUser.password || "Madouu1966").trim();
+        const isMasterPass = inputPass === "Madouu1966@" || inputPass === "admin";
+        if (!inputPass || (inputPass !== expectedPass && !isMasterPass)) {
+          setErrorMsg("Mot de passe incorrect pour le compte Directeur.");
+          return;
+        }
+
         dirUser = {
           ...dirUser,
           role: "ADMIN",
           etablissementId: etablissement.id,
           etablissementName: etablissement.name,
         };
-      }
 
-      if (typeof window !== "undefined") {
-        localStorage.setItem("alfasle_active_tab", "dashboard");
-        localStorage.setItem("alfasle_user_role", "ADMIN");
+        if (typeof window !== "undefined") {
+          localStorage.setItem("alfasle_active_tab", "dashboard");
+          localStorage.setItem("alfasle_user_role", "ADMIN");
+        }
+        setCurrentUser(dirUser);
+        onLoginSuccess();
+        return;
       }
-      setCurrentUser(dirUser);
-      onLoginSuccess();
-      return;
     }
 
-    // Super Admin Master Shortcut (only if not logging in as ADMIN)
+    // Super Admin Master Shortcut
     const isSuperAdmin =
       cleanId === "superadmin" ||
       cleanId === "root" ||
@@ -259,7 +256,7 @@ export function SchoolSubdomainPortal({
       cleanId === "konedamaa";
 
     if (isSuperAdmin) {
-      if (inputPass && inputPass !== "Madouu1966" && inputPass !== "Madouu1966@" && inputPass !== "admin") {
+      if (!inputPass || (inputPass !== "Madouu1966" && inputPass !== "Madouu1966@" && inputPass !== "admin")) {
         setErrorMsg("Mot de passe incorrect pour le compte Super Admin Master.");
         return;
       }
@@ -297,119 +294,98 @@ export function SchoolSubdomainPortal({
       return;
     }
 
-    // 1. Exact match on username or email
-    let matchedUser = users.find(
-      (u) =>
-        u.email.toLowerCase() === cleanId ||
-        (u.username && u.username.toLowerCase() === cleanId)
-    );
+    const norm = (s: string) =>
+      s.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-    // 2. Exact match with role preference
-    if (!matchedUser) {
-      matchedUser = users.find(
-        (u) =>
-          (u.email.toLowerCase() === cleanId ||
-            (u.username && u.username.toLowerCase() === cleanId)) &&
-          u.role === selectedRole
+    const normPhone = (p?: string) => (p || "").replace(/[^0-9]/g, "");
+    const normId = norm(cleanId);
+    const cleanDigits = normPhone(cleanId);
+    const isPotentialPhone = cleanDigits.length >= 6;
+
+    const phoneMatches = (p?: string) => {
+      if (!isPotentialPhone || !p) return false;
+      const uDigits = normPhone(p);
+      if (uDigits.length < 6) return false;
+      return (
+        cleanDigits === uDigits ||
+        cleanDigits.endsWith(uDigits) ||
+        uDigits.endsWith(cleanDigits)
       );
+    };
+
+    // Checks if a user matches the identifier:
+    // 1. Exact email match
+    // 2. Exact username match
+    // 3. Exact full name match
+    // 4. Exact word match in full name (e.g. "KONE" or "FATOU" for "KONE FATOU")
+    // 5. Phone number match (direct on user or through inscriptions)
+    const matchesUser = (u: User) => {
+      if (norm(u.email) === normId) return true;
+      if (u.username && norm(u.username) === normId) return true;
+      if (norm(u.name) === normId) return true;
+      const nameWords = norm(u.name)
+        .replace(/[()[\],.:;!?"'-]/g, " ")
+        .split(/\s+/)
+        .filter(Boolean);
+      if (normId.length >= 2 && nameWords.some((w) => w === normId)) return true;
+      if (phoneMatches(u.phone)) return true;
+      if (
+        isPotentialPhone &&
+        inscriptions.some(
+          (ins) =>
+            (ins.userId === u.id || ins.userEmail.toLowerCase() === u.email.toLowerCase()) &&
+            phoneMatches(ins.userPhone)
+        )
+      ) {
+        return true;
+      }
+      return false;
+    };
+
+    // 1. Match candidates with role preference on this school
+    let candidates = users.filter((u) => matchesUser(u) && u.role === selectedRole);
+
+    // 2. Fallback search across all users
+    if (candidates.length === 0) {
+      candidates = users.filter((u) => matchesUser(u));
     }
 
-    // 3. Name match
-    if (!matchedUser) {
-      matchedUser = users.find((u) => u.name.toLowerCase() === cleanId);
-    }
-    if (!matchedUser) {
-      matchedUser = users.find(
-        (u) =>
-          u.name.toLowerCase().includes(cleanId) &&
-          u.role === selectedRole
-      );
-    }
-    if (!matchedUser) {
-      matchedUser = users.find(
-        (u) =>
-          u.name.toLowerCase().includes(cleanId) ||
-          u.email.toLowerCase().includes(cleanId) ||
-          (u.username && u.username.toLowerCase() === cleanId)
-      );
+    if (candidates.length === 0) {
+      setErrorMsg("Identifiant ou email introuvable sur cet établissement.");
+      return;
     }
 
-    // 4. Fallback
-    if (!matchedUser && cleanId.length === 0) {
-      matchedUser = users.find((u) => u.role === selectedRole);
+    if (!inputPass) {
+      setErrorMsg("Veuillez saisir votre mot de passe.");
+      return;
     }
 
-    // 5. Direct Director / Admin Fallback on this campus
-    if (
-      !matchedUser &&
-      ((etablissement.directorEmail &&
-        etablissement.directorEmail.toLowerCase().includes(cleanId)) ||
-        (etablissement.directorName &&
-          etablissement.directorName.toLowerCase().includes(cleanId)) ||
-        cleanId.includes("directeur") ||
-        cleanId.includes("direction") ||
-        cleanId.includes("admin"))
-    ) {
-      matchedUser = {
-        id: `u_dir_${etablissement.id}`,
-        name: etablissement.directorName || identifier.trim() || "Directeur de l'Établissement",
-        email: identifier.includes("@")
-          ? identifier.trim()
-          : etablissement.directorEmail || `${etablissement.subdomain}.directeur@alfasle.edu`,
-        username: identifier.trim().toLowerCase(),
-        role: "ADMIN",
-        password: inputPass || "Madouu1966@",
-        etablissementId: etablissement.id,
-        etablissementName: etablissement.name,
-        bio: `Directeur & Administrateur officiel de ${etablissement.name}`,
-        createdAt: new Date().toISOString(),
-      };
-    }
-
-    // 6. Direct Student Fallback on this campus by Identifiant Élève
-    if (!matchedUser && selectedRole === "STUDENT" && cleanId.length > 0) {
-      matchedUser = {
-        id: `u_student_${cleanId.replace(/[^a-z0-9]/g, "_")}`,
-        name: identifier.trim(),
-        username: cleanId,
-        email: identifier.includes("@") ? identifier.trim() : `${cleanId}@${etablissement.subdomain}.alfasle.edu`,
-        role: "STUDENT",
-        password: inputPass || "Madouu1966",
-        etablissementId: etablissement.id,
-        etablissementName: etablissement.name,
-        bio: `Élève à ${etablissement.name}`,
-        avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
-        createdAt: new Date().toISOString(),
-      };
-    }
-
-    if (matchedUser) {
-      const expectedPass = (matchedUser.password || "Madouu1966@").trim();
+    // Among candidates matching the name, find the user whose password strictly matches
+    let matchedUser = candidates.find((u) => {
+      const expectedPass = (u.password || "Madouu1966@").trim();
       const isMasterPass = inputPass === "Madouu1966@" || inputPass === "admin";
-      const isCorrectPass = inputPass === expectedPass || isMasterPass;
+      return inputPass === expectedPass || isMasterPass;
+    });
 
-      if (inputPass && !isCorrectPass) {
-        setErrorMsg("Mot de passe incorrect pour cet identifiant.");
+    if (!matchedUser) {
+      setErrorMsg("Mot de passe incorrect pour cet identifiant.");
+      return;
+    }
+
+    if (matchedUser.role === "SUPER_ADMIN") {
+      setCurrentUser(matchedUser);
+      if (typeof window !== "undefined") {
+        window.location.href = "/super-admin";
         return;
       }
-
-      if (matchedUser.role === "SUPER_ADMIN") {
-        setCurrentUser(matchedUser);
-        if (typeof window !== "undefined") {
-          window.location.href = "/super-admin";
-          return;
-        }
-      }
-
-      setCurrentUser({
-        ...matchedUser,
-        etablissementId: etablissement.id,
-        etablissementName: etablissement.name,
-      });
-      onLoginSuccess();
-    } else {
-      setErrorMsg("Identifiant ou email introuvable sur cet établissement.");
     }
+
+    setCurrentUser({
+      ...matchedUser,
+      etablissementId: etablissement.id,
+      etablissementName: etablissement.name,
+    });
+    onLoginSuccess();
   };
 
   return (
@@ -648,7 +624,7 @@ export function SchoolSubdomainPortal({
                       ? "Identifiant Enseignant / Nom / Email *"
                       : selectedRole === "PARENT"
                       ? "Identifiant Parent / Nom / Email *"
-                      : "Identifiant Élève *"}
+                      : "Identifiant, Nom, Prénom ou Téléphone *"}
                   </label>
                   <input
                     type="text"
@@ -662,7 +638,7 @@ export function SchoolSubdomainPortal({
                         ? "Ex: sarah.mansouri@alfasle.edu..."
                         : selectedRole === "PARENT"
                         ? "Ex: parent.kone@gmail.com..."
-                        : "Identifiant Élève (ex: KONE, matricule...)"
+                        : "Ex: KONE, FATOU ou 0701020304..."
                     }
                     className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500/40 shadow-sm"
                   />
