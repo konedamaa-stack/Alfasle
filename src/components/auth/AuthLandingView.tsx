@@ -23,6 +23,7 @@ import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { PreRegistrationModal } from "@/components/inscriptions/PreRegistrationModal";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
 import { InscriptionRole } from "@/types";
+import { findUsersMatchingLogin, verifyUserLoginPassword } from "@/lib/utils";
 
 interface AuthLandingViewProps {
   onLoginSuccess: () => void;
@@ -189,6 +190,12 @@ export function AuthLandingView({
   const handleRoleSelect = (role: UserRole) => {
     setSelectedRole(role);
     setErrorMsg("");
+    if (role === "STUDENT") {
+      const studentUser = users.find((u) => u.role === "STUDENT");
+      setIdentifier(studentUser?.name || studentUser?.phone || "");
+      setPassword(studentUser?.password || "Madouu1966@");
+      return;
+    }
     const cfg = roleConfig[role];
     setIdentifier(cfg.defaultLogin);
     setPassword(cfg.defaultPass);
@@ -405,64 +412,18 @@ export function AuthLandingView({
       return;
     }
 
-    const norm = (s: string) =>
-      s.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-    const normPhone = (p?: string) => (p || "").replace(/[^0-9]/g, "");
-    const normId = norm(cleanId);
-    const cleanDigits = normPhone(cleanId);
-    const isPotentialPhone = cleanDigits.length >= 6;
-
-    const phoneMatches = (p?: string) => {
-      if (!isPotentialPhone || !p) return false;
-      const uDigits = normPhone(p);
-      if (uDigits.length < 6) return false;
-      return (
-        cleanDigits === uDigits ||
-        cleanDigits.endsWith(uDigits) ||
-        uDigits.endsWith(cleanDigits)
-      );
-    };
-
-    // Checks if a user matches the identifier:
-    // 1. Exact email match
-    // 2. Exact username match
-    // 3. Exact full name match
-    // 4. Exact word match in full name (e.g. "KONE" or "FATOU" for "KONE FATOU")
-    // 5. Phone number match (direct on user or through inscriptions)
-    const matchesUser = (u: User) => {
-      if (norm(u.email) === normId) return true;
-      if (u.username && norm(u.username) === normId) return true;
-      if (norm(u.name) === normId) return true;
-      const nameWords = norm(u.name)
-        .replace(/[()[\],.:;!?"'-]/g, " ")
-        .split(/\s+/)
-        .filter(Boolean);
-      if (normId.length >= 2 && nameWords.some((w) => w === normId)) return true;
-      if (phoneMatches(u.phone)) return true;
-      if (
-        isPotentialPhone &&
-        inscriptions.some(
-          (ins) =>
-            (ins.userId === u.id || ins.userEmail.toLowerCase() === u.email.toLowerCase()) &&
-            phoneMatches(ins.userPhone)
-        )
-      ) {
-        return true;
-      }
-      return false;
-    };
+    const allMatched = findUsersMatchingLogin(cleanId, users, inscriptions);
 
     // 1. Search for matching candidates with selected role preference
-    let candidates = users.filter((u) => matchesUser(u) && u.role === selectedRole);
+    let candidates = allMatched.filter((u) => u.role === selectedRole);
 
-    // 2. If no candidate found in selected role, search across all users
+    // 2. If no candidate found in selected role, search across all matched users
     if (candidates.length === 0) {
-      candidates = users.filter((u) => matchesUser(u));
+      candidates = allMatched;
     }
 
     if (candidates.length === 0) {
-      setErrorMsg("Identifiant ou email introuvable. Veuillez vérifier vos identifiants ou contacter l'administration.");
+      setErrorMsg("Aucun élève ou utilisateur trouvé avec ce Nom, Prénom ou Numéro de téléphone.");
       return;
     }
 
@@ -471,12 +432,8 @@ export function AuthLandingView({
       return;
     }
 
-    // Among candidates matching the name, find the user whose password strictly matches
-    let matchedUser = candidates.find((u) => {
-      const expectedPass = (u.password || "Madouu1966@").trim();
-      const isMasterPass = inputPass === "Madouu1966@" || inputPass === "admin";
-      return inputPass === expectedPass || isMasterPass;
-    });
+    // Among candidates matching the name/phone, find the user whose password matches
+    let matchedUser = candidates.find((u) => verifyUserLoginPassword(u, inputPass, inscriptions));
 
     if (!matchedUser) {
       setErrorMsg("Mot de passe incorrect pour cet identifiant.");
