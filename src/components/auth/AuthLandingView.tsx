@@ -85,12 +85,12 @@ export function AuthLandingView({
       leftDesc:
         "Pilotez l'ensemble des activités, établissements, classes et paramètres de votre système éducatif.",
       roleSubtitle: "connexion en tant que directeur d'établissement",
-      espaceTitle: "Espace Directeur (KONE ADAMA)",
-      espaceDesc: "Direction de l'établissement هيئة التدريس - جامعة النور الإسلامية & Supervision Pédagogique",
-      defaultLogin: "konedamaa@gmail.com",
-      defaultPass: "Madouu1966",
-      cardBg: "from-[#c8a98d] via-[#ae8463] to-[#865d3d]",
-      gradient: "from-[#b58d6b] to-[#865d3d]",
+      espaceTitle: "Espace Direction (CHÉRIF)",
+      espaceDesc: "Direction de l'établissement جامعة النور الإسلامية & Supervision Pédagogique",
+      defaultLogin: "cherifladivo@gmail.com",
+      defaultPass: "Madouu966",
+      cardBg: "from-emerald-700 via-teal-800 to-slate-900",
+      gradient: "from-emerald-600 to-teal-700",
     },
     TEACHER: {
       badgeIcon: "👨‍🏫",

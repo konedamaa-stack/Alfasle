@@ -177,6 +177,48 @@ function loadInitialData<T extends { id: string }>(suffix: string, initialData: 
             if (!hasSuperAdmin && initialData[0]) {
               merged.unshift(initialData[0]);
             }
+
+            // Migration automatique: lamine -> cherifladivo
+            merged = merged.map((u: any) => {
+              if (u.email === "lamine@gmail.com" || u.id === "u_dir_lamine") {
+                return {
+                  ...u,
+                  id: "u_dir_cherif",
+                  name: "CHÉRIF (Directeur)",
+                  username: "cherif",
+                  email: "cherifladivo@gmail.com",
+                };
+              }
+              return u;
+            });
+          }
+
+          if (suffix === "etablissements") {
+            // Migration automatique: directeur lamine -> cherifladivo
+            merged = merged.map((e: any) => {
+              if (e.id === "etab_1793080550879" || e.subdomain === "kouliyat" || e.directorEmail === "lamine@gmail.com") {
+                return {
+                  ...e,
+                  directorName: "CHÉRIF",
+                  directorEmail: "cherifladivo@gmail.com",
+                  email: "cherifladivo@gmail.com",
+                };
+              }
+              return e;
+            });
+          }
+
+          if (suffix === "classes") {
+            merged = merged.map((c: any) => {
+              if (c.teacherId === "u_dir_lamine" || c.teacherName === "LAMINE (Directeur)") {
+                return {
+                  ...c,
+                  teacherId: "u_dir_cherif",
+                  teacherName: "CHÉRIF (Directeur)",
+                };
+              }
+              return c;
+            });
           }
 
           return merged;
@@ -197,6 +239,15 @@ function loadInitialUser(defaultUser: User): User {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.id && parsed.role) {
+          if (parsed.email === "lamine@gmail.com" || parsed.id === "u_dir_lamine") {
+            return {
+              ...parsed,
+              id: "u_dir_cherif",
+              name: "CHÉRIF (Directeur)",
+              username: "cherif",
+              email: "cherifladivo@gmail.com",
+            };
+          }
           return parsed;
         }
       }

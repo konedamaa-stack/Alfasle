@@ -12,12 +12,12 @@ export const initialEtablissements: Etablissement[] = [
     country: "Côte d'Ivoire",
     address: "DIVO",
     phone: "0505617743",
-    email: "lamine@gmail.com",
+    email: "cherifladivo@gmail.com",
     description: "جامعة النور الإسلامية بمدينة ديفو (Université Islamique An-Nour de Divo - U.I.N.D.).",
     logoUrl: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=150&auto=format&fit=crop&q=80",
     coverImage: "https://images.unsplash.com/photo-1562774053-701939374585?w=800&auto=format&fit=crop&q=80",
-    directorName: "LAMINE",
-    directorEmail: "lamine@gmail.com",
+    directorName: "CHÉRIF",
+    directorEmail: "cherifladivo@gmail.com",
     directorPassword: "Madouu966",
     status: "ACTIVE",
     subscriptionPlan: "ENTERPRISE",
@@ -29,7 +29,7 @@ export const initialEtablissements: Etablissement[] = [
   },
 ];
 
-// Utilisateurs : Super Admin Master + Directeur LAMINE
+// Utilisateurs : Super Admin Master + Directeur CHÉRIF
 export const initialUsers: User[] = [
   {
     id: "u_super_admin_root",
@@ -43,15 +43,15 @@ export const initialUsers: User[] = [
     createdAt: "2026-10-27T00:00:00Z",
   },
   {
-    id: "u_dir_lamine",
-    name: "LAMINE (Directeur)",
-    username: "lamine",
-    email: "lamine@gmail.com",
+    id: "u_dir_cherif",
+    name: "CHÉRIF (Directeur)",
+    username: "cherif",
+    email: "cherifladivo@gmail.com",
     password: "Madouu966",
     role: "ADMIN",
     etablissementId: "etab_1793080550879",
     etablissementName: "جامعة النور الإسلامية",
-    bio: "Directeur de l'établissement جامعة النور الإسلامية.",
+    bio: "Directeur de l'établissement جامعة النور الإسلامية بمدينة ديفو.",
     avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
     createdAt: "2026-10-27T05:55:50.879Z",
   },
@@ -84,8 +84,8 @@ export const initialClasses: Classe[] = [
     assignmentsCount: 0,
     enrollmentMode: "OPEN",
     status: "ACTIVE",
-    teacherId: "u_dir_lamine",
-    teacherName: "LAMINE (Directeur)",
+    teacherId: "u_dir_cherif",
+    teacherName: "CHÉRIF (Directeur)",
     createdAt: "2026-10-27T06:00:00Z",
   },
   {
@@ -113,8 +113,8 @@ export const initialClasses: Classe[] = [
     assignmentsCount: 0,
     enrollmentMode: "OPEN",
     status: "ACTIVE",
-    teacherId: "u_dir_lamine",
-    teacherName: "LAMINE (Directeur)",
+    teacherId: "u_dir_cherif",
+    teacherName: "CHÉRIF (Directeur)",
     createdAt: "2026-10-27T06:00:00Z",
   },
 ];
