@@ -29,7 +29,7 @@ import {
   Check,
   Filter,
 } from "lucide-react";
-import { getVideoEmbedInfo, getPdfEmbedInfo, isStudentMatchingInscription } from "@/lib/utils";
+import { getVideoEmbedInfo, getPdfEmbedInfo, isStudentMatchingInscription, findStudentInscription, findStudentClass } from "@/lib/utils";
 import { triggerDownload } from "@/lib/download";
 import { ConfirmModal, ConfirmVariant } from "@/components/common/ConfirmModal";
 import { SkeletonLoader } from "@/components/common/SkeletonLoader";
@@ -83,13 +83,8 @@ export function CourseViewer({
   const userEtabId = currentUser.etablissementId;
 
   // Récupérer la classe unique rattachée à l'élève (1 seule classe autorisée)
-  const studentInscription = isStudent
-    ? inscriptions.find(
-        (i) =>
-          isStudentMatchingInscription(i, currentUser) &&
-          (i.status === "APPROVED" || i.status === "CONFIRMED" || i.status === "PENDING")
-      )
-    : null;
+  const studentInscription = isStudent ? findStudentInscription(currentUser, inscriptions) : null;
+  const studentClass = isStudent ? findStudentClass(currentUser, inscriptions, classes) : null;
 
   // Classes accessibles :
   // - Pour un élève : STRICTEMENT sa classe unique où il est inscrit
@@ -97,6 +92,7 @@ export function CourseViewer({
   // - Pour Enseignant / Directeur : classes de son établissement
   const accessibleClasses = classes.filter((c) => {
     if (isStudent) {
+      if (studentClass) return c.id === studentClass.id;
       return studentInscription ? c.id === studentInscription.classeId : false;
     }
     if (isSuperAdmin) return true;
@@ -109,23 +105,25 @@ export function CourseViewer({
     return true;
   });
 
+  const targetStudentClassId = studentClass?.id || studentInscription?.classeId || currentUser.classeId;
+
   const [activeClassId, setActiveClassId] = useState<string>(
-    isStudent && studentInscription
-      ? studentInscription.classeId
+    isStudent && targetStudentClassId
+      ? targetStudentClassId
       : selectedClassId && accessibleClasses.some((c) => c.id === selectedClassId)
       ? selectedClassId
       : accessibleClasses[0]?.id || ""
   );
 
   React.useEffect(() => {
-    if (isStudent && studentInscription) {
-      setActiveClassId(studentInscription.classeId);
+    if (isStudent && targetStudentClassId) {
+      setActiveClassId(targetStudentClassId);
       return;
     }
     if (accessibleClasses.length > 0 && (!activeClassId || !accessibleClasses.some((c) => c.id === activeClassId))) {
       setActiveClassId(accessibleClasses[0].id);
     }
-  }, [accessibleClasses, activeClassId, isStudent, studentInscription]);
+  }, [accessibleClasses, activeClassId, isStudent, targetStudentClassId]);
 
   // Loading states for skeleton transitions
   const [isClassLoading, setIsClassLoading] = useState<boolean>(true);

@@ -70,18 +70,25 @@ export function PreRegistrationModal({
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [isActivationOpen, setIsActivationOpen] = useState(false);
+  const [createdInscription, setCreatedInscription] = useState<any>(null);
 
   // Synchronize props when opening modal or when defaultEstablishmentId changes
   React.useEffect(() => {
+    if (!isOpen) return;
     if (defaultEstablishmentId) {
       setEstablishmentId(defaultEstablishmentId);
-    } else if (etablissements.length > 0 && (!establishmentId || !etablissements.some((e) => e.id === establishmentId))) {
+    } else if (
+      etablissements.length > 0 &&
+      (!establishmentId ||
+        (establishmentId !== "ALL" &&
+          !etablissements.some((e) => e.id === establishmentId || e.subdomain === establishmentId)))
+    ) {
       setEstablishmentId(etablissements[0].id);
     }
     if (defaultRole) {
       setRole(defaultRole);
     }
-  }, [defaultEstablishmentId, defaultRole, isOpen, etablissements]);
+  }, [defaultEstablishmentId, defaultRole, isOpen]);
 
   // Robustly filter available classes for selected establishment (supporting ID, subdomain, and name matching)
   const currentSelectedEst = etablissements.find(
@@ -124,16 +131,14 @@ export function PreRegistrationModal({
     }
   }, [isOpen, establishmentId, availableClasses.length]);
 
-  // Auto-select first class when changing establishment or reset if none available
+  // Auto-select first class only if no valid class is currently selected for this establishment
   React.useEffect(() => {
     if (availableClasses.length > 0) {
       if (!classeId || !availableClasses.some((c) => c.id === classeId)) {
         setClasseId(availableClasses[0].id);
       }
-    } else {
-      setClasseId("");
     }
-  }, [establishmentId, availableClasses]);
+  }, [establishmentId, availableClasses.length]);
 
   // Courses associated with the selected class
   const classCourses = courses.filter((crs) => crs.classeId === classeId);
@@ -363,10 +368,11 @@ export function PreRegistrationModal({
     });
 
     if (result.success) {
+      setCreatedInscription(result.inscription || null);
       setIsSubmitted(true);
       toast.success(
         "Enregistrement effectué avec succès",
-        `Votre préinscription auprès de ${selectedEstablishment?.name || "l'établissement"} a été soumise avec succès.`
+        `Votre préinscription pour la classe « ${chosenClassObj?.title || ""} » auprès de ${selectedEstablishment?.name || "l'établissement"} a été soumise avec succès.`
       );
     } else {
       setErrorMsg(result.message);
@@ -376,6 +382,7 @@ export function PreRegistrationModal({
 
   const handleResetAndClose = () => {
     setIsSubmitted(false);
+    setCreatedInscription(null);
     setUserName("");
     setUserEmail("");
     setUserPhone("");
@@ -607,9 +614,18 @@ export function PreRegistrationModal({
                       const selectedId = e.target.value;
                       setClasseId(selectedId);
                       setSelectedCourseId("");
-                      const chosenClass = classes.find((c) => c.id === selectedId);
-                      if (chosenClass?.etablissementId && establishmentId !== chosenClass.etablissementId) {
-                        setEstablishmentId(chosenClass.etablissementId);
+                      if (establishmentId === "ALL") {
+                        const chosenClass = classes.find((c) => c.id === selectedId);
+                        if (chosenClass?.etablissementId) {
+                          const matchedEst = etablissements.find(
+                            (est) =>
+                              est.id === chosenClass.etablissementId ||
+                              est.subdomain === chosenClass.etablissementId
+                          );
+                          if (matchedEst) {
+                            setEstablishmentId(matchedEst.id);
+                          }
+                        }
                       }
                     }}
                     required
@@ -892,6 +908,7 @@ export function PreRegistrationModal({
           setIsActivationOpen(false);
           handleResetAndClose();
         }}
+        inscription={createdInscription}
         emailOrToken={userEmail}
         onSuccess={() => {
           setIsActivationOpen(false);

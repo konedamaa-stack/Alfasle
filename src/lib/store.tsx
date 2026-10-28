@@ -328,7 +328,57 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       let fetchedInscriptions: Inscription[] = [];
       if (inscriptionsRes.data) {
         fetchedInscriptions = inscriptionsRes.data.map(mapRowToInscription);
-        setInscriptions(fetchedInscriptions);
+        setInscriptions((prev) => {
+          const fetchedIds = new Set(fetchedInscriptions.map((i) => i.id));
+          const localOnly = prev.filter((i) => !fetchedIds.has(i.id));
+          return [...fetchedInscriptions, ...localOnly];
+        });
+
+        // Synchroniser automatiquement la classe obligatoire choisie par chaque élève sur son profil User
+        setUsers((prevUsers) => {
+          let updatedUsers = prevUsers.map((u) => {
+            if (u.role !== "STUDENT") return u;
+            const matchedIns = fetchedInscriptions.find((i) => isStudentMatchingInscription(u, i));
+            if (matchedIns && matchedIns.classeId) {
+              return {
+                ...u,
+                classeId: matchedIns.classeId,
+                classeTitle: matchedIns.classeTitle || u.classeTitle,
+              };
+            }
+            return u;
+          });
+
+          // S'assurer que tout élève validé (APPROVED / CONFIRMED) dans Supabase existe aussi dans users avec sa classe
+          fetchedInscriptions.forEach((ins) => {
+            if (ins.role === "STUDENT" && (ins.status === "APPROVED" || ins.status === "CONFIRMED")) {
+              const exists = updatedUsers.some((u) => isStudentMatchingInscription(u, ins));
+              if (!exists) {
+                const generatedUsername =
+                  (ins.userEmail || ins.userName).split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "") ||
+                  `eleve${Date.now().toString().slice(-4)}`;
+                updatedUsers.push({
+                  id: ins.userId || `u_cand_${ins.id}`,
+                  name: ins.userName,
+                  email: ins.userEmail.toLowerCase(),
+                  phone: ins.userPhone,
+                  username: generatedUsername,
+                  password: "Madouu1966@",
+                  role: "STUDENT",
+                  etablissementId: ins.etablissementId,
+                  etablissementName: ins.etablissementName,
+                  classeId: ins.classeId,
+                  classeTitle: ins.classeTitle,
+                  bio: ins.motivation || `Élève inscrit dans la classe ${ins.classeTitle}`,
+                  avatarUrl: ins.userAvatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
+                  createdAt: ins.appliedAt || new Date().toISOString(),
+                });
+              }
+            }
+          });
+
+          return updatedUsers;
+        });
       }
 
       // Compute approved student enrollments per class
@@ -500,20 +550,58 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   // User Management (Super Admin & Admins)
   const createUser = (userData: Omit<User, "id" | "createdAt">) => {
+    const newUserId = `u_${Date.now()}`;
+    const targetClass = userData.classeId ? classes.find((c) => c.id === userData.classeId) : undefined;
     const newUser: User = {
       ...userData,
-      id: `u_${Date.now()}`,
+      id: newUserId,
+      classeId: userData.classeId || targetClass?.id,
+      classeTitle: userData.classeTitle || targetClass?.title,
       createdAt: new Date().toISOString(),
     };
     setUsers((prev) => [newUser, ...prev]);
+
+    // Si c'est un élève rattaché à une classe, enregistrer également son inscription validée (local + Supabase)
+    if (newUser.role === "STUDENT" && newUser.classeId) {
+      const nowIso = new Date().toISOString();
+      const autoIns: Inscription = {
+        id: `ins_${Date.now()}`,
+        etablissementId: newUser.etablissementId || targetClass?.etablissementId,
+        etablissementName: newUser.etablissementName || targetClass?.etablissementName,
+        classeId: newUser.classeId,
+        classeTitle: newUser.classeTitle || targetClass?.title || "Classe choisie",
+        userId: newUser.id,
+        userName: newUser.name,
+        userEmail: newUser.email,
+        role: "STUDENT",
+        userAvatar: newUser.avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+        status: "APPROVED",
+        motivation: newUser.bio || `Inscrit dans la classe ${newUser.classeTitle || targetClass?.title || ""}`,
+        createdAt: nowIso,
+        appliedAt: nowIso,
+        reviewedAt: nowIso,
+        reviewedBy: currentUser.name,
+      };
+      setInscriptions((prev) => [autoIns, ...prev]);
+      if (isSupabaseConfigured()) {
+        supabase.from("inscriptions").upsert(mapInscriptionToRow(autoIns)).then();
+      }
+    }
+
     return newUser;
   };
 
   const updateUser = (id: string, data: Partial<User>) => {
+    const targetClass = data.classeId ? classes.find((c) => c.id === data.classeId) : undefined;
+    const enrichedData: Partial<User> = {
+      ...data,
+      ...(targetClass ? { classeId: targetClass.id, classeTitle: targetClass.title } : {}),
+    };
+
     setUsers((prev) =>
       prev.map((u) => {
         if (u.id === id) {
-          const updated = { ...u, ...data };
+          const updated = { ...u, ...enrichedData };
           if (currentUser.id === id) {
             setCurrentUser(updated);
           }
@@ -522,6 +610,57 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         return u;
       })
     );
+
+    if (enrichedData.classeId) {
+      const targetUser = users.find((u) => u.id === id);
+      const clsTitle = enrichedData.classeTitle || targetClass?.title || "Classe choisie";
+      setInscriptions((prev) => {
+        const existingIdx = prev.findIndex(
+          (i) => i.userId === id || (targetUser && isStudentMatchingInscription(i, targetUser))
+        );
+        if (existingIdx >= 0) {
+          const updatedIns: Inscription = {
+            ...prev[existingIdx],
+            userId: id,
+            userName: enrichedData.name || prev[existingIdx].userName,
+            userEmail: enrichedData.email || prev[existingIdx].userEmail,
+            classeId: enrichedData.classeId!,
+            classeTitle: clsTitle,
+          };
+          if (isSupabaseConfigured()) {
+            supabase.from("inscriptions").upsert(mapInscriptionToRow(updatedIns)).then();
+          }
+          const copy = [...prev];
+          copy[existingIdx] = updatedIns;
+          return copy;
+        } else if (targetUser) {
+          const nowIso = new Date().toISOString();
+          const newIns: Inscription = {
+            id: `ins_${Date.now()}`,
+            etablissementId: targetUser.etablissementId || targetClass?.etablissementId,
+            etablissementName: targetUser.etablissementName || targetClass?.etablissementName,
+            classeId: enrichedData.classeId!,
+            classeTitle: clsTitle,
+            userId: id,
+            userName: enrichedData.name || targetUser.name,
+            userEmail: enrichedData.email || targetUser.email,
+            role: "STUDENT",
+            userAvatar: targetUser.avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+            status: "APPROVED",
+            motivation: enrichedData.bio || targetUser.bio || `Affecté à la classe ${clsTitle}`,
+            createdAt: nowIso,
+            appliedAt: nowIso,
+            reviewedAt: nowIso,
+            reviewedBy: currentUser.name,
+          };
+          if (isSupabaseConfigured()) {
+            supabase.from("inscriptions").upsert(mapInscriptionToRow(newIns)).then();
+          }
+          return [newIns, ...prev];
+        }
+        return prev;
+      });
+    }
   };
 
   const deleteUser = (id: string) => {
@@ -1102,6 +1241,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
+    if (!data.classeId) {
+      return {
+        success: false,
+        message: "Veuillez obligatoirement choisir une classe pour votre inscription.",
+      };
+    }
+
     const targetClass = classes.find((c) => c.id === data.classeId);
     const targetEtab =
       etablissements.find(
@@ -1121,10 +1267,32 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       targetClass?.etablissementName ||
       "Établissement AlFasle";
 
+    const finalClasseId = targetClass?.id || data.classeId;
+    const finalClasseTitle = targetClass?.title || "Classe AlFasle";
+
     const activationToken = `act_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 6)}`;
+    const insId = `ins_${Date.now()}`;
+    const existingCandidateUser = users.find(
+      (u) =>
+        u.email.toLowerCase() === data.userEmail.trim().toLowerCase() ||
+        (u.role === "STUDENT" && u.name.trim().toLowerCase() === data.userName.trim().toLowerCase())
+    );
+    const candidateUserId = existingCandidateUser?.id || `u_cand_${insId}`;
+
+    // Si l'utilisateur existe déjà dans users, le rattacher obligatoirement à la classe choisie
+    if (existingCandidateUser && data.role === "STUDENT") {
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === existingCandidateUser.id
+            ? { ...u, classeId: finalClasseId, classeTitle: finalClasseTitle }
+            : u
+        )
+      );
+    }
 
     const newInscription: Inscription = {
-      id: `ins_${Date.now()}`,
+      id: insId,
+      userId: candidateUserId,
       userName: data.userName.trim(),
       userEmail: data.userEmail.trim().toLowerCase(),
       userPhone: data.userPhone?.trim(),
@@ -1135,8 +1303,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       role: data.role,
       etablissementId: finalEtabId,
       etablissementName: finalEtabName,
-      classeId: data.classeId,
-      classeTitle: targetClass?.title || "Classe AlFasle",
+      classeId: finalClasseId,
+      classeTitle: finalClasseTitle,
       subject: data.subject?.trim(),
       diplomaOrBio: data.diplomaOrBio?.trim(),
       status: "PENDING",
@@ -1173,7 +1341,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     // Update pending counter on class
     setClasses((cls) =>
       cls.map((c) =>
-        c.id === data.classeId ? { ...c, pendingCount: (c.pendingCount || 0) + 1 } : c
+        c.id === finalClasseId ? { ...c, pendingCount: (c.pendingCount || 0) + 1 } : c
       )
     );
 
@@ -1183,7 +1351,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         id: `notif_${Date.now()}`,
         userId: "u_super_admin_root",
         title: `Nouvelle préinscription (${data.role === "TEACHER" ? "👨‍🏫 Enseignant" : "🎓 Élève"})`,
-        message: `${data.userName} a postulé pour ${targetClass?.title || "une classe"} (${finalEtabName}). Dossier consultable dans l'établissement.`,
+        message: `${data.userName} a postulé pour ${finalClasseTitle} (${finalEtabName}). Dossier consultable dans l'établissement.`,
         type: "INSCRIPTION",
         isRead: false,
         createdAt: new Date().toISOString(),
@@ -1193,7 +1361,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     return {
       success: true,
-      message: `Votre demande de pré-inscription pour « ${targetClass?.title || "la classe"} » a été enregistrée pour ${finalEtabName}.`,
+      message: `Votre demande de pré-inscription pour « ${finalClasseTitle} » a été enregistrée pour ${finalEtabName}.`,
       inscription: newInscription,
     };
   };
@@ -1206,12 +1374,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const cleanSearch = data.emailOrToken.trim().toLowerCase();
     const targetIns = inscriptions.find(
       (i) =>
+        i.id.toLowerCase() === cleanSearch ||
         i.userEmail.toLowerCase() === cleanSearch ||
         (i.activationToken && i.activationToken.toLowerCase() === cleanSearch)
     );
 
     const targetEmail = targetIns ? targetIns.userEmail.toLowerCase() : cleanSearch;
-    let existingUser = users.find((u) => u.email.toLowerCase() === targetEmail);
+    let existingUser = users.find(
+      (u) =>
+        u.email.toLowerCase() === targetEmail ||
+        (targetIns?.userId && u.id === targetIns.userId)
+    );
 
     let activeUser: User;
 
@@ -1223,6 +1396,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         role: targetIns?.role || existingUser.role,
         etablissementId: targetIns?.etablissementId || existingUser.etablissementId,
         etablissementName: targetIns?.etablissementName || existingUser.etablissementName,
+        classeId: targetIns?.classeId || existingUser.classeId,
+        classeTitle: targetIns?.classeTitle || existingUser.classeTitle,
       };
       setUsers((prev) => prev.map((u) => (u.id === activeUser.id ? activeUser : u)));
     } else {
@@ -1231,20 +1406,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         `user${Date.now().toString().slice(-4)}`;
 
       activeUser = {
-        id: `u_act_${Date.now()}`,
+        id: targetIns?.userId || `u_act_${Date.now()}`,
         name: targetIns?.userName || targetEmail.split("@")[0],
         email: targetEmail,
         phone: targetIns?.userPhone,
         username: generatedUsername,
         password: data.newPassword,
         role: targetIns?.role || "STUDENT",
-        etablissementId: targetIns?.etablissementId || "etab_1792343761588",
-        etablissementName: targetIns?.etablissementName || "هيئة التدريس - جامعة النور الإسلامية",
+        etablissementId: targetIns?.etablissementId || "etab_1793080550879",
+        etablissementName: targetIns?.etablissementName || "جامعة النور الإسلامية",
+        classeId: targetIns?.classeId,
+        classeTitle: targetIns?.classeTitle,
         bio:
           targetIns?.diplomaOrBio ||
           (targetIns?.role === "TEACHER"
             ? `Professeur de ${targetIns.subject || "matières scientifiques"}`
-            : "Élève actif"),
+            : `Élève inscrit dans la classe ${targetIns?.classeTitle || ""}`),
         avatarUrl:
           targetIns?.role === "TEACHER"
             ? "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150"
@@ -1256,20 +1433,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     // Update matching inscription to approved and confirmed
     if (targetIns) {
+      const updatedIns: Inscription = {
+        ...targetIns,
+        userId: activeUser.id,
+        status: "APPROVED",
+        emailConfirmed: true,
+        reviewedAt: new Date().toISOString(),
+        reviewedBy: "Activation Email",
+      };
+
       setInscriptions((prev) =>
-        prev.map((ins) =>
-          ins.id === targetIns.id
-            ? {
-                ...ins,
-                userId: activeUser.id,
-                status: "APPROVED",
-                emailConfirmed: true,
-                reviewedAt: new Date().toISOString(),
-                reviewedBy: "Activation Email",
-              }
-            : ins
-        )
+        prev.map((ins) => (ins.id === targetIns.id ? updatedIns : ins))
       );
+
+      if (isSupabaseConfigured()) {
+        supabase
+          .from("inscriptions")
+          .upsert(mapInscriptionToRow(updatedIns))
+          .then();
+      }
 
       // Update class counter
       setClasses((cls) =>
@@ -1364,17 +1546,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const targetIns = inscriptions.find((i) => i.id === inscriptionId);
     if (!targetIns) return;
 
-    // 1. If user account does not exist, create it automatically!
+    // 1. If user account does not exist, create it automatically with the chosen class; if it exists, assign the chosen class!
     const existingUser = users.find(
-      (u) => u.email.toLowerCase() === targetIns.userEmail.toLowerCase()
+      (u) =>
+        u.email.toLowerCase() === targetIns.userEmail.toLowerCase() ||
+        (targetIns.userId && u.id === targetIns.userId)
     );
 
-    let createdUserId = existingUser?.id;
+    let createdUserId = existingUser?.id || targetIns.userId || `u_cand_${Date.now()}`;
 
     if (!existingUser) {
       const generatedUsername = targetIns.userEmail.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "") || `user${Date.now().toString().slice(-4)}`;
       const newUser: User = {
-        id: `u_cand_${Date.now()}`,
+        id: createdUserId,
         name: targetIns.userName,
         email: targetIns.userEmail.toLowerCase(),
         phone: targetIns.userPhone,
@@ -1383,30 +1567,42 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         role: targetIns.role || "STUDENT",
         etablissementId: targetIns.etablissementId,
         etablissementName: targetIns.etablissementName,
-        bio: targetIns.diplomaOrBio || targetIns.motivation || (targetIns.role === "TEACHER" ? `Enseignant de ${targetIns.subject || "matières scientifiques"}` : "Élève validé"),
+        classeId: targetIns.classeId,
+        classeTitle: targetIns.classeTitle,
+        bio: targetIns.diplomaOrBio || targetIns.motivation || (targetIns.role === "TEACHER" ? `Enseignant de ${targetIns.subject || "matières scientifiques"}` : `Élève inscrit dans la classe ${targetIns.classeTitle}`),
         avatarUrl: targetIns.userAvatar || (targetIns.role === "TEACHER" ? "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150" : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"),
         createdAt: new Date().toISOString(),
       };
 
       setUsers((prev) => [newUser, ...prev]);
-      createdUserId = newUser.id;
+    } else {
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === existingUser.id
+            ? {
+                ...u,
+                classeId: targetIns.classeId || u.classeId,
+                classeTitle: targetIns.classeTitle || u.classeTitle,
+                etablissementId: targetIns.etablissementId || u.etablissementId,
+                etablissementName: targetIns.etablissementName || u.etablissementName,
+              }
+            : u
+        )
+      );
     }
+
+    const updatedIns: Inscription = {
+      ...targetIns,
+      userId: createdUserId,
+      status: "APPROVED",
+      emailConfirmed: true,
+      reviewedAt: new Date().toISOString(),
+      reviewedBy: currentUser.name || "Super Admin",
+    };
 
     // 2. Update inscription state
     setInscriptions((prev) =>
-      prev.map((ins) => {
-        if (ins.id === inscriptionId) {
-          return {
-            ...ins,
-            userId: createdUserId,
-            status: "APPROVED",
-            emailConfirmed: true,
-            reviewedAt: new Date().toISOString(),
-            reviewedBy: currentUser.name || "Super Admin",
-          };
-        }
-        return ins;
-      })
+      prev.map((ins) => (ins.id === inscriptionId ? updatedIns : ins))
     );
 
     // 3. Update class counters & teacher assignment
@@ -1443,13 +1639,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     if (isSupabaseConfigured()) {
       supabase
         .from("inscriptions")
-        .update({
-          status: "APPROVED",
-          user_id: createdUserId || null,
-          reviewed_at: new Date().toISOString(),
-          reviewed_by: currentUser.name || "Super Admin",
-        })
-        .eq("id", inscriptionId)
+        .upsert(mapInscriptionToRow(updatedIns))
         .then();
     }
   };

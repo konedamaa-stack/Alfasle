@@ -25,7 +25,7 @@ import { GradingModal } from "./GradingModal";
 import { SubmitAssignmentModal } from "./SubmitAssignmentModal";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
 
-import { isStudentMatchingInscription } from "@/lib/utils";
+import { isStudentMatchingInscription, findStudentInscription, findStudentClass } from "@/lib/utils";
 
 interface AssignmentListProps {
   onOpenCreateAssignment: () => void;
@@ -80,16 +80,12 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
   const userEtabId = currentUser.etablissementId;
 
   // Récupérer la classe unique de l'élève (1 seule classe autorisée)
-  const studentInscription = isStudent
-    ? inscriptions.find(
-        (i) =>
-          isStudentMatchingInscription(i, currentUser) &&
-          (i.status === "APPROVED" || i.status === "PENDING" || i.status === "CONFIRMED")
-      )
-    : null;
+  const studentInscription = isStudent ? findStudentInscription(currentUser, inscriptions) : null;
+  const studentClass = isStudent ? findStudentClass(currentUser, inscriptions, classes) : null;
 
   const accessibleClasses = classes.filter((c) => {
     if (isStudent) {
+      if (studentClass) return c.id === studentClass.id;
       return studentInscription ? c.id === studentInscription.classeId : false;
     }
     if (isSuperAdmin) return true;

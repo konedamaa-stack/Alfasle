@@ -14,7 +14,7 @@ import {
   PlayCircle,
   AlertCircle,
 } from "lucide-react";
-import { formatDate, formatDateTime, isStudentMatchingInscription } from "@/lib/utils";
+import { formatDate, formatDateTime, findStudentInscription, findStudentClass } from "@/lib/utils";
 
 interface StudentDashboardProps {
   onNavigate: (tab: any) => void;
@@ -29,11 +29,16 @@ export function StudentDashboard({
 }: StudentDashboardProps) {
   const { currentUser, classes, inscriptions, courses, assignments, submissions } = useStore();
 
-  const myInscriptions = inscriptions.filter((i) => isStudentMatchingInscription(currentUser, i));
-  const myApprovedInscriptions = myInscriptions.filter((i) => i.status === "APPROVED");
-  const activeInscription = myApprovedInscriptions[0] || myInscriptions[0];
-  const myApprovedClassIds = activeInscription ? [activeInscription.classeId] : [];
-  const myClasses = classes.filter((c) => myApprovedClassIds.includes(c.id));
+  const activeInscription = findStudentInscription(currentUser, inscriptions);
+  const studentClass = findStudentClass(currentUser, inscriptions, classes);
+  const myApprovedClassIds = studentClass
+    ? [studentClass.id]
+    : activeInscription?.classeId
+    ? [activeInscription.classeId]
+    : currentUser.classeId
+    ? [currentUser.classeId]
+    : [];
+  const myClasses = studentClass ? [studentClass] : classes.filter((c) => myApprovedClassIds.includes(c.id));
   const myCourses = courses.filter((c) => myApprovedClassIds.includes(c.classeId));
 
   // My pending assignments

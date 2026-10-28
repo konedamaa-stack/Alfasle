@@ -12,6 +12,8 @@ export interface User {
   bio?: string;
   etablissementId?: string;
   etablissementName?: string;
+  classeId?: string;
+  classeTitle?: string;
   childrenStudentIds?: string[]; // For PARENT role
   createdAt: string;
 }

@@ -38,6 +38,7 @@ import {
 import { SkeletonLoader } from "@/components/common/SkeletonLoader";
 import { ConfirmModal, ConfirmVariant } from "@/components/common/ConfirmModal";
 import { useToast } from "@/lib/toast-context";
+import { isStudentMatchingInscription, findStudentInscription, findStudentClass } from "@/lib/utils";
 
 interface DirecteurDashboardProps {
   onNavigate?: (tab: string) => void;
@@ -289,7 +290,10 @@ export function DirecteurDashboard({
   });
 
   const pendingStudentCandidates = schoolInscriptions.filter(
-    (i) => i.role === "STUDENT" && i.status === "PENDING"
+    (i) =>
+      i.role === "STUDENT" &&
+      i.status === "PENDING" &&
+      (studentFilterType === "PENDING" || !schoolStudents.some((s) => isStudentMatchingInscription(i, s)))
   );
 
   const pendingInscriptionsCount = schoolInscriptions.filter((i) => i.status === "PENDING").length;
@@ -395,6 +399,8 @@ export function DirecteurDashboard({
       newStudentUsername.trim().toLowerCase() ||
       newStudentName.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
 
+    const targetClass = schoolClasses.find((c) => c.id === newStudentClasseId);
+
     createUser({
       name: newStudentName.trim(),
       username: autoLogin,
@@ -403,6 +409,8 @@ export function DirecteurDashboard({
       role: "STUDENT",
       etablissementId: currentEtab?.id,
       etablissementName: currentEtab?.name,
+      classeId: targetClass?.id || newStudentClasseId || undefined,
+      classeTitle: targetClass?.title || undefined,
       bio: newStudentBio || `Élève inscrit par la Direction (${currentEtab?.name}).`,
       avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
     });
@@ -521,14 +529,15 @@ export function DirecteurDashboard({
   };
 
   const handleOpenEditStudent = (s: User) => {
-    const studentInscription = inscriptions.find((i) => i.userId === s.id);
+    const studentInscription = findStudentInscription(s, inscriptions);
+    const studentClass = findStudentClass(s, inscriptions, classes);
     setEditingStudent(s);
     setEditStudentName(s.name);
     setEditStudentEmail(s.email);
     setEditStudentUsername(s.username || s.name.split(" ")[0].toLowerCase());
     setEditStudentPassword(s.password || "Madouu1966@");
     setShowEditStudentPassword(false);
-    setEditStudentClasseId(studentInscription?.classeId || "");
+    setEditStudentClasseId(studentClass?.id || studentInscription?.classeId || s.classeId || "");
     setEditStudentBio(s.bio || "");
     setIsEditStudentOpen(true);
   };
@@ -536,11 +545,14 @@ export function DirecteurDashboard({
   const handleSaveEditStudent = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingStudent) return;
+    const selectedClass = classes.find((c) => c.id === editStudentClasseId);
     updateUser(editingStudent.id, {
       name: editStudentName.trim(),
       email: editStudentEmail.trim().toLowerCase(),
       username: editStudentUsername.trim().toLowerCase(),
       password: editStudentPassword.trim(),
+      classeId: selectedClass?.id || editStudentClasseId || editingStudent.classeId,
+      classeTitle: selectedClass?.title || editingStudent.classeTitle,
       bio: editStudentBio.trim(),
     });
     setIsEditStudentOpen(false);
@@ -1045,7 +1057,9 @@ export function DirecteurDashboard({
                           const isPwdVisible = visiblePasswords[s.id] || false;
                           const pwd = s.password || "Madouu1966@";
                           const studentLogin = s.username || s.name.split(" ")[0].toLowerCase();
-                          const studentInscription = inscriptions.find((i) => i.userId === s.id);
+                          const studentInscription = findStudentInscription(s, inscriptions);
+                          const studentClass = findStudentClass(s, inscriptions, classes);
+                          const resolvedClasseTitle = studentClass?.title || studentInscription?.classeTitle || s.classeTitle;
 
                           return (
                             <tr key={`user-${s.id}`} className="hover:bg-white transition-colors">
@@ -1092,9 +1106,9 @@ export function DirecteurDashboard({
                               </td>
 
                               <td className="py-3 px-4">
-                                {studentInscription ? (
+                                {resolvedClasseTitle ? (
                                   <span className="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-600 border border-indigo-500/30 text-[10px] font-bold">
-                                    {studentInscription.classeTitle}
+                                    {resolvedClasseTitle}
                                   </span>
                                 ) : (
                                   <span className="text-slate-500 italic">Tronc Commun</span>
@@ -2205,23 +2219,41 @@ export function DirecteurDashboard({
                 </div>
               </div>
 
-              <div>
-                <label className="block text-slate-600 font-semibold mb-1">Mot de Passe *</label>
-                <div className="relative">
-                  <input
-                    type={showEditStudentPassword ? "text" : "password"}
-                    required
-                    value={editStudentPassword}
-                    onChange={(e) => setEditStudentPassword(e.target.value)}
-                    className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-white border border-slate-200 text-amber-600 font-mono font-bold focus:outline-none focus:border-sky-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowEditStudentPassword(!showEditStudentPassword)}
-                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-900"
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Mot de Passe *</label>
+                  <div className="relative">
+                    <input
+                      type={showEditStudentPassword ? "text" : "password"}
+                      required
+                      value={editStudentPassword}
+                      onChange={(e) => setEditStudentPassword(e.target.value)}
+                      className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-white border border-slate-200 text-amber-600 font-mono font-bold focus:outline-none focus:border-sky-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowEditStudentPassword(!showEditStudentPassword)}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-900"
+                    >
+                      {showEditStudentPassword ? <EyeOff className="w-4 h-4 text-sky-600" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Classe Affectée *</label>
+                  <select
+                    value={editStudentClasseId}
+                    onChange={(e) => setEditStudentClasseId(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 font-bold focus:outline-none focus:border-sky-500"
                   >
-                    {showEditStudentPassword ? <EyeOff className="w-4 h-4 text-sky-600" /> : <Eye className="w-4 h-4" />}
-                  </button>
+                    <option value="">-- Choisir une classe --</option>
+                    {schoolClasses.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.title} ({c.classCode})
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -2610,32 +2642,49 @@ export function DirecteurDashboard({
             <div className="p-6 overflow-y-auto space-y-4 flex-1">
               {(() => {
                 const classInscriptions = inscriptions.filter(
-                  (i) => i.classeId === viewingClassStudents.id && i.status === "APPROVED"
+                  (i) =>
+                    i.role !== "TEACHER" &&
+                    (i.classeId === viewingClassStudents.id ||
+                      (i.classeTitle && i.classeTitle.trim().toLowerCase() === viewingClassStudents.title.trim().toLowerCase())) &&
+                    (i.status === "APPROVED" || i.status === "CONFIRMED" || i.status === "PENDING")
                 );
-                const enrolledStudentIds = new Set(classInscriptions.map((i) => i.userId));
-                const enrolledUsers = users.filter((u) => enrolledStudentIds.has(u.id));
 
-                const displayStudents = enrolledUsers.length > 0
-                  ? enrolledUsers.map((u) => {
-                      const insc = classInscriptions.find((i) => i.userId === u.id);
-                      return {
-                        id: u.id,
-                        name: u.name,
-                        email: u.email,
-                        avatar: u.avatarUrl,
-                        date: insc?.createdAt || u.createdAt,
-                      };
-                    })
-                  : users
-                      .filter((u) => u.role === "STUDENT" && (u.etablissementId === viewingClassStudents.etablissementId || !u.etablissementId))
-                      .slice(0, Math.min(viewingClassStudents.enrolledCount || 0, 5))
-                      .map((u) => ({
-                        id: u.id,
-                        name: u.name,
-                        email: u.email,
-                        avatar: u.avatarUrl,
-                        date: u.createdAt,
-                      }));
+                const studentMap = new Map<string, { id: string; name: string; email: string; avatar?: string; date: string }>();
+
+                users
+                  .filter(
+                    (u) =>
+                      u.role === "STUDENT" &&
+                      (u.classeId === viewingClassStudents.id ||
+                        (u.classeTitle && u.classeTitle.trim().toLowerCase() === viewingClassStudents.title.trim().toLowerCase()) ||
+                        classInscriptions.some((i) => isStudentMatchingInscription(i, u)))
+                  )
+                  .forEach((u) => {
+                    const insc = classInscriptions.find((i) => isStudentMatchingInscription(i, u));
+                    const key = (u.email || u.id).toLowerCase();
+                    studentMap.set(key, {
+                      id: u.id,
+                      name: u.name,
+                      email: u.email,
+                      avatar: u.avatarUrl,
+                      date: insc?.createdAt || u.createdAt,
+                    });
+                  });
+
+                classInscriptions.forEach((insc) => {
+                  const key = (insc.userEmail || insc.userId || insc.id).toLowerCase();
+                  if (!studentMap.has(key)) {
+                    studentMap.set(key, {
+                      id: insc.userId || insc.id,
+                      name: insc.userName,
+                      email: insc.userEmail,
+                      avatar: insc.userAvatar,
+                      date: insc.createdAt || insc.appliedAt,
+                    });
+                  }
+                });
+
+                const displayStudents = Array.from(studentMap.values());
 
                 if (displayStudents.length === 0) {
                   return (

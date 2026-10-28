@@ -91,7 +91,7 @@ export function AccountActivationModal({
     setIsLoading(true);
     setTimeout(() => {
       const result = activateAccountWithPassword({
-        emailOrToken: activeIns?.activationToken || targetEmail,
+        emailOrToken: activeIns?.id || activeIns?.activationToken || targetEmail,
         newPassword: password,
       });
 

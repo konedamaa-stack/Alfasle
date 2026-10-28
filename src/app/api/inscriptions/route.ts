@@ -84,9 +84,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const activationToken = `act_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 6)}`;
+    const activationToken = body.activationToken || `act_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 6)}`;
+    const insId = body.id || `ins_${Date.now()}`;
     const newInscription: Inscription = {
-      id: `ins_${Date.now()}`,
+      id: insId,
+      userId: body.userId || `u_cand_${insId}`,
       userName: String(body.userName).trim(),
       userEmail: String(body.userEmail).trim().toLowerCase(),
       userPhone: body.userPhone ? String(body.userPhone).trim() : undefined,
@@ -101,39 +103,35 @@ export async function POST(request: Request) {
       classeTitle: body.classeTitle || "Classe AlFasle",
       subject: body.subject ? String(body.subject).trim() : undefined,
       diplomaOrBio: body.diplomaOrBio ? String(body.diplomaOrBio).trim() : undefined,
-      status: "PENDING",
+      status: body.status || "PENDING",
       emailConfirmed: false,
       activationToken,
       motivation: body.motivation ? String(body.motivation).trim() : "Candidature en ligne via portail public",
-      appliedAt: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
+      appliedAt: body.appliedAt || new Date().toISOString(),
+      createdAt: body.createdAt || new Date().toISOString(),
     };
 
-    // Save to memory
-    memoryInscriptions.unshift(newInscription);
+    // Save to memory (avoid duplicate id)
+    memoryInscriptions = [newInscription, ...memoryInscriptions.filter((i) => i.id !== newInscription.id)];
 
     // Save to Cloud Supabase if configured
     if (isSupabaseConfigured()) {
       try {
-        await supabase.from("inscriptions").insert([
+        await supabase.from("inscriptions").upsert([
           {
             id: newInscription.id,
+            user_id: newInscription.userId || `u_cand_${newInscription.id}`,
             user_name: newInscription.userName,
             user_email: newInscription.userEmail,
-            user_phone: newInscription.userPhone,
-            user_avatar: newInscription.userAvatar,
+            user_phone: newInscription.userPhone || null,
             role: newInscription.role,
-            etablissement_id: newInscription.etablissementId,
-            etablissement_name: newInscription.etablissementName,
+            etablissement_id: newInscription.etablissementId || null,
+            etablissement_name: newInscription.etablissementName || null,
             classe_id: newInscription.classeId,
             classe_title: newInscription.classeTitle,
-            subject: newInscription.subject,
-            diploma_or_bio: newInscription.diplomaOrBio,
             status: newInscription.status,
-            motivation: newInscription.motivation,
-            activation_token: newInscription.activationToken,
+            motivation: newInscription.motivation || null,
             applied_at: newInscription.appliedAt,
-            created_at: newInscription.createdAt,
           },
         ]);
       } catch (cloudErr) {

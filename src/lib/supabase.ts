@@ -234,7 +234,12 @@ export function mapRowToInscription(row: any): Inscription {
     userName: row.user_name || row.userName,
     userEmail: row.user_email || row.userEmail,
     userPhone: row.user_phone || row.userPhone,
-    userAvatar: row.user_avatar || row.userAvatar,
+    userAvatar:
+      row.user_avatar ||
+      row.userAvatar ||
+      (row.role === "TEACHER"
+        ? "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80"
+        : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"),
     role: row.role || "STUDENT",
     etablissementId: row.etablissement_id || row.etablissementId,
     etablissementName: row.etablissement_name || row.etablissementName,
@@ -247,7 +252,7 @@ export function mapRowToInscription(row: any): Inscription {
     activationToken: row.activation_token || row.activationToken,
     emailConfirmed: true,
     appliedAt: row.applied_at || row.appliedAt || new Date().toISOString(),
-    createdAt: row.created_at || row.createdAt || new Date().toISOString(),
+    createdAt: row.created_at || row.createdAt || row.applied_at || row.appliedAt || new Date().toISOString(),
     reviewedAt: row.reviewed_at || row.reviewedAt,
     reviewedBy: row.reviewed_by || row.reviewedBy,
   };
@@ -256,23 +261,18 @@ export function mapRowToInscription(row: any): Inscription {
 export function mapInscriptionToRow(i: Inscription): any {
   return {
     id: i.id,
-    user_id: i.userId || null,
+    user_id: i.userId || `u_cand_${i.id}`,
     user_name: i.userName,
     user_email: i.userEmail,
     user_phone: i.userPhone || null,
-    user_avatar: i.userAvatar || null,
-    role: i.role,
+    role: i.role || "STUDENT",
     etablissement_id: i.etablissementId || null,
     etablissement_name: i.etablissementName || null,
     classe_id: i.classeId,
     classe_title: i.classeTitle,
-    subject: i.subject || null,
-    diploma_or_bio: i.diplomaOrBio || null,
-    status: i.status,
+    status: i.status || "PENDING",
     motivation: i.motivation || null,
-    activation_token: i.activationToken || null,
-    applied_at: i.appliedAt,
-    created_at: i.createdAt || new Date().toISOString(),
+    applied_at: i.appliedAt || new Date().toISOString(),
     reviewed_at: i.reviewedAt || null,
     reviewed_by: i.reviewedBy || null,
   };

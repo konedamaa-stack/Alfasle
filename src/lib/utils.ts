@@ -197,12 +197,12 @@ export function getPdfEmbedInfo(rawUrl: string): PdfEmbedInfo {
 }
 
 /**
- * Robust matching between a student user and an inscription (by ID, email, name, or username slug)
+ * Robust matching between a student user and an inscription (by ID, email, phone, full name, or exact username slug)
  * Accepts arguments in either order (user, inscription) or (inscription, user).
  */
 export function isStudentMatchingInscription(arg1: any, arg2: any): boolean {
   if (!arg1 || !arg2) return false;
-  const isArg1Inscription = Boolean(arg1.classeId || arg1.userEmail || arg1.userName);
+  const isArg1Inscription = Boolean(arg1.userEmail !== undefined || arg1.userName !== undefined || arg1.appliedAt !== undefined);
   const i = isArg1Inscription ? arg1 : arg2;
   const u = isArg1Inscription ? arg2 : arg1;
 
@@ -213,29 +213,74 @@ export function isStudentMatchingInscription(arg1: any, arg2: any): boolean {
   const cleanInsEmail = i.userEmail?.trim().toLowerCase();
   if (cleanUserEmail && cleanInsEmail && cleanUserEmail === cleanInsEmail) return true;
 
-  const cleanUserName = u.name?.trim().toLowerCase();
-  const cleanInsName = i.userName?.trim().toLowerCase();
-  if (cleanUserName && cleanInsName) {
-    if (cleanUserName === cleanInsName) return true;
-    if (cleanInsName.includes(cleanUserName) || cleanUserName.includes(cleanInsName)) return true;
+  const normPhone = (p?: string) => (p || "").replace(/[^0-9]/g, "");
+  const uPhone = normPhone(u.phone);
+  const iPhone = normPhone(i.userPhone);
+  if (uPhone.length >= 6 && iPhone.length >= 6 && (uPhone === iPhone || uPhone.endsWith(iPhone) || iPhone.endsWith(uPhone))) {
+    return true;
   }
+
+  const cleanUserName = u.name?.trim().toLowerCase().replace(/\s+/g, " ");
+  const cleanInsName = i.userName?.trim().toLowerCase().replace(/\s+/g, " ");
+  if (cleanUserName && cleanInsName && cleanUserName === cleanInsName) return true;
 
   const cleanUsername = u.username?.trim().toLowerCase();
   if (cleanUsername && cleanInsName) {
-    if (cleanUsername === cleanInsName) return true;
-    if (cleanInsName.includes(cleanUsername) || cleanUsername.includes(cleanInsName)) return true;
+    const insSlug = cleanInsName.replace(/[^a-z0-9]/g, "");
+    if (cleanUsername === cleanInsName || cleanUsername === insSlug) return true;
   }
 
-  // Slug matching (ex: DIAWARA ALAMA vs diawaraalama.3842@alfasle.edu or alama@alfasle.edu)
-  if (cleanUserName && cleanInsEmail) {
-    const slug = cleanUserName.replace(/[^a-z0-9]/g, "");
-    if (slug.length >= 3 && (cleanInsEmail.includes(slug) || slug.includes(cleanInsEmail.split("@")[0]))) return true;
-  }
-  if (cleanUsername && cleanInsEmail) {
-    const slug = cleanUsername.replace(/[^a-z0-9]/g, "");
-    if (slug.length >= 3 && (cleanInsEmail.includes(slug) || slug.includes(cleanInsEmail.split("@")[0]))) return true;
+  if (cleanInsEmail) {
+    const insEmailPrefix = cleanInsEmail.split("@")[0].replace(/\.[0-9]{4}$/, "");
+    if (cleanUserName && cleanUserName.replace(/[^a-z0-9]/g, "") === insEmailPrefix) return true;
+    if (cleanUsername && (cleanUsername === insEmailPrefix || cleanUsername === cleanInsEmail.split("@")[0])) return true;
   }
 
   return false;
+}
+
+/**
+ * Finds the authoritative inscription for a student user, prioritizing APPROVED/CONFIRMED over PENDING.
+ */
+export function findStudentInscription(user: any, inscriptions: any[]): any | null {
+  if (!user || !Array.isArray(inscriptions)) return null;
+  // 1. Exact userId match first
+  const byId = inscriptions.filter((i) => i.role !== "TEACHER" && i.userId && user.id && i.userId === user.id);
+  if (byId.length > 0) {
+    return (
+      byId.find((i) => i.status === "APPROVED" || i.status === "CONFIRMED") ||
+      byId.find((i) => i.status === "PENDING") ||
+      byId[0]
+    );
+  }
+  // 2. Fallback to strict email / phone / full name matching
+  const matching = inscriptions.filter((i) => isStudentMatchingInscription(user, i));
+  if (matching.length === 0) return null;
+  return (
+    matching.find((i) => i.status === "APPROVED" || i.status === "CONFIRMED") ||
+    matching.find((i) => i.status === "PENDING") ||
+    matching[0]
+  );
+}
+
+/**
+ * Resolves the exact class chosen by a student during pre-registration or enrollment.
+ */
+export function findStudentClass(user: any, inscriptions: any[], classes: any[]): any | null {
+  if (!user || !Array.isArray(classes)) return null;
+  const ins = findStudentInscription(user, inscriptions);
+  const targetClassId = ins?.classeId || user.classeId;
+  const targetClassTitle = ins?.classeTitle || user.classeTitle;
+
+  if (targetClassId) {
+    const byId = classes.find((c) => c.id === targetClassId);
+    if (byId) return byId;
+  }
+  if (targetClassTitle) {
+    const normTitle = targetClassTitle.trim().toLowerCase();
+    const byTitle = classes.find((c) => c.title?.trim().toLowerCase() === normTitle);
+    if (byTitle) return byTitle;
+  }
+  return null;
 }
 

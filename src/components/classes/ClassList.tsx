@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { ApplyModal } from "./ApplyModal";
 import { ConfirmModal, ConfirmVariant } from "@/components/common/ConfirmModal";
-import { isStudentMatchingInscription } from "@/lib/utils";
+import { isStudentMatchingInscription, findStudentInscription, findStudentClass } from "@/lib/utils";
 
 interface ClassListProps {
   onOpenCreateClass: () => void;
@@ -174,17 +174,13 @@ export function ClassList({
   const myManagedEtabIds = new Set(myManagedEtabs.map((e) => e.id));
 
   const isStudent = currentUser.role === "STUDENT";
-  const studentInscription = isStudent
-    ? inscriptions.find(
-        (i) =>
-          isStudentMatchingInscription(i, currentUser) &&
-          (i.status === "APPROVED" || i.status === "PENDING" || i.status === "CONFIRMED")
-      )
-    : null;
+  const studentInscription = isStudent ? findStudentInscription(currentUser, inscriptions) : null;
+  const studentClass = isStudent ? findStudentClass(currentUser, inscriptions, classes) : null;
 
   const filteredClasses = classes.filter((c) => {
-    // Si un élève consulte l'onglet "Ma Classe Inscrite", afficher UNIQUEMENT sa classe
-    if (isStudent && onlyEnrolled) {
+    // Si un élève consulte l'onglet "Ma Classe Inscrite" ou possède déjà une classe attribuée à la pré-inscription, afficher UNIQUEMENT sa classe obligatoire
+    if (isStudent && (onlyEnrolled || studentClass || studentInscription?.classeId)) {
+      if (studentClass) return c.id === studentClass.id;
       return studentInscription ? c.id === studentInscription.classeId : false;
     }
 
@@ -228,7 +224,11 @@ export function ClassList({
     const ins = inscriptions.find(
       (i) => i.classeId === classId && isStudentMatchingInscription(i, currentUser)
     );
-    return ins ? ins.status : null;
+    if (ins) return ins.status;
+    if (studentClass?.id === classId || currentUser.classeId === classId) {
+      return studentInscription?.status || "APPROVED";
+    }
+    return null;
   };
 
   return (
@@ -820,32 +820,49 @@ export function ClassList({
             <div className="p-6 overflow-y-auto space-y-4 flex-1">
               {(() => {
                 const classInscriptions = inscriptions.filter(
-                  (i) => i.classeId === viewingClassStudents.id && i.status === "APPROVED"
+                  (i) =>
+                    i.role !== "TEACHER" &&
+                    (i.classeId === viewingClassStudents.id ||
+                      (i.classeTitle && i.classeTitle.trim().toLowerCase() === viewingClassStudents.title.trim().toLowerCase())) &&
+                    (i.status === "APPROVED" || i.status === "CONFIRMED" || i.status === "PENDING")
                 );
-                const enrolledStudentIds = new Set(classInscriptions.map((i) => i.userId));
-                const enrolledUsers = users.filter((u) => enrolledStudentIds.has(u.id));
 
-                const displayStudents = enrolledUsers.length > 0
-                  ? enrolledUsers.map((u) => {
-                      const insc = classInscriptions.find((i) => i.userId === u.id);
-                      return {
-                        id: u.id,
-                        name: u.name,
-                        email: u.email,
-                        avatar: u.avatarUrl,
-                        date: insc?.createdAt || u.createdAt,
-                      };
-                    })
-                  : users
-                      .filter((u) => u.role === "STUDENT")
-                      .slice(0, Math.min(viewingClassStudents.enrolledCount || 0, 5))
-                      .map((u) => ({
-                        id: u.id,
-                        name: u.name,
-                        email: u.email,
-                        avatar: u.avatarUrl,
-                        date: u.createdAt,
-                      }));
+                const studentMap = new Map<string, { id: string; name: string; email: string; avatar?: string; date: string }>();
+
+                users
+                  .filter(
+                    (u) =>
+                      u.role === "STUDENT" &&
+                      (u.classeId === viewingClassStudents.id ||
+                        (u.classeTitle && u.classeTitle.trim().toLowerCase() === viewingClassStudents.title.trim().toLowerCase()) ||
+                        classInscriptions.some((i) => isStudentMatchingInscription(i, u)))
+                  )
+                  .forEach((u) => {
+                    const insc = classInscriptions.find((i) => isStudentMatchingInscription(i, u));
+                    const key = (u.email || u.id).toLowerCase();
+                    studentMap.set(key, {
+                      id: u.id,
+                      name: u.name,
+                      email: u.email,
+                      avatar: u.avatarUrl,
+                      date: insc?.createdAt || u.createdAt,
+                    });
+                  });
+
+                classInscriptions.forEach((insc) => {
+                  const key = (insc.userEmail || insc.userId || insc.id).toLowerCase();
+                  if (!studentMap.has(key)) {
+                    studentMap.set(key, {
+                      id: insc.userId || insc.id,
+                      name: insc.userName,
+                      email: insc.userEmail,
+                      avatar: insc.userAvatar,
+                      date: insc.createdAt || insc.appliedAt,
+                    });
+                  }
+                });
+
+                const displayStudents = Array.from(studentMap.values());
 
                 if (displayStudents.length === 0) {
                   return (
