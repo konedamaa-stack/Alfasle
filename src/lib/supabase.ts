@@ -169,6 +169,14 @@ export function mapRowToCours(row: any): Cours {
 }
 
 export function mapCoursToRow(c: Cours): any {
+  const safeOrder =
+    typeof c.order === "number" &&
+    Number.isFinite(c.order) &&
+    c.order > 0 &&
+    c.order <= 2147483647
+      ? Math.floor(c.order)
+      : 1;
+
   return {
     id: c.id,
     classe_id: c.classeId,
@@ -176,7 +184,7 @@ export function mapCoursToRow(c: Cours): any {
     title: c.title,
     summary: c.summary || "",
     content: c.content || "",
-    display_order: c.order || 1,
+    display_order: safeOrder,
     status: c.status || "PUBLISHED",
     discipline: c.discipline || "",
     teacher_name: c.teacherName || "",

@@ -18,7 +18,7 @@ export function CreateCourseModal({
   defaultClassId,
   defaultDiscipline,
 }: CreateCourseModalProps) {
-  const { classes, createCourse, currentUser } = useStore();
+  const { classes, courses, createCourse, currentUser } = useStore();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -112,6 +112,8 @@ export function CreateCourseModal({
           }
         : null);
 
+    const nextOrder = (courses?.filter((c) => c.classeId === classeId).length || 0) + 1;
+
     createCourse({
       classeId,
       discipline: finalDiscipline,
@@ -120,7 +122,7 @@ export function CreateCourseModal({
       title,
       summary,
       content,
-      order: Date.now(),
+      order: nextOrder,
       status: "PUBLISHED",
       pdfUrl: effectivePdf?.url,
       pdfName: effectivePdf?.name,

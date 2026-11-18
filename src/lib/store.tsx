@@ -433,7 +433,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
       if (coursesRes.data) {
         const fetchedCourses: Cours[] = coursesRes.data.map(mapRowToCours);
-        setCourses(fetchedCourses);
+        setCourses((prev) => {
+          const fetchedIds = new Set(fetchedCourses.map((c) => c.id));
+          const recentLocal = prev.filter((c) => {
+            if (fetchedIds.has(c.id)) return false;
+            const timeMs = new Date(c.publishedAt || 0).getTime();
+            return Date.now() - timeMs < 30000;
+          });
+          return [...fetchedCourses, ...recentLocal];
+        });
       }
 
       if (assignmentsRes.data) {
@@ -1749,6 +1757,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     );
 
     if (isSupabaseConfigured()) {
+      const safeOrder =
+        typeof newCourse.order === "number" &&
+        Number.isFinite(newCourse.order) &&
+        newCourse.order > 0 &&
+        newCourse.order <= 2147483647
+          ? Math.floor(newCourse.order)
+          : (courses.filter((c) => c.classeId === newCourse.classeId).length || 0) + 1;
+
       supabase
         .from("courses")
         .upsert({
@@ -1758,7 +1774,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           title: newCourse.title,
           summary: newCourse.summary || "",
           content: newCourse.content || "",
-          display_order: newCourse.order || 1,
+          display_order: safeOrder,
           status: newCourse.status || "PUBLISHED",
           discipline: newCourse.discipline || "",
           teacher_name: newCourse.teacherName || "",
@@ -1769,7 +1785,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           resources: newCourse.resources || [],
           published_at: newCourse.publishedAt,
         })
-        .then();
+        .then(({ error }) => {
+          if (error) {
+            console.error("Erreur enregistrement cours dans Supabase:", error);
+          }
+        });
     }
   };
 
@@ -1778,6 +1798,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const next = prev.map((crs) => (crs.id === id ? { ...crs, ...data } : crs));
       const target = next.find((crs) => crs.id === id);
       if (target && isSupabaseConfigured()) {
+        const safeOrder =
+          typeof target.order === "number" &&
+          Number.isFinite(target.order) &&
+          target.order > 0 &&
+          target.order <= 2147483647
+            ? Math.floor(target.order)
+            : 1;
+
         supabase
           .from("courses")
           .upsert({
@@ -1787,7 +1815,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             title: target.title,
             summary: target.summary || "",
             content: target.content || "",
-            display_order: target.order || 1,
+            display_order: safeOrder,
             status: target.status || "PUBLISHED",
             discipline: target.discipline || "",
             teacher_name: target.teacherName || "",
@@ -1798,7 +1826,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             resources: target.resources || [],
             published_at: target.publishedAt,
           })
-          .then();
+          .then(({ error }) => {
+            if (error) {
+              console.error("Erreur mise a jour cours dans Supabase:", error);
+            }
+          });
       }
       return next;
     });
