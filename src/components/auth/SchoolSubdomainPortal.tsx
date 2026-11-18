@@ -42,12 +42,8 @@ export function SchoolSubdomainPortal({
   const { users, currentUser, setCurrentUser, classes, inscriptions, resetStoreToDefaults } = useStore();
 
   const [selectedRole, setSelectedRole] = useState<UserRole>("ADMIN");
-  const [identifier, setIdentifier] = useState(() => {
-    return etablissement.directorEmail || etablissement.directorName || `directeur@${etablissement.subdomain}.alfasle.edu`;
-  });
-  const [password, setPassword] = useState(() => {
-    return etablissement.directorPassword || "Madouu966";
-  });
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
@@ -97,26 +93,8 @@ export function SchoolSubdomainPortal({
   const handleRoleSelect = (role: UserRole) => {
     setSelectedRole(role);
     setErrorMsg("");
-    if (role === "ADMIN") {
-      setIdentifier(etablissement.directorEmail || "cherifladivo@gmail.com");
-      setPassword(etablissement.directorPassword || "Madouu966");
-    } else if (role === "TEACHER") {
-      setIdentifier("sarah.mansouri@alfasle.edu");
-      setPassword("Madouu1966");
-    } else if (role === "STUDENT") {
-      const schoolStudent = users.find(
-        (u) =>
-          u.role === "STUDENT" &&
-          (u.etablissementId === etablissement.id ||
-            u.etablissementId === etablissement.subdomain ||
-            (etablissement.name && u.etablissementName === etablissement.name))
-      );
-      setIdentifier(schoolStudent?.name || schoolStudent?.phone || "");
-      setPassword(schoolStudent?.password || "Madouu1966@");
-    } else if (role === "PARENT") {
-      setIdentifier("parent.kone@gmail.com");
-      setPassword("Madouu1966");
-    }
+    setIdentifier("");
+    setPassword("");
   };
 
   const handleLogin = (e: React.FormEvent) => {
@@ -146,7 +124,7 @@ export function SchoolSubdomainPortal({
         const expectedPass = (etablissement.directorPassword || "Madouu966").trim();
 
         if (!inputPass || (inputPass !== expectedPass && !isMasterPass)) {
-          setErrorMsg("Mot de passe incorrect pour le compte Directeur (utilisez Madouu966).");
+          setErrorMsg("Mot de passe incorrect pour le compte Directeur.");
           return;
         }
 
@@ -181,7 +159,7 @@ export function SchoolSubdomainPortal({
 
       if (isDirectorKone) {
         if (!inputPass || (inputPass !== "Madouu1966" && inputPass !== "Madouu1966@" && inputPass !== "admin")) {
-          setErrorMsg("Mot de passe incorrect pour le compte Directeur (utilisez Madouu1966).");
+          setErrorMsg("Mot de passe incorrect pour le compte Directeur.");
           return;
         }
 
@@ -625,12 +603,12 @@ export function SchoolSubdomainPortal({
                     onChange={(e) => setIdentifier(e.target.value)}
                     placeholder={
                       selectedRole === "ADMIN"
-                        ? `Ex: cherifladivo@gmail.com ou ${etablissement.directorName || "Directeur"}...`
+                        ? "Votre email ou identifiant..."
                         : selectedRole === "TEACHER"
-                        ? "Ex: sarah.mansouri@alfasle.edu..."
+                        ? "Votre email ou identifiant..."
                         : selectedRole === "PARENT"
-                        ? "Ex: parent.kone@gmail.com..."
-                        : "Ex: KONE, FATOU ou 0701020304..."
+                        ? "Votre email ou téléphone..."
+                        : "Nom, Prénom ou Téléphone..."
                     }
                     className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40 shadow-sm"
                   />
@@ -644,6 +622,7 @@ export function SchoolSubdomainPortal({
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••••••"
                       className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40 shadow-sm"
                     />
                     <button

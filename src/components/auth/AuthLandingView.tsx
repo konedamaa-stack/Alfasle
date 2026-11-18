@@ -41,8 +41,8 @@ export function AuthLandingView({
   const { users, currentUser, setCurrentUser, etablissements, classes, inscriptions, resetStoreToDefaults } = useStore();
 
   const [selectedRole, setSelectedRole] = useState<UserRole>("ADMIN");
-  const [identifier, setIdentifier] = useState("konedamaa@gmail.com");
-  const [password, setPassword] = useState("Madouu1966");
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
@@ -190,15 +190,8 @@ export function AuthLandingView({
   const handleRoleSelect = (role: UserRole) => {
     setSelectedRole(role);
     setErrorMsg("");
-    if (role === "STUDENT") {
-      const studentUser = users.find((u) => u.role === "STUDENT");
-      setIdentifier(studentUser?.name || studentUser?.phone || "");
-      setPassword(studentUser?.password || "Madouu1966@");
-      return;
-    }
-    const cfg = roleConfig[role];
-    setIdentifier(cfg.defaultLogin);
-    setPassword(cfg.defaultPass);
+    setIdentifier("");
+    setPassword("");
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
@@ -226,7 +219,7 @@ export function AuthLandingView({
 
       if (isDirectorKone) {
         if (!inputPass || (inputPass !== "Madouu1966" && inputPass !== "Madouu1966@" && inputPass !== "admin")) {
-          setErrorMsg("Mot de passe incorrect pour le compte Directeur (utilisez Madouu1966).");
+          setErrorMsg("Mot de passe incorrect pour le compte Directeur.");
           return;
         }
 
