@@ -446,7 +446,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
       if (assignmentsRes.data) {
         const fetchedAssignments: Devoir[] = assignmentsRes.data.map(mapRowToDevoir);
-        setAssignments(fetchedAssignments);
+        setAssignments((prev) => {
+          const fetchedIds = new Set(fetchedAssignments.map((a) => a.id));
+          const recentLocal = prev.filter((a) => {
+            if (fetchedIds.has(a.id)) return false;
+            const timeMs = new Date(a.createdAt || 0).getTime();
+            return Date.now() - timeMs < 30000;
+          });
+          return [...fetchedAssignments, ...recentLocal];
+        });
       }
     } catch (err) {
       console.warn("Supabase initial sync:", err);

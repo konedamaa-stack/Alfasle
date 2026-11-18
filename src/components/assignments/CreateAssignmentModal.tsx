@@ -115,8 +115,11 @@ export function CreateAssignmentModal({
         ]
       : [];
 
+    const targetClass = classes.find((c) => c.id === targetClassId);
+
     createAssignment({
       classeId: targetClassId,
+      discipline: selectedCourse?.discipline || targetClass?.category || "Général",
       coursId: coursId || undefined,
       coursTitle: selectedCourse?.title,
       title,
