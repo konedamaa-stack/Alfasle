@@ -38,7 +38,7 @@ import {
   mapRowToInscription,
   mapInscriptionToRow,
 } from "./supabase";
-import { isStudentMatchingInscription } from "./utils";
+import { isStudentMatchingInscription, findStudentInscription } from "./utils";
 
 interface StoreContextType {
   currentUser: User;
@@ -359,7 +359,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           // 2. Mettre à jour chaque élève existant avec sa classe obligatoire et son mot de passe depuis Supabase
           let updatedUsers = nonStudentOrRecentUsers.map((u) => {
             if (u.role !== "STUDENT") return u;
-            const matchedIns = fetchedInscriptions.find((i) => isStudentMatchingInscription(u, i));
+            const matchedIns = findStudentInscription(u, fetchedInscriptions);
             if (matchedIns) {
               const cloudPassword =
                 matchedIns.reviewedBy && matchedIns.reviewedBy.startsWith("PWD:")
@@ -411,6 +411,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           });
 
           return updatedUsers;
+        });
+
+        setCurrentUser((prevUser) => {
+          if (!prevUser || prevUser.role !== "STUDENT") return prevUser;
+          const matchedIns = findStudentInscription(prevUser, fetchedInscriptions);
+          if (!matchedIns) return prevUser;
+          if (
+            prevUser.classeId === matchedIns.classeId &&
+            prevUser.classeTitle === matchedIns.classeTitle
+          ) {
+            return prevUser;
+          }
+          return {
+            ...prevUser,
+            etablissementId: matchedIns.etablissementId || prevUser.etablissementId,
+            etablissementName: matchedIns.etablissementName || prevUser.etablissementName,
+            classeId: matchedIns.classeId || prevUser.classeId,
+            classeTitle: matchedIns.classeTitle || prevUser.classeTitle,
+          };
         });
       }
 

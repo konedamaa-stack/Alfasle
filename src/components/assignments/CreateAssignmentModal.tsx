@@ -17,10 +17,24 @@ export function CreateAssignmentModal({
 }: CreateAssignmentModalProps) {
   const { currentUser, classes, courses, createAssignment } = useStore();
 
-  const [classeId, setClasseId] = useState(defaultClassId || (classes[0]?.id || ""));
-  const effectiveClasseId = classeId || defaultClassId || (classes[0]?.id || "");
-  const classCourses = courses.filter((c) => c.classeId === effectiveClasseId);
+  const [classeId, setClasseId] = useState(defaultClassId && defaultClassId !== "ALL" ? defaultClassId : (classes[0]?.id || ""));
+  const effectiveClasseId = classeId || (defaultClassId && defaultClassId !== "ALL" ? defaultClassId : "") || (classes[0]?.id || "");
+  const classCourses = effectiveClasseId === "ALL" ? courses : courses.filter((c) => c.classeId === effectiveClasseId);
   const [coursId, setCoursId] = useState(classCourses[0]?.id || "");
+
+  React.useEffect(() => {
+    if (isOpen) {
+      const nextClassId =
+        defaultClassId && defaultClassId !== "ALL" && classes.some((c) => c.id === defaultClassId)
+          ? defaultClassId
+          : classeId && (classeId === "ALL" || classes.some((c) => c.id === classeId))
+          ? classeId
+          : classes[0]?.id || "";
+      setClasseId(nextClassId);
+      const nextCourses = nextClassId === "ALL" ? courses : courses.filter((c) => c.classeId === nextClassId);
+      setCoursId(nextCourses[0]?.id || "");
+    }
+  }, [isOpen, defaultClassId, classes.length]);
 
   const [title, setTitle] = useState("");
   const [instructions, setInstructions] = useState("");
@@ -115,18 +129,29 @@ export function CreateAssignmentModal({
         ]
       : [];
 
-    const targetClass = classes.find((c) => c.id === targetClassId);
+    const targetClassIds =
+      targetClassId === "ALL"
+        ? classes.map((c) => c.id)
+        : [targetClassId];
 
-    createAssignment({
-      classeId: targetClassId,
-      discipline: selectedCourse?.discipline || targetClass?.category || "Général",
-      coursId: coursId || undefined,
-      coursTitle: selectedCourse?.title,
-      title,
-      instructions,
-      dueDate: new Date(dueDate).toISOString(),
-      maxScore: maxScore || 20,
-      attachments,
+    targetClassIds.forEach((cid) => {
+      const targetClass = classes.find((c) => c.id === cid);
+      const matchingCourse =
+        selectedCourse && selectedCourse.classeId === cid
+          ? selectedCourse
+          : courses.find((c) => c.classeId === cid);
+
+      createAssignment({
+        classeId: cid,
+        discipline: matchingCourse?.discipline || selectedCourse?.discipline || targetClass?.category || "Général",
+        coursId: matchingCourse?.id || undefined,
+        coursTitle: matchingCourse?.title || selectedCourse?.title,
+        title,
+        instructions,
+        dueDate: new Date(dueDate).toISOString(),
+        maxScore: maxScore || 20,
+        attachments,
+      });
     });
 
     onClose();
@@ -163,11 +188,12 @@ export function CreateAssignmentModal({
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">Classe *</label>
               <select
-                value={classeId}
+                value={effectiveClasseId}
                 onChange={(e) => {
-                  setClasseId(e.target.value);
-                  const nextC = courses.filter((c) => c.classeId === e.target.value);
-                  if (nextC.length > 0) setCoursId(nextC[0].id);
+                  const val = e.target.value;
+                  setClasseId(val);
+                  const nextC = val === "ALL" ? courses : courses.filter((c) => c.classeId === val);
+                  setCoursId(nextC.length > 0 ? nextC[0].id : "");
                 }}
                 className="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-500"
               >
@@ -176,6 +202,9 @@ export function CreateAssignmentModal({
                     {c.title}
                   </option>
                 ))}
+                {classes.length > 1 && (
+                  <option value="ALL">🌍 Toutes les classes ({classes.length})</option>
+                )}
               </select>
             </div>
 

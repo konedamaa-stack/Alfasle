@@ -240,12 +240,22 @@ export function isStudentMatchingInscription(arg1: any, arg2: any): boolean {
 }
 
 /**
- * Finds the authoritative inscription for a student user, prioritizing APPROVED/CONFIRMED over PENDING.
+ * Finds the authoritative inscription for a student user, prioritizing the most recent APPROVED/CONFIRMED over PENDING.
  */
 export function findStudentInscription(user: any, inscriptions: any[]): any | null {
   if (!user || !Array.isArray(inscriptions)) return null;
+
+  const sortByLatest = (list: any[]) =>
+    [...list].sort((a, b) => {
+      const tA = new Date(a.reviewedAt || a.appliedAt || a.createdAt || 0).getTime();
+      const tB = new Date(b.reviewedAt || b.appliedAt || b.createdAt || 0).getTime();
+      return tB - tA;
+    });
+
   // 1. Exact userId match first
-  const byId = inscriptions.filter((i) => i.role !== "TEACHER" && i.userId && user.id && i.userId === user.id);
+  const byId = sortByLatest(
+    inscriptions.filter((i) => i.role !== "TEACHER" && i.userId && user.id && i.userId === user.id)
+  );
   if (byId.length > 0) {
     return (
       byId.find((i) => i.status === "APPROVED" || i.status === "CONFIRMED") ||
@@ -254,7 +264,7 @@ export function findStudentInscription(user: any, inscriptions: any[]): any | nu
     );
   }
   // 2. Fallback to strict email / phone / full name matching
-  const matching = inscriptions.filter((i) => isStudentMatchingInscription(user, i));
+  const matching = sortByLatest(inscriptions.filter((i) => isStudentMatchingInscription(user, i)));
   if (matching.length === 0) return null;
   return (
     matching.find((i) => i.status === "APPROVED" || i.status === "CONFIRMED") ||

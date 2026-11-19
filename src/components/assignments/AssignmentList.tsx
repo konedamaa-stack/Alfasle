@@ -28,7 +28,7 @@ import { ConfirmModal } from "@/components/common/ConfirmModal";
 import { isStudentMatchingInscription, findStudentInscription, findStudentClass } from "@/lib/utils";
 
 interface AssignmentListProps {
-  onOpenCreateAssignment: () => void;
+  onOpenCreateAssignment: (defaultClassId?: string) => void;
 }
 
 export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) {
@@ -128,7 +128,7 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
 
         {isEducator && (
           <button
-            onClick={onOpenCreateAssignment}
+            onClick={() => onOpenCreateAssignment(selectedClassId !== "ALL" ? selectedClassId : undefined)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all self-start sm:self-auto cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
@@ -187,7 +187,7 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
             </p>
             {isEducator && (
               <button
-                onClick={onOpenCreateAssignment}
+                onClick={() => onOpenCreateAssignment(selectedClassId !== "ALL" ? selectedClassId : undefined)}
                 className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer"
               >
                 <PlusCircle className="w-4 h-4" />

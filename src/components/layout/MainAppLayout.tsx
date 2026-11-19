@@ -85,6 +85,8 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
   const [createCourseDefaultDiscipline, setCreateCourseDefaultDiscipline] =
     useState<string | undefined>(undefined);
   const [isCreateAssignmentOpen, setIsCreateAssignmentOpen] = useState(false);
+  const [createAssignmentDefaultClassId, setCreateAssignmentDefaultClassId] =
+    useState<string | undefined>(undefined);
 
   const [selectedSubmissionForGrading, setSelectedSubmissionForGrading] =
     useState<Soumission | null>(null);
@@ -267,7 +269,10 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
           {/* ASSIGNMENTS */}
           {activeTab === "assignments" && (
             <AssignmentList
-              onOpenCreateAssignment={() => setIsCreateAssignmentOpen(true)}
+              onOpenCreateAssignment={(defaultClsId) => {
+                setCreateAssignmentDefaultClassId(defaultClsId || selectedClassForCourses);
+                setIsCreateAssignmentOpen(true);
+              }}
             />
           )}
 
@@ -333,7 +338,11 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
 
       <CreateAssignmentModal
         isOpen={isCreateAssignmentOpen}
-        onClose={() => setIsCreateAssignmentOpen(false)}
+        onClose={() => {
+          setIsCreateAssignmentOpen(false);
+          setCreateAssignmentDefaultClassId(undefined);
+        }}
+        defaultClassId={createAssignmentDefaultClassId || selectedClassForCourses}
       />
 
       <GradingModal
