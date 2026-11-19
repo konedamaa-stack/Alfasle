@@ -578,35 +578,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       } catch (e) {
         console.error("Erreur reset localStorage:", e);
       }
-    }
-
-    if (isSupabaseConfigured()) {
-      Promise.all([
-        supabase.from("submissions").delete().neq("id", "non_existent_fake_id"),
-        supabase.from("corrections").delete().neq("id", "non_existent_fake_id"),
-        supabase.from("assignments").delete().neq("id", "non_existent_fake_id"),
-        supabase.from("courses").delete().neq("id", "non_existent_fake_id"),
-        supabase.from("inscriptions").delete().neq("id", "non_existent_fake_id"),
-        supabase.from("classes").delete().neq("id", "non_existent_fake_id"),
-        supabase.from("notifications").delete().neq("id", "non_existent_fake_id"),
-        supabase.from("etablissements").update({ classes_count: 0, students_count: 0 }).neq("id", "non_existent_fake_id"),
-      ]).then(() => {
-        if (typeof window !== "undefined") {
-          window.location.reload();
-        }
-      });
-    }
-
-    setUsers(initialUsers);
-    setEtablissements(initialEtablissements);
-    setClasses(initialClasses);
-    setInscriptions(initialInscriptions);
-    setCourses(initialCourses);
-    setAssignments(initialAssignments);
-    setSubmissions(initialSubmissions);
-    setNotifications(initialNotifications);
-    setCurrentUser(initialUsers[0]); // KONE ADAMA (Super Admin Master)
-    if (typeof window !== "undefined") {
       window.location.reload();
     }
   };

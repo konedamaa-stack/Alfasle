@@ -60,43 +60,43 @@ export function Navbar({
     switch (role) {
       case "SUPER_ADMIN":
         return {
-          label: "Super Admin (Root)",
-          icon: <Shield className="w-3.5 h-3.5 text-amber-400" />,
-          color: "bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm",
+          label: "Super Admin",
+          icon: <Shield className="w-3.5 h-3.5 text-amber-600" />,
+          color: "bg-amber-50 text-amber-800 border-amber-200 shadow-sm",
         };
       case "TEACHER":
         return {
           label: "Enseignant",
-          icon: <BookOpen className="w-3.5 h-3.5" />,
-          color: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+          icon: <BookOpen className="w-3.5 h-3.5 text-blue-600" />,
+          color: "bg-blue-50 text-blue-700 border-blue-200",
         };
       case "STUDENT":
         return {
           label: "Élève",
-          icon: <GraduationCap className="w-3.5 h-3.5" />,
-          color: "bg-sky-500/20 text-sky-300 border-sky-500/30",
+          icon: <GraduationCap className="w-3.5 h-3.5 text-sky-600" />,
+          color: "bg-sky-50 text-sky-700 border-sky-200",
         };
       case "PARENT":
         return {
           label: "Parent",
-          icon: <User className="w-3.5 h-3.5" />,
-          color: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+          icon: <User className="w-3.5 h-3.5 text-purple-600" />,
+          color: "bg-purple-50 text-purple-700 border-purple-200",
         };
       case "DIRECTEUR":
       case "ADMIN":
       default:
         return {
           label: "Directeur",
-          icon: <Shield className="w-3.5 h-3.5 text-rose-500" />,
-          color: "bg-rose-500/20 text-rose-300 border-rose-500/30",
+          icon: <Shield className="w-3.5 h-3.5 text-rose-600" />,
+          color: "bg-rose-50 text-rose-700 border-rose-200",
         };
     }
   };
 
   const badge = getRoleBadge(currentUser?.role) || {
     label: "Directeur",
-    icon: <Shield className="w-3.5 h-3.5 text-rose-500" />,
-    color: "bg-rose-500/20 text-rose-300 border-rose-500/30",
+    icon: <Shield className="w-3.5 h-3.5 text-rose-600" />,
+    color: "bg-rose-50 text-rose-700 border-rose-200",
   };
 
   return (
@@ -177,71 +177,14 @@ export function Navbar({
           </button>
         )}
 
-        {/* Role Switcher Pill */}
-        <div className="relative">
-          <button
-            onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 hover:bg-slate-200 text-xs font-medium text-slate-800 transition-all shadow-sm cursor-pointer"
+        {/* Active Role Badge */}
+        <div className="hidden sm:flex items-center">
+          <span
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-semibold ${badge.color}`}
           >
-            <span
-              className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[11px] font-semibold ${badge.color}`}
-            >
-              {badge.icon}
-              {badge.label}
-            </span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
-          </button>
-
-          {showRoleDropdown && (
-            <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-slate-200 p-2 z-50">
-              <div className="px-3 py-2 border-b border-slate-100 mb-1">
-                <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                  Changer de vue (Mode Démo)
-                </p>
-              </div>
-              <div className="space-y-1">
-                {(currentUser.role === "SUPER_ADMIN"
-                  ? users
-                  : users.filter(
-                      (u) =>
-                        u.etablissementId === currentUser.etablissementId ||
-                        (currentUser.etablissementName &&
-                          u.etablissementName === currentUser.etablissementName)
-                    )
-                ).map((u) => {
-                  const uBadge = getRoleBadge(u.role);
-                  const isSelected = u.id === currentUser.id;
-                  return (
-                    <button
-                      key={u.id}
-                      onClick={() => {
-                        setCurrentUser(u);
-                        setShowRoleDropdown(false);
-                      }}
-                      className={`w-full flex items-center justify-between p-2 rounded-lg text-left text-xs transition-colors cursor-pointer ${
-                        isSelected
-                          ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
-                          : "hover:bg-slate-100 text-slate-700"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <img
-                          src={u.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100"}
-                          alt={u.name}
-                          className="w-7 h-7 rounded-full object-cover border border-slate-200"
-                        />
-                        <div>
-                          <p className="font-semibold text-slate-800 leading-tight">{u.name}</p>
-                          <span className="text-[10px] text-slate-500">{uBadge.label}</span>
-                        </div>
-                      </div>
-                      {isSelected && <Check className="w-4 h-4 text-indigo-600" />}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+            {badge.icon}
+            {badge.label}
+          </span>
         </div>
 
         {/* Notifications Popover */}

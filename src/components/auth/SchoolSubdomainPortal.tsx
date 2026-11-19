@@ -705,14 +705,8 @@ export function SchoolSubdomainPortal({
       </main>
 
       {/* Footer */}
-      <footer className="w-full text-center py-4 px-4 text-xs text-slate-500 border-t border-slate-200 z-10 flex flex-col sm:flex-row items-center justify-between gap-2 max-w-5xl mx-auto">
-        <span>© 2026-2027 {etablissement.name} • Hébergé sur la plateforme AlFasle Multi-Tenant</span>
-        <button
-          onClick={() => setIsResetConfirmOpen(true)}
-          className="text-[11px] text-slate-400 hover:text-rose-500 underline transition-colors flex items-center gap-1 cursor-pointer"
-        >
-          <span>🧹 Vider le cache & Réinitialiser</span>
-        </button>
+      <footer className="w-full text-center py-4 px-4 text-xs text-slate-500 border-t border-slate-200 z-10 flex flex-col sm:flex-row items-center justify-center gap-2 max-w-5xl mx-auto">
+        <span>© 2026-2027 {etablissement.name} • Propulsé par AlFasle Pro</span>
       </footer>
 
       {/* Campus Pre-Registration Modal */}
@@ -721,18 +715,6 @@ export function SchoolSubdomainPortal({
         onClose={() => setIsPreRegModalOpen(false)}
         defaultEstablishmentId={etablissement.id}
         defaultRole={preRegRole}
-      />
-
-      {/* Reset Cache Confirmation Modal */}
-      <ConfirmModal
-        isOpen={isResetConfirmOpen}
-        onClose={() => setIsResetConfirmOpen(false)}
-        onConfirm={resetStoreToDefaults}
-        title="Réinitialisation du Campus"
-        message="Voulez-vous vider le cache et réinitialiser les données de démonstration de cet établissement ?"
-        confirmLabel="Réinitialiser"
-        cancelLabel="Annuler"
-        variant="warning"
       />
     </div>
   );

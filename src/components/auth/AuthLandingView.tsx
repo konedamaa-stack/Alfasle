@@ -755,37 +755,6 @@ export function AuthLandingView({
                   </label>
                 </div>
 
-                                {/* Bouton d'accès direct 1-Clic KONE ADAMA */}
-                <div className="p-3 rounded-2xl bg-gradient-to-r from-[#faf5f0] to-[#f4ede4] border border-[#e2d2c1] space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-extrabold text-[#6d4624] flex items-center gap-1.5">
-                      <span>👑</span>
-                      <span>Connexion Directe 1-Clic :</span>
-                    </span>
-                    <span className="text-[10px] font-bold text-[#865d3d] bg-white px-2 py-0.5 rounded-full border border-[#e2d2c1]">
-                      Sans mot de passe
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleFastLogin("konedamaa@gmail.com", "Madouu1966", "ADMIN")}
-                      className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#a87f5d] to-[#865d3d] hover:from-[#b58d6b] hover:to-[#926644] text-white font-extrabold text-[11px] flex items-center justify-between shadow-md shadow-[#865d3d]/20 transition-all cursor-pointer"
-                    >
-                      <span>Entrer : KONE ADAMA</span>
-                      <span>&rarr;</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleFastLogin("diawara@gmail.com", "Madouu1966", "ADMIN")}
-                      className="py-2.5 px-3 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-[11px] flex items-center justify-between transition-all cursor-pointer"
-                    >
-                      <span>Entrer : Dr. DIAWARA</span>
-                      <span>&rarr;</span>
-                    </button>
-                  </div>
-                </div>
-
                 {/* Submit button matching reference image */}
                 <div className="flex items-center justify-between gap-3 pt-2">
                   <button
@@ -917,14 +886,8 @@ export function AuthLandingView({
       </main>
 
       {/* Page Footer */}
-      <footer className="w-full text-center py-4 px-4 text-xs text-slate-500 border-t border-slate-200 z-10 flex flex-col sm:flex-row items-center justify-between gap-3 max-w-7xl mx-auto">
-        <span>© 2026-2027 ALFASLE LMS • Plateforme Éducative Multi-Établissements</span>
-        <button
-          onClick={() => setIsResetConfirmOpen(true)}
-          className="text-[11px] text-slate-400 hover:text-rose-500 underline transition-colors flex items-center gap-1 cursor-pointer"
-        >
-          <span>🧹 Vider le cache & Réinitialiser</span>
-        </button>
+      <footer className="w-full text-center py-4 px-4 text-xs text-slate-500 border-t border-slate-200 z-10 flex flex-col sm:flex-row items-center justify-center gap-3 max-w-7xl mx-auto">
+        <span>© 2026-2027 ALFASLE PRO • Plateforme Éducative Multi-Établissements</span>
       </footer>
 
       {/* Public Pre-Registration Modal */}
@@ -932,18 +895,6 @@ export function AuthLandingView({
         isOpen={isPreRegModalOpen}
         onClose={() => setIsPreRegModalOpen(false)}
         defaultRole={preRegRole}
-      />
-
-      {/* Reset Cache Confirmation Modal */}
-      <ConfirmModal
-        isOpen={isResetConfirmOpen}
-        onClose={() => setIsResetConfirmOpen(false)}
-        onConfirm={resetStoreToDefaults}
-        title="Réinitialisation des Données"
-        message="Voulez-vous vider le cache et réinitialiser les données de démonstration de la plateforme ?"
-        confirmLabel="Réinitialiser"
-        cancelLabel="Annuler"
-        variant="warning"
       />
     </div>
   );

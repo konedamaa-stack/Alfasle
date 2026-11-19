@@ -348,7 +348,7 @@ export function ValidationQueue() {
                   <div className="flex lg:flex-col items-center justify-end gap-2.5 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-200">
                     <button
                       onClick={() => setSelectedActivationIns(ins)}
-                      title="Simuler la réception de l'email et définir le mot de passe"
+                      title="Gérer les identifiants et définir le mot de passe du compte"
                       className="w-full sm:w-auto px-4 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm"
                     >
                       <Mail className="w-3.5 h-3.5 text-indigo-600" />

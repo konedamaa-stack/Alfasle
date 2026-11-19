@@ -34,9 +34,9 @@ export function SuperAdminLoginView({
 }: SuperAdminLoginViewProps) {
   const { setCurrentUser, users } = useStore();
 
-  const [masterLogin, setMasterLogin] = useState("konedamaa@gmail.com");
-  const [masterPassword, setMasterPassword] = useState("Madouu1966@");
-  const [securityPin, setSecurityPin] = useState("994821");
+  const [masterLogin, setMasterLogin] = useState("");
+  const [masterPassword, setMasterPassword] = useState("");
+  const [securityPin, setSecurityPin] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [authMode, setAuthMode] = useState<"PASSWORD" | "2FA_PIN" | "BIOMETRIC">("PASSWORD");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -360,25 +360,10 @@ export function SuperAdminLoginView({
                     disabled={isLoading}
                     className="px-6 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs shadow-lg shadow-amber-500/20"
                   >
-                    Simuler la détection FIDO2 Root
+                    Authentification Clé FIDO2 Root
                   </button>
                 </div>
               )}
-
-              {/* Quick 1-Click Super Admin Access */}
-              <div className="pt-4 border-t border-slate-200">
-                <button
-                  type="button"
-                  onClick={handleSuperAdminLogin}
-                  className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-amber-600 text-xs font-semibold flex items-center justify-between transition-all"
-                >
-                  <span className="flex items-center gap-2">
-                    <span>👑</span>
-                    <span>Accès Direct Démo : Super Admin Master</span>
-                  </span>
-                  <span className="text-amber-600 text-[10px] font-mono">&rarr; Entrer</span>
-                </button>
-              </div>
             </div>
 
             {/* Bottom Footer Note */}
