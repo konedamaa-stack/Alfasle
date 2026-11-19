@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { Classe, Etablissement, Cours, Devoir, Inscription } from "@/types";
+import { Classe, Etablissement, Cours, Devoir, Inscription, Soumission } from "@/types";
 
 const defaultSupabaseUrl = "https://zsdyfyegmssnmlyobmmc.supabase.co";
 const defaultSupabaseAnonKey =
@@ -282,6 +282,47 @@ export function mapInscriptionToRow(i: Inscription): any {
     applied_at: i.appliedAt || new Date().toISOString(),
     reviewed_at: i.reviewedAt || null,
     reviewed_by: i.reviewedBy || null,
+  };
+}
+
+export function mapRowToSoumission(
+  row: any,
+  assignments?: Devoir[],
+  classes?: Classe[],
+  inscriptions?: Inscription[]
+): Soumission {
+  const assignment = assignments?.find((a) => a.id === (row.assignment_id || row.devoirId));
+  const classObj = classes?.find((c) => c.id === assignment?.classeId);
+  const student = inscriptions?.find((i) => i.userId === row.student_id || i.id === row.student_id);
+
+  return {
+    id: row.id,
+    devoirId: row.assignment_id || row.devoirId,
+    devoirTitle: assignment?.title || row.devoir_title || "Devoir",
+    classeId: assignment?.classeId || row.classe_id || "",
+    classeTitle: classObj?.title || row.classe_title || "Classe",
+    studentId: row.student_id || row.studentId,
+    studentName: student?.userName || row.student_name || "Élève",
+    studentEmail: student?.userEmail || row.student_email || "",
+    studentAvatar: student?.userAvatar || row.student_avatar,
+    content: row.content || "",
+    attachmentName: row.attachment_name || row.attachmentName || "",
+    attachmentUrl: row.attachment_url || row.attachmentUrl || "",
+    submittedAt: row.submitted_at || row.submittedAt || new Date().toISOString(),
+    status: row.status || "SUBMITTED",
+  };
+}
+
+export function mapSoumissionToRow(s: Soumission): any {
+  return {
+    id: s.id,
+    assignment_id: s.devoirId,
+    student_id: s.studentId,
+    content: s.content || "",
+    attachment_name: s.attachmentName || "",
+    attachment_url: s.attachmentUrl || "",
+    submitted_at: s.submittedAt,
+    status: s.status || "SUBMITTED",
   };
 }
 

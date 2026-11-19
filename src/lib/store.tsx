@@ -37,6 +37,8 @@ import {
   mapDevoirToRow,
   mapRowToInscription,
   mapInscriptionToRow,
+  mapRowToSoumission,
+  mapSoumissionToRow,
 } from "./supabase";
 import { isStudentMatchingInscription, findStudentInscription } from "./utils";
 
@@ -306,12 +308,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const syncFromSupabase = React.useCallback(async () => {
     if (!isSupabaseConfigured()) return;
     try {
-      const [etabsRes, classesRes, coursesRes, assignmentsRes, inscriptionsRes] = await Promise.all([
+      const [etabsRes, classesRes, coursesRes, assignmentsRes, inscriptionsRes, submissionsRes] = await Promise.all([
         supabase.from("etablissements").select("*"),
         supabase.from("classes").select("*"),
         supabase.from("courses").select("*"),
         supabase.from("assignments").select("*"),
         supabase.from("inscriptions").select("*"),
+        supabase.from("submissions").select("*"),
       ]);
 
       if (etabsRes.data) {
@@ -463,8 +466,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         });
       }
 
+      let fetchedAssignments: Devoir[] = [];
       if (assignmentsRes.data) {
-        const fetchedAssignments: Devoir[] = assignmentsRes.data.map(mapRowToDevoir);
+        fetchedAssignments = assignmentsRes.data.map(mapRowToDevoir);
         setAssignments((prev) => {
           const fetchedIds = new Set(fetchedAssignments.map((a) => a.id));
           const recentLocal = prev.filter((a) => {
@@ -473,6 +477,26 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             return Date.now() - timeMs < 30000;
           });
           return [...fetchedAssignments, ...recentLocal];
+        });
+      }
+
+      if (submissionsRes && submissionsRes.data) {
+        const fetchedSubs: Soumission[] = submissionsRes.data.map((row: any) =>
+          mapRowToSoumission(
+            row,
+            fetchedAssignments,
+            classesRes.data ? classesRes.data.map(mapRowToClasse) : undefined,
+            fetchedInscriptions
+          )
+        );
+        setSubmissions((prev) => {
+          const fetchedIds = new Set(fetchedSubs.map((s) => s.id));
+          const recentLocal = prev.filter((s) => {
+            if (fetchedIds.has(s.id)) return false;
+            const timeMs = new Date(s.submittedAt || 0).getTime();
+            return Date.now() - timeMs < 30000;
+          });
+          return [...fetchedSubs, ...recentLocal];
         });
       }
     } catch (err) {
@@ -1879,6 +1903,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const deleteAssignment = (id: string) => {
     setAssignments((prev) => prev.filter((a) => a.id !== id));
+    setSubmissions((prev) => prev.filter((s) => s.devoirId !== id));
     if (isSupabaseConfigured()) {
       supabase
         .from("assignments")
@@ -1890,6 +1915,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           },
           (err: any) => console.error("Erreur réseau Supabase suppression:", err)
         );
+      supabase
+        .from("submissions")
+        .delete()
+        .eq("assignment_id", id)
+        .then();
     }
   };
 
@@ -1929,6 +1959,27 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           : a
       )
     );
+
+    if (isSupabaseConfigured()) {
+      supabase
+        .from("submissions")
+        .upsert({
+          id: newSub.id,
+          assignment_id: newSub.devoirId,
+          student_id: newSub.studentId,
+          content: newSub.content || "",
+          attachment_name: newSub.attachmentName || "",
+          attachment_url: newSub.attachmentUrl || "",
+          submitted_at: newSub.submittedAt,
+          status: newSub.status || "SUBMITTED",
+        })
+        .then(
+          ({ error }) => {
+            if (error) console.error("Erreur enregistrement soumission Supabase:", error);
+          },
+          (err) => console.error("Erreur reseau soumission:", err)
+        );
+    }
 
     // Notify teacher
     if (targetClass) {
