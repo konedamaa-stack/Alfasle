@@ -486,11 +486,11 @@ export function AuthLandingView({
               setPreRegRole("STUDENT");
               setIsPreRegModalOpen(true);
             }}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold shadow-sm transition-all transform hover:-translate-y-0.5 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold shadow-sm transition-all transform hover:-translate-y-0.5 cursor-pointer whitespace-nowrap"
             title="Pré-inscription en ligne"
           >
             <span>📝</span>
-            <span className="hidden sm:inline">Pré-inscription</span>
+            <span className="inline font-bold">Pré-inscription</span>
           </button>
 
           <button
