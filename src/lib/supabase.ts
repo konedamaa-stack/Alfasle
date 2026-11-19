@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { Classe, Etablissement, Cours, Devoir, Inscription, Soumission } from "@/types";
+import { Classe, Etablissement, Cours, Devoir, Inscription, Soumission, Correction } from "@/types";
 
 const defaultSupabaseUrl = "https://zsdyfyegmssnmlyobmmc.supabase.co";
 const defaultSupabaseAnonKey =
@@ -285,15 +285,48 @@ export function mapInscriptionToRow(i: Inscription): any {
   };
 }
 
+export function mapRowToCorrection(row: any): Correction {
+  return {
+    id: row.id,
+    soumissionId: row.submission_id || row.soumissionId,
+    graderId: row.grader_id || row.graderId || "",
+    graderName: row.grader_name || row.graderName || "Enseignant",
+    score: typeof row.score === "number" ? row.score : parseFloat(row.score) || 0,
+    maxScore: typeof row.max_score === "number" ? row.max_score : parseFloat(row.max_score) || 20,
+    feedback: row.feedback || "",
+    gradedAt: row.graded_at || row.gradedAt || new Date().toISOString(),
+  };
+}
+
+export function mapCorrectionToRow(c: Correction): any {
+  return {
+    id: c.id,
+    submission_id: c.soumissionId,
+    grader_id: c.graderId,
+    score: c.score,
+    max_score: c.maxScore || 20,
+    feedback: c.feedback || "",
+    graded_at: c.gradedAt || new Date().toISOString(),
+  };
+}
+
 export function mapRowToSoumission(
   row: any,
   assignments?: Devoir[],
   classes?: Classe[],
-  inscriptions?: Inscription[]
+  inscriptions?: Inscription[],
+  corrections?: any[]
 ): Soumission {
   const assignment = assignments?.find((a) => a.id === (row.assignment_id || row.devoirId));
   const classObj = classes?.find((c) => c.id === assignment?.classeId);
   const student = inscriptions?.find((i) => i.userId === row.student_id || i.id === row.student_id);
+
+  const matchedCorrection = corrections?.find(
+    (c: any) => (c.submission_id || c.soumissionId) === row.id
+  );
+  const correction: Correction | undefined = matchedCorrection
+    ? mapRowToCorrection(matchedCorrection)
+    : undefined;
 
   return {
     id: row.id,
@@ -309,7 +342,8 @@ export function mapRowToSoumission(
     attachmentName: row.attachment_name || row.attachmentName || "",
     attachmentUrl: row.attachment_url || row.attachmentUrl || "",
     submittedAt: row.submitted_at || row.submittedAt || new Date().toISOString(),
-    status: row.status || "SUBMITTED",
+    status: correction || row.status === "GRADED" ? "GRADED" : (row.status || "SUBMITTED"),
+    correction,
   };
 }
 

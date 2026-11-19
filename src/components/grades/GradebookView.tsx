@@ -10,6 +10,7 @@ export function GradebookView() {
 
   const isTeacher = currentUser.role === "TEACHER" || currentUser.role === "ADMIN";
   const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
+  const isStudent = currentUser.role === "STUDENT";
 
   const userSchoolClasses = isSuperAdmin
     ? classes
@@ -24,11 +25,18 @@ export function GradebookView() {
     (s) =>
       s.status === "GRADED" &&
       s.correction &&
-      (isSuperAdmin || schoolClassIds.has(s.classeId))
+      (isSuperAdmin || !s.classeId || schoolClassIds.size === 0 || schoolClassIds.has(s.classeId))
   );
-  const myGradedSubmissions = isTeacher
+  const myGradedSubmissions = isTeacher || isSuperAdmin
     ? allGradedSubmissions
-    : allGradedSubmissions.filter((s) => s.studentId === currentUser.id);
+    : submissions.filter(
+        (s) =>
+          s.status === "GRADED" &&
+          s.correction &&
+          (s.studentId === currentUser.id ||
+            (currentUser.email && s.studentEmail && s.studentEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
+            (currentUser.name && s.studentName && s.studentName.trim().toLowerCase() === currentUser.name.trim().toLowerCase()))
+      );
 
   const averageScore =
     myGradedSubmissions.length > 0

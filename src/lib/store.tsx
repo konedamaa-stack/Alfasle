@@ -308,13 +308,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const syncFromSupabase = React.useCallback(async () => {
     if (!isSupabaseConfigured()) return;
     try {
-      const [etabsRes, classesRes, coursesRes, assignmentsRes, inscriptionsRes, submissionsRes] = await Promise.all([
+      const [etabsRes, classesRes, coursesRes, assignmentsRes, inscriptionsRes, submissionsRes, correctionsRes] = await Promise.all([
         supabase.from("etablissements").select("*"),
         supabase.from("classes").select("*"),
         supabase.from("courses").select("*"),
         supabase.from("assignments").select("*"),
         supabase.from("inscriptions").select("*"),
         supabase.from("submissions").select("*"),
+        supabase.from("corrections").select("*"),
       ]);
 
       if (etabsRes.data) {
@@ -486,7 +487,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             row,
             fetchedAssignments,
             classesRes.data ? classesRes.data.map(mapRowToClasse) : undefined,
-            fetchedInscriptions
+            fetchedInscriptions,
+            correctionsRes?.data || []
           )
         );
         setSubmissions((prev) => {
@@ -2035,6 +2037,27 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             },
             ...n,
           ]);
+
+          if (isSupabaseConfigured()) {
+            supabase
+              .from("corrections")
+              .upsert({
+                id: correction.id,
+                submission_id: sub.id,
+                grader_id: currentUser.id,
+                score,
+                max_score: 20,
+                feedback,
+                graded_at: correction.gradedAt,
+              })
+              .then();
+
+            supabase
+              .from("submissions")
+              .update({ status: "GRADED" })
+              .eq("id", sub.id)
+              .then();
+          }
 
           return {
             ...sub,
