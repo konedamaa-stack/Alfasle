@@ -23,6 +23,7 @@ import {
   X,
 } from "lucide-react";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
+import { findStudentInscription, findStudentClass } from "@/lib/utils";
 
 export type NavTab =
   | "dashboard"
@@ -85,7 +86,20 @@ export function Sidebar({
 
   const pendingInscriptionsCount = schoolInscriptions.filter((i) => i.status === "PENDING").length;
   const pendingGradingCount = submissions.filter((s) => s.status === "SUBMITTED").length;
-  const pendingAssignmentsCount = assignments.filter((a) => new Date() <= new Date(a.dueDate)).length;
+
+  const studentInscription = currentUser.role === "STUDENT" ? findStudentInscription(currentUser, inscriptions) : null;
+  const studentClass = currentUser.role === "STUDENT" ? findStudentClass(currentUser, inscriptions, classes) : null;
+  const studentClassId = studentClass?.id || studentInscription?.classeId || currentUser.classeId;
+  const submittedIds = new Set(
+    submissions.filter((s) => s.studentId === currentUser.id).map((s) => s.devoirId)
+  );
+  const pendingAssignmentsCount = assignments.filter((a) => {
+    if (currentUser.role === "STUDENT") {
+      if (!studentClassId || a.classeId !== studentClassId) return false;
+      if (submittedIds.has(a.id)) return false;
+    }
+    return true;
+  }).length;
 
   const getNavItems = () => {
     switch (currentUser.role) {
