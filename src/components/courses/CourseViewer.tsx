@@ -93,7 +93,9 @@ export function CourseViewer({
   const accessibleClasses = classes.filter((c) => {
     if (isStudent) {
       if (studentClass) return c.id === studentClass.id;
-      return studentInscription ? c.id === studentInscription.classeId : false;
+      if (studentInscription) return c.id === studentInscription.classeId;
+      if (currentUser.classeId) return c.id === currentUser.classeId;
+      return false;
     }
     if (isSuperAdmin) return true;
     if (userEtabId) {

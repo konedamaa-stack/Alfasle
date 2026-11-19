@@ -3,7 +3,7 @@
 import React from "react";
 import { useStore } from "@/lib/store";
 import { Award, BarChart3, GraduationCap, TrendingUp, Users, CheckCircle2, Phone } from "lucide-react";
-import { formatDateTime } from "@/lib/utils";
+import { formatDateTime, findStudentInscription } from "@/lib/utils";
 
 export function GradebookView() {
   const { currentUser, submissions, assignments, classes, users, inscriptions } = useStore();
@@ -11,6 +11,8 @@ export function GradebookView() {
   const isTeacher = currentUser.role === "TEACHER" || currentUser.role === "ADMIN";
   const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
   const isStudent = currentUser.role === "STUDENT";
+
+  const studentIns = isStudent ? findStudentInscription(currentUser, inscriptions) : null;
 
   const userSchoolClasses = isSuperAdmin
     ? classes
@@ -34,8 +36,11 @@ export function GradebookView() {
           s.status === "GRADED" &&
           s.correction &&
           (s.studentId === currentUser.id ||
+            (s.studentId && currentUser.id && (s.studentId.includes(currentUser.id) || currentUser.id.includes(s.studentId))) ||
             (currentUser.email && s.studentEmail && s.studentEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
-            (currentUser.name && s.studentName && s.studentName.trim().toLowerCase() === currentUser.name.trim().toLowerCase()))
+            (currentUser.name && s.studentName && s.studentName.trim().toLowerCase() === currentUser.name.trim().toLowerCase()) ||
+            (currentUser.username && s.studentEmail && s.studentEmail.toLowerCase().startsWith(currentUser.username.toLowerCase())) ||
+            (studentIns && (s.studentId === studentIns.userId || s.studentId === `u_cand_${studentIns.id}` || (s.studentId && s.studentId.includes(studentIns.id)))))
       );
 
   const averageScore =

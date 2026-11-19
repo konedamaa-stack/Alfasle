@@ -319,7 +319,12 @@ export function mapRowToSoumission(
 ): Soumission {
   const assignment = assignments?.find((a) => a.id === (row.assignment_id || row.devoirId));
   const classObj = classes?.find((c) => c.id === assignment?.classeId);
-  const student = inscriptions?.find((i) => i.userId === row.student_id || i.id === row.student_id);
+  const student = inscriptions?.find(
+    (i) =>
+      i.userId === row.student_id ||
+      i.id === row.student_id ||
+      (i.id && row.student_id && row.student_id.includes(i.id))
+  );
 
   const matchedCorrection = corrections?.find(
     (c: any) => (c.submission_id || c.soumissionId) === row.id
