@@ -18,6 +18,7 @@ import {
   Trash2,
   Eye,
   Download,
+  Phone,
 } from "lucide-react";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import { triggerDownload } from "@/lib/download";
@@ -32,7 +33,7 @@ interface AssignmentListProps {
 }
 
 export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) {
-  const { currentUser, assignments, submissions, classes, inscriptions, deleteAssignment } = useStore();
+  const { currentUser, assignments, submissions, classes, inscriptions, users, deleteAssignment } = useStore();
 
   const isEducator =
     currentUser.role === "TEACHER" ||
@@ -351,10 +352,27 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
                           Aucun étudiant n'a encore remis sa copie pour ce devoir.
                         </p>
                       ) : (
-                        assignmentSubmissions.map((sub) => (
+                        assignmentSubmissions.map((sub) => {
+                          const studentPhone =
+                            inscriptions.find(
+                              (i) =>
+                                i.userId === sub.studentId ||
+                                i.id === sub.studentId ||
+                                (i.userName && sub.studentName && i.userName.trim().toLowerCase() === sub.studentName.trim().toLowerCase()) ||
+                                (i.userEmail && sub.studentEmail && i.userEmail.toLowerCase() === sub.studentEmail.toLowerCase())
+                            )?.userPhone ||
+                            users.find(
+                              (u) =>
+                                u.id === sub.studentId ||
+                                (u.name && sub.studentName && u.name.trim().toLowerCase() === sub.studentName.trim().toLowerCase())
+                            )?.phone;
+
+                          const cleanPhoneDigits = studentPhone ? studentPhone.replace(/[^0-9]/g, "") : "";
+
+                          return (
                           <div
                             key={sub.id}
-                            className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 text-xs"
+                            className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
                           >
                             <div className="flex items-center gap-3">
                               <img
@@ -363,10 +381,31 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
                                   "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100"
                                 }
                                 alt={sub.studentName}
-                                className="w-7 h-7 rounded-full object-cover border border-slate-200"
+                                className="w-8 h-8 rounded-full object-cover border border-slate-200"
                               />
                               <div>
-                                <span className="font-semibold text-slate-900">{sub.studentName}</span>
+                                <span className="font-bold text-slate-900">{sub.studentName}</span>
+                                {studentPhone && (
+                                  <div className="flex items-center gap-1.5 mt-0.5">
+                                    <a
+                                      href={`tel:${studentPhone}`}
+                                      className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-bold hover:underline"
+                                      title="Appeler cet élève"
+                                    >
+                                      <Phone className="w-3 h-3 text-emerald-600" />
+                                      <span>{studentPhone}</span>
+                                    </a>
+                                    <a
+                                      href={`https://wa.me/${cleanPhoneDigits}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="px-1.5 py-0.2 rounded bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[10px] font-bold"
+                                      title="Discuter sur WhatsApp"
+                                    >
+                                      WhatsApp
+                                    </a>
+                                  </div>
+                                )}
                                 <span className="text-[10px] text-slate-500 block">
                                   Rendu le {formatDateTime(sub.submittedAt)}
                                 </span>
@@ -440,7 +479,8 @@ export function AssignmentList({ onOpenCreateAssignment }: AssignmentListProps) 
                               )}
                             </div>
                           </div>
-                        ))
+                        );
+                      })
                       )}
                     </div>
                   </div>

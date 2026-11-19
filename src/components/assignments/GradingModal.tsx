@@ -17,6 +17,7 @@ import {
   Calendar,
   User,
   Check,
+  Phone,
 } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
 import { triggerDownload } from "@/lib/download";
@@ -35,7 +36,22 @@ const PRESET_FEEDBACKS = [
 ];
 
 export function GradingModal({ submission, isOpen, onClose }: GradingModalProps) {
-  const { gradeSubmission, currentUser } = useStore();
+  const { gradeSubmission, currentUser, inscriptions, users } = useStore();
+
+  const studentPhone =
+    inscriptions.find(
+      (i) =>
+        i.userId === submission?.studentId ||
+        i.id === submission?.studentId ||
+        (i.userName && submission?.studentName && i.userName.trim().toLowerCase() === submission.studentName.trim().toLowerCase()) ||
+        (i.userEmail && submission?.studentEmail && i.userEmail.toLowerCase() === submission.studentEmail.toLowerCase())
+    )?.userPhone ||
+    users.find(
+      (u) =>
+        u.id === submission?.studentId ||
+        (u.name && submission?.studentName && u.name.trim().toLowerCase() === submission.studentName.trim().toLowerCase())
+    )?.phone;
+  const cleanPhoneDigits = studentPhone ? studentPhone.replace(/[^0-9]/g, "") : "";
 
   const [score, setScore] = useState<number>(
     submission?.correction?.score !== undefined ? submission.correction.score : 18
@@ -140,9 +156,32 @@ export function GradingModal({ submission, isOpen, onClose }: GradingModalProps)
                   <span className="text-[11px] text-slate-500 block">{submission.studentEmail}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-slate-500 text-[11px]">
-                <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                <span>Rendu le {formatDateTime(submission.submittedAt)}</span>
+              <div className="flex flex-wrap items-center gap-3">
+                {studentPhone && (
+                  <div className="flex items-center gap-1.5">
+                    <a
+                      href={`tel:${studentPhone}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors"
+                      title="Appeler cet élève"
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                      <span>Appeler ({studentPhone})</span>
+                    </a>
+                    <a
+                      href={`https://wa.me/${cleanPhoneDigits}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold text-xs transition-colors"
+                      title="Discuter sur WhatsApp"
+                    >
+                      💬 WhatsApp
+                    </a>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 text-slate-500 text-[11px]">
+                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Rendu le {formatDateTime(submission.submittedAt)}</span>
+                </div>
               </div>
             </div>
 

@@ -280,10 +280,24 @@ export function ValidationQueue() {
                         </div>
 
                         {ins.userPhone && (
-                          <div className="flex items-center gap-1.5 text-slate-600">
-                            <Phone className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                            <span className="text-slate-500">Tél:</span>
-                            <span className="font-semibold text-slate-800">{ins.userPhone}</span>
+                          <div className="flex items-center gap-2 text-xs">
+                            <Phone className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <a
+                              href={`tel:${ins.userPhone}`}
+                              className="font-bold text-emerald-700 hover:text-emerald-800 hover:underline inline-flex items-center gap-1"
+                              title="Cliquer pour appeler cet élève"
+                            >
+                              <span>{ins.userPhone}</span>
+                            </a>
+                            <a
+                              href={`https://wa.me/${ins.userPhone.replace(/[^0-9]/g, "")}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-1.5 py-0.5 rounded-md bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold text-[10px] transition-colors"
+                              title="Contacter sur WhatsApp"
+                            >
+                              WhatsApp
+                            </a>
                           </div>
                         )}
 

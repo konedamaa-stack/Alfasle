@@ -2,11 +2,11 @@
 
 import React from "react";
 import { useStore } from "@/lib/store";
-import { Award, BarChart3, GraduationCap, TrendingUp, Users, CheckCircle2 } from "lucide-react";
+import { Award, BarChart3, GraduationCap, TrendingUp, Users, CheckCircle2, Phone } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
 
 export function GradebookView() {
-  const { currentUser, submissions, assignments, classes, users } = useStore();
+  const { currentUser, submissions, assignments, classes, users, inscriptions } = useStore();
 
   const isTeacher = currentUser.role === "TEACHER" || currentUser.role === "ADMIN";
   const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
@@ -126,21 +126,49 @@ export function GradebookView() {
                   <tr key={sub.id} className="hover:bg-slate-100 transition-colors">
                     <td className="px-5 py-4 font-bold text-slate-900">{sub.devoirTitle}</td>
                     <td className="px-5 py-4 text-indigo-600">{sub.classeTitle}</td>
-                    {isTeacher && (
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-2">
-                          <img
-                            src={
-                              sub.studentAvatar ||
-                              "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100"
-                            }
-                            alt={sub.studentName}
-                            className="w-6 h-6 rounded-full object-cover"
-                          />
-                          <span className="font-semibold text-slate-900">{sub.studentName}</span>
-                        </div>
-                      </td>
-                    )}
+                    {isTeacher && (() => {
+                      const stPhone = inscriptions.find(
+                        (i) => i.userId === sub.studentId || (i.userName && sub.studentName && i.userName.trim().toLowerCase() === sub.studentName.trim().toLowerCase())
+                      )?.userPhone;
+                      return (
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-2">
+                            <img
+                              src={
+                                sub.studentAvatar ||
+                                "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100"
+                              }
+                              alt={sub.studentName}
+                              className="w-7 h-7 rounded-full object-cover shrink-0"
+                            />
+                            <div>
+                              <span className="font-semibold text-slate-900 block">{sub.studentName}</span>
+                              {stPhone && (
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                  <a
+                                    href={`tel:${stPhone}`}
+                                    className="inline-flex items-center gap-1 text-[10px] text-emerald-700 font-bold hover:underline"
+                                    title="Appeler cet élève"
+                                  >
+                                    <Phone className="w-2.5 h-2.5 text-emerald-600" />
+                                    <span>{stPhone}</span>
+                                  </a>
+                                  <a
+                                    href={`https://wa.me/${stPhone.replace(/[^0-9]/g, "")}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-1.5 py-0.2 rounded bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[9px] font-bold"
+                                    title="WhatsApp"
+                                  >
+                                    WhatsApp
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                      );
+                    })()}
                     <td className="px-5 py-4">
                       <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-600 font-extrabold border border-emerald-500/30 text-xs">
                         {sub.correction?.score} / {sub.correction?.maxScore}

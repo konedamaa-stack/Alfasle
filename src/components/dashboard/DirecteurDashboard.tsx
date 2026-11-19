@@ -1060,6 +1060,8 @@ export function DirecteurDashboard({
                           const studentInscription = findStudentInscription(s, inscriptions);
                           const studentClass = findStudentClass(s, inscriptions, classes);
                           const resolvedClasseTitle = studentClass?.title || studentInscription?.classeTitle || s.classeTitle;
+                          const stPhone = s.phone || studentInscription?.userPhone;
+                          const cleanPhoneDigits = stPhone ? stPhone.replace(/[^0-9]/g, "") : "";
 
                           return (
                             <tr key={`user-${s.id}`} className="hover:bg-white transition-colors">
@@ -1078,6 +1080,27 @@ export function DirecteurDashboard({
                                       </span>
                                     </div>
                                     <span className="text-[10px] text-slate-500 font-mono">ID: {s.id}</span>
+                                    {stPhone && (
+                                      <div className="flex items-center gap-1.5 mt-1">
+                                        <a
+                                          href={`tel:${stPhone}`}
+                                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold text-[10px] transition-colors"
+                                          title="Appeler cet élève"
+                                        >
+                                          <Phone className="w-3 h-3 text-emerald-600" />
+                                          <span>{stPhone}</span>
+                                        </a>
+                                        <a
+                                          href={`https://wa.me/${cleanPhoneDigits}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="px-1.5 py-0.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[9px] transition-colors shadow-2xs"
+                                          title="Discuter sur WhatsApp"
+                                        >
+                                          WhatsApp
+                                        </a>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                               </td>
@@ -1152,9 +1175,30 @@ export function DirecteurDashboard({
                                         ⏳ Pré-inscrit
                                       </span>
                                     </div>
-                                    <span className="text-[10px] text-slate-500 font-mono">
+                                    <span className="text-[10px] text-slate-500 font-mono block">
                                       Candidature: {new Date(ins.appliedAt).toLocaleDateString()}
                                     </span>
+                                    {ins.userPhone && (
+                                      <div className="flex items-center gap-1.5 mt-1">
+                                        <a
+                                          href={`tel:${ins.userPhone}`}
+                                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold text-[10px] transition-colors"
+                                          title="Appeler ce candidat"
+                                        >
+                                          <Phone className="w-3 h-3 text-emerald-600" />
+                                          <span>{ins.userPhone}</span>
+                                        </a>
+                                        <a
+                                          href={`https://wa.me/${ins.userPhone.replace(/[^0-9]/g, "")}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="px-1.5 py-0.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[9px] transition-colors shadow-2xs"
+                                          title="Discuter sur WhatsApp"
+                                        >
+                                          WhatsApp
+                                        </a>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                               </td>
@@ -2649,7 +2693,7 @@ export function DirecteurDashboard({
                     (i.status === "APPROVED" || i.status === "CONFIRMED" || i.status === "PENDING")
                 );
 
-                const studentMap = new Map<string, { id: string; name: string; email: string; avatar?: string; date: string }>();
+                const studentMap = new Map<string, { id: string; name: string; email: string; avatar?: string; phone?: string; date: string }>();
 
                 users
                   .filter(
@@ -2667,6 +2711,7 @@ export function DirecteurDashboard({
                       name: u.name,
                       email: u.email,
                       avatar: u.avatarUrl,
+                      phone: u.phone || insc?.userPhone,
                       date: insc?.createdAt || u.createdAt,
                     });
                   });
@@ -2679,6 +2724,7 @@ export function DirecteurDashboard({
                       name: insc.userName,
                       email: insc.userEmail,
                       avatar: insc.userAvatar,
+                      phone: insc.userPhone,
                       date: insc.createdAt || insc.appliedAt,
                     });
                   }
@@ -2751,6 +2797,27 @@ export function DirecteurDashboard({
                             <div>
                               <p className="font-bold text-slate-900">{st.name}</p>
                               <p className="text-[11px] text-slate-400 font-mono">{st.email}</p>
+                              {st.phone && (
+                                <div className="flex items-center gap-1.5 mt-1">
+                                  <a
+                                    href={`tel:${st.phone}`}
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold text-[10px] transition-colors"
+                                    title="Appeler cet élève"
+                                  >
+                                    <Phone className="w-3 h-3 text-emerald-600" />
+                                    <span>{st.phone}</span>
+                                  </a>
+                                  <a
+                                    href={`https://wa.me/${st.phone.replace(/[^0-9]/g, "")}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-1.5 py-0.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[9px] transition-colors shadow-2xs"
+                                    title="Contacter sur WhatsApp"
+                                  >
+                                    WhatsApp
+                                  </a>
+                                </div>
+                              )}
                             </div>
                           </div>
                           <div className="text-right">
