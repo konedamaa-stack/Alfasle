@@ -1430,9 +1430,20 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     );
 
     // Create system notification for Super Admin and Director
+    const targetClassObj = classes.find((c) => c.id === finalClasseId);
+    const teacherOrDirId = targetClassObj?.teacherId || "u_dir_cherif";
     setNotifications((prev) => [
       {
         id: `notif_${Date.now()}`,
+        userId: teacherOrDirId,
+        title: `Nouvelle inscription en attente 🎓 (${data.role === "TEACHER" ? "Enseignant" : "Élève"})`,
+        message: `${data.userName} a postulé pour ${finalClasseTitle} (${finalEtabName}). Cliquez pour valider.`,
+        type: "INSCRIPTION",
+        isRead: false,
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: `notif_${Date.now() + 1}`,
         userId: "u_super_admin_root",
         title: `Nouvelle préinscription (${data.role === "TEACHER" ? "👨‍🏫 Enseignant" : "🎓 Élève"})`,
         message: `${data.userName} a postulé pour ${finalClasseTitle} (${finalEtabName}). Dossier consultable dans l'établissement.`,
@@ -1983,21 +1994,24 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         );
     }
 
-    // Notify teacher
-    if (targetClass) {
-      setNotifications((n) => [
-        {
-          id: `notif_${Date.now()}`,
-          userId: targetClass.teacherId,
-          title: "Nouveau devoir soumis 📝",
-          message: `${currentUser.name} a déposé son travail pour « ${assignment.title} ».`,
-          type: "ASSIGNMENT",
-          isRead: false,
-          createdAt: new Date().toISOString(),
-        },
-        ...n,
-      ]);
-    }
+    // Notify teacher and director
+    const notifTargets = new Set<string>();
+    if (targetClass?.teacherId) notifTargets.add(targetClass.teacherId);
+    notifTargets.add("u_dir_cherif");
+    notifTargets.add("u_super_admin_root");
+
+    setNotifications((n) => [
+      ...Array.from(notifTargets).map((uid, idx) => ({
+        id: `notif_${Date.now()}_${idx}`,
+        userId: uid,
+        title: "Nouveau devoir à corriger 📝",
+        message: `${currentUser.name} a déposé sa copie pour « ${assignment.title} » (${targetClass?.title || "Classe"}).`,
+        type: "ASSIGNMENT" as const,
+        isRead: false,
+        createdAt: new Date().toISOString(),
+      })),
+      ...n,
+    ]);
   };
 
   const gradeSubmission = (submissionId: string, score: number, feedback: string) => {

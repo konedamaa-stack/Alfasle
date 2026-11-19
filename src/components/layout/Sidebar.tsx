@@ -85,7 +85,14 @@ export function Sidebar({
   });
 
   const pendingInscriptionsCount = schoolInscriptions.filter((i) => i.status === "PENDING").length;
-  const pendingGradingCount = submissions.filter((s) => s.status === "SUBMITTED").length;
+  const schoolSubmissions = submissions.filter((s) => {
+    if (isSuperAdmin) return true;
+    if (userEtabId) {
+      return !s.classeId || schoolClassIds.size === 0 || schoolClassIds.has(s.classeId);
+    }
+    return true;
+  });
+  const pendingGradingCount = schoolSubmissions.filter((s) => s.status === "SUBMITTED").length;
 
   const studentInscription = currentUser.role === "STUDENT" ? findStudentInscription(currentUser, inscriptions) : null;
   const studentClass = currentUser.role === "STUDENT" ? findStudentClass(currentUser, inscriptions, classes) : null;
@@ -125,9 +132,21 @@ export function Sidebar({
             icon: <Shield className="w-4 h-4 text-emerald-600" />,
           },
           { id: "dashboard", label: "Vue Pédagogique", icon: <LayoutDashboard className="w-4 h-4" /> },
-          { id: "inscriptions", label: "Inscriptions Globales", icon: <Users className="w-4 h-4" /> },
+          {
+            id: "inscriptions",
+            label: "Inscriptions Globales",
+            icon: <Users className="w-4 h-4" />,
+            badge: pendingInscriptionsCount > 0 ? `${pendingInscriptionsCount} en attente` : null,
+            badgeColor: "bg-amber-500/20 text-amber-600 border-amber-500/30",
+          },
           { id: "courses", label: "Tous les Cours", icon: <Video className="w-4 h-4" /> },
-          { id: "assignments", label: "Devoirs & Évaluations", icon: <FileCheck2 className="w-4 h-4" /> },
+          {
+            id: "assignments",
+            label: "Devoirs & Corrections",
+            icon: <FileCheck2 className="w-4 h-4" />,
+            badge: pendingGradingCount > 0 ? `${pendingGradingCount} à corriger` : null,
+            badgeColor: "bg-rose-500/20 text-rose-600 border-rose-500/30",
+          },
           { id: "analytics", label: "Métriques & Rapports", icon: <BarChart3 className="w-4 h-4" /> },
           { id: "settings", label: "Paramètres Multi-Tenant", icon: <Settings className="w-4 h-4" /> },
         ];
@@ -148,7 +167,7 @@ export function Sidebar({
             id: "assignments",
             label: "Devoirs & Corrections",
             icon: <FileCheck2 className="w-4 h-4" />,
-            badge: pendingGradingCount > 0 ? `${pendingGradingCount} à noter` : null,
+            badge: pendingGradingCount > 0 ? `${pendingGradingCount} à corriger` : null,
             badgeColor: "bg-purple-500/20 text-purple-600 border-purple-500/30",
           },
           { id: "analytics", label: "Statistiques & Notes", icon: <BarChart3 className="w-4 h-4" /> },
@@ -196,7 +215,13 @@ export function Sidebar({
             badgeColor: "bg-amber-50 text-amber-700 border-amber-200",
           },
           { id: "courses", label: "Cours & Formations", icon: <BookOpen className="w-4 h-4" /> },
-          { id: "assignments", label: "Devoirs & Évaluations", icon: <FileCheck2 className="w-4 h-4" /> },
+          {
+            id: "assignments",
+            label: "Devoirs & Corrections",
+            icon: <FileCheck2 className="w-4 h-4" />,
+            badge: pendingGradingCount > 0 ? `${pendingGradingCount} à corriger` : null,
+            badgeColor: "bg-rose-50 text-rose-700 border-rose-200",
+          },
           { id: "grades", label: "Notes & Relevés", icon: <Award className="w-4 h-4" /> },
           { id: "analytics", label: "Statistiques Établissement", icon: <BarChart3 className="w-4 h-4" /> },
         ];

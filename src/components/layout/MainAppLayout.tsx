@@ -125,6 +125,8 @@ export function MainAppLayout({ onLogout }: MainAppLayoutProps) {
         onOpenEtablissements={() => setActiveTab("etablissements")}
         onToggleMobileMenu={() => setIsMobileMenuOpen((prev) => !prev)}
         isMobileMenuOpen={isMobileMenuOpen}
+        onNavigate={(tab) => setActiveTab(tab)}
+        onOpenGrading={handleOpenGrading}
       />
 
       {/* Main App Layout */}
