@@ -1028,238 +1028,444 @@ export function DirecteurDashboard({
               <SkeletonLoader type="table" rows={6} />
             </div>
           ) : (
-            <div className="glass-panel rounded-3xl border border-slate-200 overflow-hidden shadow-xl">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[960px] text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="border-b border-slate-200 bg-white text-slate-400 font-mono text-[11px] uppercase tracking-wider">
-                      <th className="py-3.5 px-4 min-w-[200px]">Élève & Identité</th>
-                      <th className="py-3.5 px-4">Login / Identifiant</th>
-                      <th className="py-3.5 px-4">Email</th>
-                      <th className="py-3.5 px-4">Statut & Mot de Passe</th>
-                      <th className="py-3.5 px-4 min-w-[140px]">Classe Rattachée</th>
-                      <th className="py-3.5 px-4 text-right min-w-[120px] whitespace-nowrap">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200">
-                    {filteredCombinedStudents.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="text-center py-10 text-slate-400">
-                          {studentFilterType === "PENDING"
-                            ? "Aucune pré-inscription en attente pour cet établissement."
-                            : "Aucun élève trouvé. Cliquez sur « + Inscrire un Nouvel Élève » pour ajouter vos élèves."}
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredCombinedStudents.map((item) => {
-                        if (item.type === "USER") {
-                          const s = item.data;
-                          const isPwdVisible = visiblePasswords[s.id] || false;
-                          const pwd = s.password || "Madouu1966@";
-                          const studentLogin = s.username || s.name.split(" ")[0].toLowerCase();
-                          const studentInscription = findStudentInscription(s, inscriptions);
-                          const studentClass = findStudentClass(s, inscriptions, classes);
-                          const resolvedClasseTitle = studentClass?.title || studentInscription?.classeTitle || s.classeTitle;
-                          const stPhone = s.phone || studentInscription?.userPhone;
-                          const cleanPhoneDigits = stPhone ? stPhone.replace(/[^0-9]/g, "") : "";
+            <div>
+              {/* VUE MOBILE : Cartes responsives avec boutons Modifier et Supprimer directement visibles */}
+              <div className="md:hidden space-y-3">
+                {filteredCombinedStudents.length === 0 ? (
+                  <div className="glass-panel rounded-2xl border border-slate-200 p-8 text-center text-slate-400 text-xs">
+                    {studentFilterType === "PENDING"
+                      ? "Aucune pré-inscription en attente pour cet établissement."
+                      : "Aucun élève trouvé. Cliquez sur « + Inscrire un Nouvel Élève » pour ajouter vos élèves."}
+                  </div>
+                ) : (
+                  filteredCombinedStudents.map((item) => {
+                    if (item.type === "USER") {
+                      const s = item.data;
+                      const isPwdVisible = visiblePasswords[s.id] || false;
+                      const pwd = s.password || "Madouu1966@";
+                      const studentLogin = s.username || s.name.split(" ")[0].toLowerCase();
+                      const studentInscription = findStudentInscription(s, inscriptions);
+                      const studentClass = findStudentClass(s, inscriptions, classes);
+                      const resolvedClasseTitle = studentClass?.title || studentInscription?.classeTitle || s.classeTitle;
+                      const stPhone = s.phone || studentInscription?.userPhone;
+                      const cleanPhoneDigits = stPhone ? stPhone.replace(/[^0-9]/g, "") : "";
 
-                          return (
-                            <tr key={`user-${s.id}`} className="hover:bg-white transition-colors">
-                              <td className="py-3 px-4">
-                                <div className="flex items-center gap-3">
-                                  <img
-                                    src={s.avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"}
-                                    alt={s.name}
-                                    className="w-9 h-9 rounded-xl object-cover border border-slate-200 shrink-0"
-                                  />
-                                  <div>
-                                    <div className="flex items-center gap-1.5">
-                                      <p className="font-bold text-slate-900 text-xs">{s.name}</p>
-                                      <span className="px-1.5 py-0.2 rounded-md bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 text-[9px] font-bold">
-                                        Actif
-                                      </span>
-                                    </div>
-                                    <span className="text-[10px] text-slate-500 font-mono">ID: {s.id}</span>
-                                    {stPhone && (
-                                      <div className="flex items-center gap-1.5 mt-1">
-                                        <a
-                                          href={`tel:${stPhone}`}
-                                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold text-[10px] transition-colors"
-                                          title="Appeler cet élève"
-                                        >
-                                          <Phone className="w-3 h-3 text-emerald-600" />
-                                          <span>{stPhone}</span>
-                                        </a>
-                                        <a
-                                          href={`https://wa.me/${cleanPhoneDigits}`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="px-1.5 py-0.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[9px] transition-colors shadow-2xs"
-                                          title="Discuter sur WhatsApp"
-                                        >
-                                          WhatsApp
-                                        </a>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </td>
-
-                              <td className="py-3 px-4">
-                                <span className="font-mono text-sky-600 font-bold bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20">
-                                  {studentLogin}
-                                </span>
-                              </td>
-
-                              <td className="py-3 px-4 font-mono text-slate-600">{s.email}</td>
-
-                              <td className="py-3 px-4 font-mono">
+                      return (
+                        <div key={`m-user-${s.id}`} className="glass-panel rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3 bg-white">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={s.avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"}
+                                alt={s.name}
+                                className="w-11 h-11 rounded-xl object-cover border border-slate-200 shrink-0"
+                              />
+                              <div>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-slate-800 bg-white px-2 py-1 rounded border border-slate-200 font-bold">
-                                    {isPwdVisible ? pwd : "••••••••••••"}
+                                  <p className="font-bold text-slate-900 text-sm">{s.name}</p>
+                                  <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 text-[10px] font-bold">
+                                    Actif
                                   </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => togglePasswordVisibility(s.id)}
-                                    className="p-1 text-slate-400 hover:text-slate-900 cursor-pointer"
-                                  >
-                                    {isPwdVisible ? <EyeOff className="w-3.5 h-3.5 text-sky-600" /> : <Eye className="w-3.5 h-3.5" />}
-                                  </button>
                                 </div>
-                              </td>
+                                <span className="text-[10px] text-slate-400 font-mono">ID: {s.id}</span>
+                              </div>
+                            </div>
+                            {resolvedClasseTitle && (
+                              <span className="px-2 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 text-[11px] font-bold shrink-0">
+                                {resolvedClasseTitle}
+                              </span>
+                            )}
+                          </div>
 
-                              <td className="py-3 px-4">
-                                {resolvedClasseTitle ? (
-                                  <span className="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-600 border border-indigo-500/30 text-[10px] font-bold">
-                                    {resolvedClasseTitle}
+                          {stPhone && (
+                            <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
+                              <a
+                                href={`tel:${stPhone}`}
+                                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold text-xs"
+                              >
+                                <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>{stPhone}</span>
+                              </a>
+                              <a
+                                href={`https://wa.me/${cleanPhoneDigits}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs"
+                              >
+                                WhatsApp
+                              </a>
+                            </div>
+                          )}
+
+                          <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50/70 p-2.5 rounded-xl border border-slate-100 font-mono">
+                            <div>
+                              <span className="text-[10px] text-slate-400 uppercase font-sans font-semibold block">Identifiant</span>
+                              <span className="font-bold text-sky-700">{studentLogin}</span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-slate-400 uppercase font-sans font-semibold block">Mot de passe</span>
+                              <div className="flex items-center gap-1">
+                                <span className="font-bold text-slate-800">
+                                  {isPwdVisible ? pwd : "••••••••"}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => togglePasswordVisibility(s.id)}
+                                  className="p-1 text-slate-400 hover:text-slate-700"
+                                >
+                                  {isPwdVisible ? <EyeOff className="w-3 h-3 text-sky-600" /> : <Eye className="w-3 h-3" />}
+                                </button>
+                              </div>
+                            </div>
+                            <div className="col-span-2 pt-1 border-t border-slate-200/60 truncate">
+                              <span className="text-[10px] text-slate-400 uppercase font-sans font-semibold block">Email</span>
+                              <span className="text-slate-600 truncate block">{s.email}</span>
+                            </div>
+                          </div>
+
+                          {/* BOUTONS ACTIONS VISIBLES IMMÉDIATEMENT SUR MOBILE */}
+                          <div className="flex items-center gap-2 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditStudent(s)}
+                              className="flex-1 py-2 px-3 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                            >
+                              <Edit className="w-4 h-4 text-sky-600" />
+                              <span>Modifier</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteStudent(s)}
+                              className="flex-1 py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                            >
+                              <Trash2 className="w-4 h-4 text-rose-600" />
+                              <span>Supprimer</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      // Candidat en attente
+                      const ins = item.data;
+                      const candidateLogin = ins.userEmail ? ins.userEmail.split("@")[0] : ins.userName.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+                      return (
+                        <div key={`m-ins-${ins.id}`} className="glass-panel rounded-2xl border-2 border-amber-300/80 p-4 shadow-sm space-y-3 bg-amber-500/5">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 font-black text-sm flex items-center justify-center shrink-0 shadow-md">
+                                {ins.userName.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="font-bold text-slate-900 text-sm">{ins.userName}</p>
+                                  <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-800 border border-amber-500/30 text-[10px] font-black animate-pulse">
+                                    ⏳ Pré-inscrit
                                   </span>
-                                ) : (
-                                  <span className="text-slate-500 italic">Tronc Commun</span>
-                                )}
-                              </td>
-
-                              <td className="py-3 px-4 text-right whitespace-nowrap min-w-[120px]">
-                                <div className="flex items-center justify-end gap-1.5">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleOpenEditStudent(s)}
-                                    className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-sky-600 border border-sky-500/30 transition-all cursor-pointer shrink-0"
-                                    title="Modifier l'élève"
-                                  >
-                                    <Edit className="w-3.5 h-3.5" />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleDeleteStudent(s)}
-                                    className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border border-rose-500/30 transition-all cursor-pointer shrink-0"
-                                    title="Supprimer l'élève"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
                                 </div>
-                              </td>
-                            </tr>
-                          );
-                        } else {
-                          // item.type === "INSCRIPTION" -> Candidat en attente
-                          const ins = item.data;
-                          const candidateLogin = ins.userEmail ? ins.userEmail.split("@")[0] : ins.userName.toLowerCase().replace(/[^a-z0-9]/g, "");
+                                <span className="text-[10px] text-slate-500 font-mono">
+                                  Postulé le {new Date(ins.appliedAt).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+                            <span className="px-2 py-1 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 text-[11px] font-bold shrink-0">
+                              {ins.classeTitle}
+                            </span>
+                          </div>
 
-                          return (
-                            <tr key={`ins-${ins.id}`} className="bg-amber-500/5 hover:bg-amber-500/10 transition-colors border-l-4 border-l-amber-500">
-                              <td className="py-3 px-4">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 font-black text-xs flex items-center justify-center shrink-0 shadow-md">
-                                    {ins.userName.charAt(0).toUpperCase()}
-                                  </div>
-                                  <div>
-                                    <div className="flex items-center gap-1.5">
-                                      <p className="font-bold text-slate-900 text-xs">{ins.userName}</p>
-                                      <span className="px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-800 border border-amber-500/30 text-[9px] font-black animate-pulse">
-                                        ⏳ Pré-inscrit
-                                      </span>
-                                    </div>
-                                    <span className="text-[10px] text-slate-500 font-mono block">
-                                      Candidature: {new Date(ins.appliedAt).toLocaleDateString()}
-                                    </span>
-                                    {ins.userPhone && (
-                                      <div className="flex items-center gap-1.5 mt-1">
-                                        <a
-                                          href={`tel:${ins.userPhone}`}
-                                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold text-[10px] transition-colors"
-                                          title="Appeler ce candidat"
-                                        >
-                                          <Phone className="w-3 h-3 text-emerald-600" />
-                                          <span>{ins.userPhone}</span>
-                                        </a>
-                                        <a
-                                          href={`https://wa.me/${ins.userPhone.replace(/[^0-9]/g, "")}`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="px-1.5 py-0.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[9px] transition-colors shadow-2xs"
-                                          title="Discuter sur WhatsApp"
-                                        >
-                                          WhatsApp
-                                        </a>
+                          {ins.userPhone && (
+                            <div className="flex items-center gap-2 pt-1 border-t border-amber-200/50">
+                              <a
+                                href={`tel:${ins.userPhone}`}
+                                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold text-xs"
+                              >
+                                <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>{ins.userPhone}</span>
+                              </a>
+                              <a
+                                href={`https://wa.me/${ins.userPhone.replace(/[^0-9]/g, "")}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs"
+                              >
+                                WhatsApp
+                              </a>
+                            </div>
+                          )}
+
+                          <div className="text-xs bg-white/80 p-2.5 rounded-xl border border-amber-200/60 font-mono space-y-1">
+                            <div className="flex justify-between items-center">
+                              <span className="text-[10px] text-slate-400 uppercase font-sans font-semibold">Identifiant souhaité:</span>
+                              <span className="font-bold text-amber-700">{candidateLogin}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-[10px] text-slate-400 uppercase font-sans font-semibold">Email:</span>
+                              <span className="text-slate-600">{ins.userEmail}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 pt-1">
+                            <button
+                              onClick={() => {
+                                approveInscription(ins.id);
+                                toast.success("Candidature validée avec succès !", `${ins.userName} est maintenant un élève officiel de la classe ${ins.classeTitle}.`);
+                              }}
+                              className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
+                            >
+                              <CheckCircle2 className="w-4 h-4" />
+                              <span>Valider</span>
+                            </button>
+                            <button
+                              onClick={() => {
+                                rejectInscription(ins.id);
+                                toast.info("Candidature refusée", `La préinscription de ${ins.userName} a été rejetée.`);
+                              }}
+                              className="py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              <XCircle className="w-4 h-4" />
+                              <span>Refuser</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    }
+                  })
+                )}
+              </div>
+
+              {/* VUE TABLETTE & DESKTOP (>= md) avec colonne Actions épinglée (sticky) */}
+              <div className="hidden md:block glass-panel rounded-3xl border border-slate-200 overflow-hidden shadow-xl">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[960px] text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200 bg-white text-slate-400 font-mono text-[11px] uppercase tracking-wider">
+                        <th className="py-3.5 px-4 min-w-[200px]">Élève & Identité</th>
+                        <th className="py-3.5 px-4">Login / Identifiant</th>
+                        <th className="py-3.5 px-4">Email</th>
+                        <th className="py-3.5 px-4">Statut & Mot de Passe</th>
+                        <th className="py-3.5 px-4 min-w-[140px]">Classe Rattachée</th>
+                        <th className="py-3.5 px-4 text-right min-w-[120px] whitespace-nowrap sticky right-0 bg-white shadow-[-4px_0_8px_rgba(0,0,0,0.03)] z-10">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200">
+                      {filteredCombinedStudents.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="text-center py-10 text-slate-400">
+                            {studentFilterType === "PENDING"
+                              ? "Aucune pré-inscription en attente pour cet établissement."
+                              : "Aucun élève trouvé. Cliquez sur « + Inscrire un Nouvel Élève » pour ajouter vos élèves."}
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredCombinedStudents.map((item) => {
+                          if (item.type === "USER") {
+                            const s = item.data;
+                            const isPwdVisible = visiblePasswords[s.id] || false;
+                            const pwd = s.password || "Madouu1966@";
+                            const studentLogin = s.username || s.name.split(" ")[0].toLowerCase();
+                            const studentInscription = findStudentInscription(s, inscriptions);
+                            const studentClass = findStudentClass(s, inscriptions, classes);
+                            const resolvedClasseTitle = studentClass?.title || studentInscription?.classeTitle || s.classeTitle;
+                            const stPhone = s.phone || studentInscription?.userPhone;
+                            const cleanPhoneDigits = stPhone ? stPhone.replace(/[^0-9]/g, "") : "";
+
+                            return (
+                              <tr key={`user-${s.id}`} className="hover:bg-white transition-colors">
+                                <td className="py-3 px-4">
+                                  <div className="flex items-center gap-3">
+                                    <img
+                                      src={s.avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"}
+                                      alt={s.name}
+                                      className="w-9 h-9 rounded-xl object-cover border border-slate-200 shrink-0"
+                                    />
+                                    <div>
+                                      <div className="flex items-center gap-1.5">
+                                        <p className="font-bold text-slate-900 text-xs">{s.name}</p>
+                                        <span className="px-1.5 py-0.2 rounded-md bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 text-[9px] font-bold">
+                                          Actif
+                                        </span>
                                       </div>
-                                    )}
+                                      <span className="text-[10px] text-slate-500 font-mono">ID: {s.id}</span>
+                                      {stPhone && (
+                                        <div className="flex items-center gap-1.5 mt-1">
+                                          <a
+                                            href={`tel:${stPhone}`}
+                                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold text-[10px] transition-colors"
+                                            title="Appeler cet élève"
+                                          >
+                                            <Phone className="w-3 h-3 text-emerald-600" />
+                                            <span>{stPhone}</span>
+                                          </a>
+                                          <a
+                                            href={`https://wa.me/${cleanPhoneDigits}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="px-1.5 py-0.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[9px] transition-colors shadow-2xs"
+                                            title="Discuter sur WhatsApp"
+                                          >
+                                            WhatsApp
+                                          </a>
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              </td>
+                                </td>
 
-                              <td className="py-3 px-4">
-                                <span className="font-mono text-amber-700 font-bold bg-amber-500/15 px-2 py-0.5 rounded border border-amber-500/30">
-                                  {candidateLogin}
-                                </span>
-                              </td>
+                                <td className="py-3 px-4">
+                                  <span className="font-mono text-sky-600 font-bold bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20">
+                                    {studentLogin}
+                                  </span>
+                                </td>
 
-                              <td className="py-3 px-4 font-mono text-slate-600">{ins.userEmail}</td>
+                                <td className="py-3 px-4 font-mono text-slate-600">{s.email}</td>
 
-                              <td className="py-3 px-4 font-mono">
-                                <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-800 border border-amber-500/30 text-[10px] font-bold">
-                                  En attente d&apos;admission
-                                </span>
-                              </td>
+                                <td className="py-3 px-4 font-mono">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-slate-800 bg-white px-2 py-1 rounded border border-slate-200 font-bold">
+                                      {isPwdVisible ? pwd : "••••••••••••"}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => togglePasswordVisibility(s.id)}
+                                      className="p-1 text-slate-400 hover:text-slate-900 cursor-pointer"
+                                    >
+                                      {isPwdVisible ? <EyeOff className="w-3.5 h-3.5 text-sky-600" /> : <Eye className="w-3.5 h-3.5" />}
+                                    </button>
+                                  </div>
+                                </td>
 
-                              <td className="py-3 px-4">
-                                <span className="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-700 border border-purple-500/30 text-[10px] font-bold">
-                                  {ins.classeTitle}
-                                </span>
-                              </td>
+                                <td className="py-3 px-4">
+                                  {resolvedClasseTitle ? (
+                                    <span className="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-600 border border-indigo-500/30 text-[10px] font-bold">
+                                      {resolvedClasseTitle}
+                                    </span>
+                                  ) : (
+                                    <span className="text-slate-500 italic">Tronc Commun</span>
+                                  )}
+                                </td>
 
-                              <td className="py-3 px-4 text-right">
-                                <div className="flex items-center justify-end gap-1.5">
-                                  <button
-                                    onClick={() => {
-                                      approveInscription(ins.id);
-                                      toast.success("Candidature validée avec succès !", `${ins.userName} est maintenant un élève officiel de la classe ${ins.classeTitle}.`);
-                                    }}
-                                    className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] flex items-center gap-1 transition-all shadow-md cursor-pointer"
-                                    title="Valider et intégrer comme élève officiel"
-                                  >
-                                    <CheckCircle2 className="w-3.5 h-3.5" />
-                                    <span>Valider</span>
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      rejectInscription(ins.id);
-                                      toast.info("Candidature refusée", `La préinscription de ${ins.userName} a été rejetée.`);
-                                    }}
-                                    className="px-2 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border border-rose-500/30 font-bold text-[11px] flex items-center gap-1 transition-all cursor-pointer"
-                                    title="Refuser la préinscription"
-                                  >
-                                    <XCircle className="w-3.5 h-3.5" />
-                                    <span>Refuser</span>
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        }
-                      })
-                    )}
-                  </tbody>
-                </table>
+                                <td className="py-3 px-4 text-right whitespace-nowrap min-w-[120px] sticky right-0 bg-white shadow-[-4px_0_8px_rgba(0,0,0,0.03)] z-10">
+                                  <div className="flex items-center justify-end gap-1.5">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenEditStudent(s)}
+                                      className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-sky-600 border border-sky-500/30 transition-all cursor-pointer shrink-0"
+                                      title="Modifier l'élève"
+                                    >
+                                      <Edit className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteStudent(s)}
+                                      className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border border-rose-500/30 transition-all cursor-pointer shrink-0"
+                                      title="Supprimer l'élève"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          } else {
+                            // item.type === "INSCRIPTION" -> Candidat en attente
+                            const ins = item.data;
+                            const candidateLogin = ins.userEmail ? ins.userEmail.split("@")[0] : ins.userName.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+                            return (
+                              <tr key={`ins-${ins.id}`} className="bg-amber-500/5 hover:bg-amber-500/10 transition-colors border-l-4 border-l-amber-500">
+                                <td className="py-3 px-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 font-black text-xs flex items-center justify-center shrink-0 shadow-md">
+                                      {ins.userName.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div>
+                                      <div className="flex items-center gap-1.5">
+                                        <p className="font-bold text-slate-900 text-xs">{ins.userName}</p>
+                                        <span className="px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-800 border border-amber-500/30 text-[9px] font-black animate-pulse">
+                                          ⏳ Pré-inscrit
+                                        </span>
+                                      </div>
+                                      <span className="text-[10px] text-slate-500 font-mono block">
+                                        Candidature: {new Date(ins.appliedAt).toLocaleDateString()}
+                                      </span>
+                                      {ins.userPhone && (
+                                        <div className="flex items-center gap-1.5 mt-1">
+                                          <a
+                                            href={`tel:${ins.userPhone}`}
+                                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold text-[10px] transition-colors"
+                                            title="Appeler ce candidat"
+                                          >
+                                            <Phone className="w-3 h-3 text-emerald-600" />
+                                            <span>{ins.userPhone}</span>
+                                          </a>
+                                          <a
+                                            href={`https://wa.me/${ins.userPhone.replace(/[^0-9]/g, "")}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="px-1.5 py-0.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[9px] transition-colors shadow-2xs"
+                                            title="Discuter sur WhatsApp"
+                                          >
+                                            WhatsApp
+                                          </a>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </td>
+
+                                <td className="py-3 px-4">
+                                  <span className="font-mono text-amber-700 font-bold bg-amber-500/15 px-2 py-0.5 rounded border border-amber-500/30">
+                                    {candidateLogin}
+                                  </span>
+                                </td>
+
+                                <td className="py-3 px-4 font-mono text-slate-600">{ins.userEmail}</td>
+
+                                <td className="py-3 px-4 font-mono">
+                                  <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-800 border border-amber-500/30 text-[10px] font-bold">
+                                    En attente d&apos;admission
+                                  </span>
+                                </td>
+
+                                <td className="py-3 px-4">
+                                  <span className="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-700 border border-purple-500/30 text-[10px] font-bold">
+                                    {ins.classeTitle}
+                                  </span>
+                                </td>
+
+                                <td className="py-3 px-4 text-right whitespace-nowrap min-w-[120px] sticky right-0 bg-amber-50 shadow-[-4px_0_8px_rgba(0,0,0,0.03)] z-10">
+                                  <div className="flex items-center justify-end gap-1.5">
+                                    <button
+                                      onClick={() => {
+                                        approveInscription(ins.id);
+                                        toast.success("Candidature validée avec succès !", `${ins.userName} est maintenant un élève officiel de la classe ${ins.classeTitle}.`);
+                                      }}
+                                      className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] flex items-center gap-1 transition-all shadow-md cursor-pointer"
+                                      title="Valider et intégrer comme élève officiel"
+                                    >
+                                      <CheckCircle2 className="w-3.5 h-3.5" />
+                                      <span>Valider</span>
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        rejectInscription(ins.id);
+                                        toast.info("Candidature refusée", `La préinscription de ${ins.userName} a été rejetée.`);
+                                      }}
+                                      className="px-2 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border border-rose-500/30 font-bold text-[11px] flex items-center gap-1 transition-all cursor-pointer"
+                                      title="Refuser la préinscription"
+                                    >
+                                      <XCircle className="w-3.5 h-3.5" />
+                                      <span>Refuser</span>
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          }
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
@@ -1292,117 +1498,223 @@ export function DirecteurDashboard({
             </button>
           </div>
 
-          {/* Teachers Table */}
-          <div className="glass-panel rounded-3xl border border-slate-200 overflow-hidden shadow-xl">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[950px] text-left border-collapse text-xs">
-                <thead>
-                  <tr className="border-b border-slate-200 bg-white text-slate-400 font-mono text-[11px] uppercase tracking-wider">
-                    <th className="py-3.5 px-4 min-w-[200px]">Professeur</th>
-                    <th className="py-3.5 px-4">Matière / Spécialité</th>
-                    <th className="py-3.5 px-4">Identifiant & Email</th>
-                    <th className="py-3.5 px-4">Mot de Passe</th>
-                    <th className="py-3.5 px-4 min-w-[140px]">Classes Affectées</th>
-                    <th className="py-3.5 px-4 text-right min-w-[120px] whitespace-nowrap">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  {filteredTeachers.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="text-center py-10 text-slate-400">
-                        Aucun professeur enregistré sur ce campus. Cliquez sur « + Inscrire un Professeur ».
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredTeachers.map((t) => {
-                      const isPwdVisible = visiblePasswords[t.id] || false;
-                      const pwd = t.password || "Madouu1966@";
-                      const tLogin = t.username || t.name.split(" ")[0].toLowerCase();
-                      const teacherClasses = schoolClasses.filter(
-                        (c) => c.teacherId === t.id
-                      );
+          {/* Teachers Cards (Mobile) & Table (Desktop) */}
+          <div>
+            {/* VUE MOBILE : Cartes Professeurs avec boutons Modifier et Supprimer directement visibles */}
+            <div className="md:hidden space-y-3">
+              {filteredTeachers.length === 0 ? (
+                <div className="glass-panel rounded-2xl border border-slate-200 p-8 text-center text-slate-400 text-xs bg-white">
+                  Aucun professeur enregistré sur ce campus. Cliquez sur « + Inscrire un Professeur ».
+                </div>
+              ) : (
+                filteredTeachers.map((t) => {
+                  const isPwdVisible = visiblePasswords[t.id] || false;
+                  const pwd = t.password || "Madouu1966@";
+                  const tLogin = t.username || t.name.split(" ")[0].toLowerCase();
+                  const teacherClasses = schoolClasses.filter(
+                    (c) => c.teacherId === t.id
+                  );
+                  const discipline = t.bio?.includes("Enseignant en ")
+                    ? t.bio.split(".")[0].replace("Enseignant en ", "")
+                    : "Discipline Générale";
 
-                      return (
-                        <tr key={t.id} className="hover:bg-white transition-colors">
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-3">
-                              <img
-                                src={t.avatarUrl || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150"}
-                                alt={t.name}
-                                className="w-9 h-9 rounded-xl object-cover border border-slate-200 shrink-0"
-                              />
-                              <div>
-                                <p className="font-bold text-slate-900 text-xs">{t.name}</p>
-                                <span className="text-[10px] text-slate-500 font-mono">ID: {t.id}</span>
-                              </div>
-                            </div>
-                          </td>
+                  return (
+                    <div key={`m-teacher-${t.id}`} className="glass-panel rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3 bg-white">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={t.avatarUrl || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150"}
+                            alt={t.name}
+                            className="w-11 h-11 rounded-xl object-cover border border-slate-200 shrink-0"
+                          />
+                          <div>
+                            <p className="font-bold text-slate-900 text-sm">{t.name}</p>
+                            <span className="text-[10px] text-slate-400 font-mono">ID: {t.id}</span>
+                          </div>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold shrink-0">
+                          {discipline}
+                        </span>
+                      </div>
 
-                          <td className="py-3 px-4">
-                            <span className="font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-500/30 text-[11px]">
-                              {t.bio?.includes("Enseignant en ") ? t.bio.split(".")[0].replace("Enseignant en ", "") : "Discipline Générale"}
+                      <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50/70 p-2.5 rounded-xl border border-slate-100 font-mono">
+                        <div>
+                          <span className="text-[10px] text-slate-400 uppercase font-sans font-semibold block">Identifiant</span>
+                          <span className="font-bold text-slate-900">{tLogin}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-slate-400 uppercase font-sans font-semibold block">Mot de passe</span>
+                          <div className="flex items-center gap-1">
+                            <span className="font-bold text-slate-800">
+                              {isPwdVisible ? pwd : "••••••••"}
                             </span>
-                          </td>
+                            <button
+                              type="button"
+                              onClick={() => togglePasswordVisibility(t.id)}
+                              className="p-1 text-slate-400 hover:text-slate-700"
+                            >
+                              {isPwdVisible ? <EyeOff className="w-3 h-3 text-emerald-600" /> : <Eye className="w-3 h-3" />}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="col-span-2 pt-1 border-t border-slate-200/60 truncate">
+                          <span className="text-[10px] text-slate-400 uppercase font-sans font-semibold block">Email</span>
+                          <span className="text-slate-600 truncate block">{t.email}</span>
+                        </div>
+                      </div>
 
-                          <td className="py-3 px-4 font-mono text-slate-600">
-                            <span className="font-bold text-slate-900 block">{tLogin}</span>
-                            <span className="text-[10px] text-slate-400">{t.email}</span>
-                          </td>
+                      {/* Classes affectées */}
+                      <div>
+                        <span className="text-[10px] text-slate-400 uppercase font-semibold block mb-1">Classes assignées:</span>
+                        <div className="flex flex-wrap gap-1">
+                          {teacherClasses.map((c) => (
+                            <span key={c.id} className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-medium border border-slate-200">
+                              {c.title}
+                            </span>
+                          ))}
+                          {teacherClasses.length === 0 && (
+                            <span className="text-slate-400 italic text-[11px]">Aucune classe assignée</span>
+                          )}
+                        </div>
+                      </div>
 
-                          <td className="py-3 px-4 font-mono">
-                            <div className="flex items-center gap-2">
-                              <span className="text-slate-800 bg-white px-2 py-1 rounded border border-slate-200 font-bold">
-                                {isPwdVisible ? pwd : "••••••••••••"}
+                      {/* BOUTONS ACTIONS VISIBLES IMMÉDIATEMENT SUR MOBILE */}
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEditTeacher(t)}
+                          className="flex-1 py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          <Edit className="w-4 h-4 text-emerald-600" />
+                          <span>Modifier</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteTeacher(t)}
+                          className="flex-1 py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4 text-rose-600" />
+                          <span>Supprimer</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* VUE TABLETTE & DESKTOP (>= md) avec colonne Actions épinglée (sticky) */}
+            <div className="hidden md:block glass-panel rounded-3xl border border-slate-200 overflow-hidden shadow-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[950px] text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-white text-slate-400 font-mono text-[11px] uppercase tracking-wider">
+                      <th className="py-3.5 px-4 min-w-[200px]">Professeur</th>
+                      <th className="py-3.5 px-4">Matière / Spécialité</th>
+                      <th className="py-3.5 px-4">Identifiant & Email</th>
+                      <th className="py-3.5 px-4">Mot de Passe</th>
+                      <th className="py-3.5 px-4 min-w-[140px]">Classes Affectées</th>
+                      <th className="py-3.5 px-4 text-right min-w-[120px] whitespace-nowrap sticky right-0 bg-white shadow-[-4px_0_8px_rgba(0,0,0,0.03)] z-10">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {filteredTeachers.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="text-center py-10 text-slate-400">
+                          Aucun professeur enregistré sur ce campus. Cliquez sur « + Inscrire un Professeur ».
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredTeachers.map((t) => {
+                        const isPwdVisible = visiblePasswords[t.id] || false;
+                        const pwd = t.password || "Madouu1966@";
+                        const tLogin = t.username || t.name.split(" ")[0].toLowerCase();
+                        const teacherClasses = schoolClasses.filter(
+                          (c) => c.teacherId === t.id
+                        );
+
+                        return (
+                          <tr key={t.id} className="hover:bg-white transition-colors">
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-3">
+                                <img
+                                  src={t.avatarUrl || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150"}
+                                  alt={t.name}
+                                  className="w-9 h-9 rounded-xl object-cover border border-slate-200 shrink-0"
+                                />
+                                <div>
+                                  <p className="font-bold text-slate-900 text-xs">{t.name}</p>
+                                  <span className="text-[10px] text-slate-500 font-mono">ID: {t.id}</span>
+                                </div>
+                              </div>
+                            </td>
+
+                            <td className="py-3 px-4">
+                              <span className="font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-500/30 text-[11px]">
+                                {t.bio?.includes("Enseignant en ") ? t.bio.split(".")[0].replace("Enseignant en ", "") : "Discipline Générale"}
                               </span>
-                              <button
-                                type="button"
-                                onClick={() => togglePasswordVisibility(t.id)}
-                                className="p-1 text-slate-400 hover:text-slate-900"
-                              >
-                                {isPwdVisible ? <EyeOff className="w-3.5 h-3.5 text-emerald-600" /> : <Eye className="w-3.5 h-3.5" />}
-                              </button>
-                            </div>
-                          </td>
+                            </td>
 
-                          <td className="py-3 px-4">
-                            <div className="flex flex-wrap gap-1">
-                              {teacherClasses.map((c) => (
-                                <span key={c.id} className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px]">
-                                  {c.title}
+                            <td className="py-3 px-4 font-mono text-slate-600">
+                              <span className="font-bold text-slate-900 block">{tLogin}</span>
+                              <span className="text-[10px] text-slate-400">{t.email}</span>
+                            </td>
+
+                            <td className="py-3 px-4 font-mono">
+                              <div className="flex items-center gap-2">
+                                <span className="text-slate-800 bg-white px-2 py-1 rounded border border-slate-200 font-bold">
+                                  {isPwdVisible ? pwd : "••••••••••••"}
                                 </span>
-                              ))}
-                              {teacherClasses.length === 0 && (
-                                <span className="text-slate-500 italic text-[11px]">Non assigné</span>
-                              )}
-                            </div>
-                          </td>
+                                <button
+                                  type="button"
+                                  onClick={() => togglePasswordVisibility(t.id)}
+                                  className="p-1 text-slate-400 hover:text-slate-900 cursor-pointer"
+                                >
+                                  {isPwdVisible ? <EyeOff className="w-3.5 h-3.5 text-emerald-600" /> : <Eye className="w-3.5 h-3.5" />}
+                                </button>
+                              </div>
+                            </td>
 
-                          <td className="py-3 px-4 text-right whitespace-nowrap min-w-[120px]">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => handleOpenEditTeacher(t)}
-                                className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-emerald-600 border border-emerald-500/30 transition-all cursor-pointer shrink-0"
-                                title="Modifier le professeur"
-                              >
-                                <Edit className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteTeacher(t)}
-                                className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border border-rose-500/30 transition-all cursor-pointer shrink-0"
-                                title="Supprimer le professeur"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+                            <td className="py-3 px-4">
+                              <div className="flex flex-wrap gap-1">
+                                {teacherClasses.map((c) => (
+                                  <span key={c.id} className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px]">
+                                    {c.title}
+                                  </span>
+                                ))}
+                                {teacherClasses.length === 0 && (
+                                  <span className="text-slate-500 italic text-[11px]">Non assigné</span>
+                                )}
+                              </div>
+                            </td>
+
+                            <td className="py-3 px-4 text-right whitespace-nowrap min-w-[120px] sticky right-0 bg-white shadow-[-4px_0_8px_rgba(0,0,0,0.03)] z-10">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEditTeacher(t)}
+                                  className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-emerald-600 border border-emerald-500/30 transition-all cursor-pointer shrink-0"
+                                  title="Modifier le professeur"
+                                >
+                                  <Edit className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteTeacher(t)}
+                                  className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border border-rose-500/30 transition-all cursor-pointer shrink-0"
+                                  title="Supprimer le professeur"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
