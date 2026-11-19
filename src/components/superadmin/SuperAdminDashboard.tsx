@@ -946,16 +946,16 @@ export function SuperAdminDashboard({
           {/* User Account Table */}
           <div className="glass-panel rounded-3xl border border-slate-200 overflow-hidden shadow-xl">
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
+              <table className="w-full min-w-[980px] text-left border-collapse text-xs">
                 <thead>
                   <tr className="border-b border-slate-200 bg-white text-slate-400 font-mono text-[11px] uppercase tracking-wider">
-                    <th className="py-3.5 px-4">Utilisateur & Identité</th>
+                    <th className="py-3.5 px-4 min-w-[200px]">Utilisateur & Identité</th>
                     <th className="py-3.5 px-4">Login / Identifiant</th>
                     <th className="py-3.5 px-4">Email</th>
                     <th className="py-3.5 px-4">Mot de Passe</th>
                     <th className="py-3.5 px-4">Rôle</th>
                     <th className="py-3.5 px-4">Établissement Rattaché</th>
-                    <th className="py-3.5 px-4 text-right">Actions Super Admin</th>
+                    <th className="py-3.5 px-4 text-right min-w-[130px] whitespace-nowrap">Actions Super Admin</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
@@ -1092,7 +1092,7 @@ export function SuperAdminDashboard({
                           </td>
 
                           {/* Action Buttons */}
-                          <td className="py-3 px-4 text-right">
+                          <td className="py-3 px-4 text-right whitespace-nowrap min-w-[130px]">
                             <div className="flex items-center justify-end gap-2">
                               <button
                                 type="button"

@@ -108,7 +108,7 @@ export function GradebookView() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-600">
+          <table className="w-full min-w-[720px] text-left text-xs text-slate-600">
             <thead className="bg-white text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-200">
               <tr>
                 <th className="px-5 py-3">Devoir / TP</th>

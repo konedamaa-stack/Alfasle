@@ -1030,15 +1030,15 @@ export function DirecteurDashboard({
           ) : (
             <div className="glass-panel rounded-3xl border border-slate-200 overflow-hidden shadow-xl">
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
+                <table className="w-full min-w-[960px] text-left border-collapse text-xs">
                   <thead>
                     <tr className="border-b border-slate-200 bg-white text-slate-400 font-mono text-[11px] uppercase tracking-wider">
-                      <th className="py-3.5 px-4">Élève & Identité</th>
+                      <th className="py-3.5 px-4 min-w-[200px]">Élève & Identité</th>
                       <th className="py-3.5 px-4">Login / Identifiant</th>
                       <th className="py-3.5 px-4">Email</th>
                       <th className="py-3.5 px-4">Statut & Mot de Passe</th>
-                      <th className="py-3.5 px-4">Classe Rattachée</th>
-                      <th className="py-3.5 px-4 text-right">Actions</th>
+                      <th className="py-3.5 px-4 min-w-[140px]">Classe Rattachée</th>
+                      <th className="py-3.5 px-4 text-right min-w-[120px] whitespace-nowrap">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
@@ -1138,21 +1138,25 @@ export function DirecteurDashboard({
                                 )}
                               </td>
 
-                              <td className="py-3 px-4 text-right">
-                                <button
-                                  onClick={() => handleOpenEditStudent(s)}
-                                  className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-sky-600 border border-sky-500/30 transition-all mr-1.5 cursor-pointer"
-                                  title="Modifier l'élève"
-                                >
-                                  <Edit className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteStudent(s)}
-                                  className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border border-rose-500/30 transition-all cursor-pointer"
-                                  title="Supprimer l'élève"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
+                              <td className="py-3 px-4 text-right whitespace-nowrap min-w-[120px]">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenEditStudent(s)}
+                                    className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-sky-600 border border-sky-500/30 transition-all cursor-pointer shrink-0"
+                                    title="Modifier l'élève"
+                                  >
+                                    <Edit className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteStudent(s)}
+                                    className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border border-rose-500/30 transition-all cursor-pointer shrink-0"
+                                    title="Supprimer l'élève"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           );
@@ -1291,15 +1295,15 @@ export function DirecteurDashboard({
           {/* Teachers Table */}
           <div className="glass-panel rounded-3xl border border-slate-200 overflow-hidden shadow-xl">
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
+              <table className="w-full min-w-[950px] text-left border-collapse text-xs">
                 <thead>
                   <tr className="border-b border-slate-200 bg-white text-slate-400 font-mono text-[11px] uppercase tracking-wider">
-                    <th className="py-3.5 px-4">Professeur</th>
+                    <th className="py-3.5 px-4 min-w-[200px]">Professeur</th>
                     <th className="py-3.5 px-4">Matière / Spécialité</th>
                     <th className="py-3.5 px-4">Identifiant & Email</th>
                     <th className="py-3.5 px-4">Mot de Passe</th>
-                    <th className="py-3.5 px-4">Classes Affectées</th>
-                    <th className="py-3.5 px-4 text-right">Actions</th>
+                    <th className="py-3.5 px-4 min-w-[140px]">Classes Affectées</th>
+                    <th className="py-3.5 px-4 text-right min-w-[120px] whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
@@ -1373,21 +1377,25 @@ export function DirecteurDashboard({
                             </div>
                           </td>
 
-                          <td className="py-3 px-4 text-right">
-                            <button
-                              onClick={() => handleOpenEditTeacher(t)}
-                              className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-emerald-600 border border-emerald-500/30 transition-all mr-1.5"
-                              title="Modifier le professeur"
-                            >
-                              <Edit className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteTeacher(t)}
-                              className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border border-rose-500/30 transition-all"
-                              title="Supprimer le professeur"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                          <td className="py-3 px-4 text-right whitespace-nowrap min-w-[120px]">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditTeacher(t)}
+                                className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-emerald-600 border border-emerald-500/30 transition-all cursor-pointer shrink-0"
+                                title="Modifier le professeur"
+                              >
+                                <Edit className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteTeacher(t)}
+                                className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border border-rose-500/30 transition-all cursor-pointer shrink-0"
+                                title="Supprimer le professeur"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );

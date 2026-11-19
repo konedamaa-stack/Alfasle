@@ -529,11 +529,10 @@ export function SchoolSubdomainPortal({
                 <button
                   type="button"
                   onClick={() => handleRoleSelect("ADMIN")}
-                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all cursor-pointer ${
-                    selectedRole === "ADMIN"
-                      ? "bg-emerald-50 border-emerald-600 text-emerald-900 shadow-md ring-2 ring-emerald-400/30"
-                      : "bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
-                  }`}
+                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all cursor-pointer ${selectedRole === "ADMIN"
+                    ? "bg-emerald-50 border-emerald-600 text-emerald-900 shadow-md ring-2 ring-emerald-400/30"
+                    : "bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+                    }`}
                 >
                   <span className="text-lg">👑</span>
                   <span className="text-[10px] font-bold">Direction</span>
@@ -542,11 +541,10 @@ export function SchoolSubdomainPortal({
                 <button
                   type="button"
                   onClick={() => handleRoleSelect("TEACHER")}
-                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all cursor-pointer ${
-                    selectedRole === "TEACHER"
-                      ? "bg-emerald-50 border-emerald-600 text-emerald-900 shadow-md ring-2 ring-emerald-400/30"
-                      : "bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
-                  }`}
+                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all cursor-pointer ${selectedRole === "TEACHER"
+                    ? "bg-emerald-50 border-emerald-600 text-emerald-900 shadow-md ring-2 ring-emerald-400/30"
+                    : "bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+                    }`}
                 >
                   <span className="text-lg">👨‍🏫</span>
                   <span className="text-[10px] font-bold">Prof</span>
@@ -555,11 +553,10 @@ export function SchoolSubdomainPortal({
                 <button
                   type="button"
                   onClick={() => handleRoleSelect("STUDENT")}
-                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all cursor-pointer ${
-                    selectedRole === "STUDENT"
-                      ? "bg-emerald-50 border-emerald-600 text-emerald-900 shadow-md ring-2 ring-emerald-400/30"
-                      : "bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
-                  }`}
+                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all cursor-pointer ${selectedRole === "STUDENT"
+                    ? "bg-emerald-50 border-emerald-600 text-emerald-900 shadow-md ring-2 ring-emerald-400/30"
+                    : "bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+                    }`}
                 >
                   <span className="text-lg">🎓</span>
                   <span className="text-[10px] font-bold">Élève</span>
@@ -568,11 +565,10 @@ export function SchoolSubdomainPortal({
                 <button
                   type="button"
                   onClick={() => handleRoleSelect("PARENT")}
-                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all cursor-pointer ${
-                    selectedRole === "PARENT"
-                      ? "bg-emerald-50 border-emerald-600 text-emerald-900 shadow-md ring-2 ring-emerald-400/30"
-                      : "bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
-                  }`}
+                  className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all cursor-pointer ${selectedRole === "PARENT"
+                    ? "bg-emerald-50 border-emerald-600 text-emerald-900 shadow-md ring-2 ring-emerald-400/30"
+                    : "bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+                    }`}
                 >
                   <span className="text-lg">👨‍👩‍👧</span>
                   <span className="text-[10px] font-bold">Parent</span>
@@ -591,10 +587,10 @@ export function SchoolSubdomainPortal({
                     {selectedRole === "ADMIN"
                       ? "Identifiant Direction / Nom / Email *"
                       : selectedRole === "TEACHER"
-                      ? "Identifiant Enseignant / Nom / Email *"
-                      : selectedRole === "PARENT"
-                      ? "Identifiant Parent / Nom / Email *"
-                      : "Identifiant, Nom, Prénom ou Téléphone *"}
+                        ? "Identifiant Enseignant / Nom / Email *"
+                        : selectedRole === "PARENT"
+                          ? "Identifiant Parent / Nom / Email *"
+                          : "Identifiant, Nom, Prénom ou Téléphone *"}
                   </label>
                   <input
                     type="text"
@@ -605,10 +601,10 @@ export function SchoolSubdomainPortal({
                       selectedRole === "ADMIN"
                         ? "Votre email ou identifiant..."
                         : selectedRole === "TEACHER"
-                        ? "Votre email ou identifiant..."
-                        : selectedRole === "PARENT"
-                        ? "Votre email ou téléphone..."
-                        : "Nom, Prénom ou Téléphone..."
+                          ? "Votre email ou identifiant..."
+                          : selectedRole === "PARENT"
+                            ? "Votre email ou téléphone..."
+                            : "Nom, Prénom ou Téléphone..."
                     }
                     className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40 shadow-sm"
                   />
@@ -705,8 +701,14 @@ export function SchoolSubdomainPortal({
       </main>
 
       {/* Footer */}
-      <footer className="w-full text-center py-4 px-4 text-xs text-slate-500 border-t border-slate-200 z-10 flex flex-col sm:flex-row items-center justify-center gap-2 max-w-5xl mx-auto">
-        <span>© 2026-2027 {etablissement.name} • Propulsé par AlFasle Pro</span>
+      <footer className="w-full text-center py-4 px-4 text-xs text-slate-500 border-t border-slate-200 z-10 flex flex-col sm:flex-row items-center justify-between gap-2 max-w-5xl mx-auto">
+        <span>© 2026-2027 {etablissement.name} • Hébergé sur la plateforme AlFasle Multi-Tenant</span>
+        <button
+          onClick={() => setIsResetConfirmOpen(true)}
+          className="text-[11px] text-slate-400 hover:text-rose-500 underline transition-colors flex items-center gap-1 cursor-pointer"
+        >
+          <span>🧹 Vider le cache & Réinitialiser</span>
+        </button>
       </footer>
 
       {/* Campus Pre-Registration Modal */}
@@ -715,6 +717,18 @@ export function SchoolSubdomainPortal({
         onClose={() => setIsPreRegModalOpen(false)}
         defaultEstablishmentId={etablissement.id}
         defaultRole={preRegRole}
+      />
+
+      {/* Reset Cache Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isResetConfirmOpen}
+        onClose={() => setIsResetConfirmOpen(false)}
+        onConfirm={resetStoreToDefaults}
+        title="Réinitialisation du Campus"
+        message="Voulez-vous vider le cache et réinitialiser les données de démonstration de cet établissement ?"
+        confirmLabel="Réinitialiser"
+        cancelLabel="Annuler"
+        variant="warning"
       />
     </div>
   );
