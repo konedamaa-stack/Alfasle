@@ -1,0 +1,39 @@
+{
+  "name": "AlFasle - Système Éducatif & Gestion Scolaire",
+  "short_name": "AlFasle",
+  "description": "Plateforme complète de gestion scolaire : cours en ligne, devoirs, pré-inscriptions et suivi pédagogique.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mes Cours",
+      "url": "/",
+      "description": "Accéder directement aux cours et leçons"
+    },
+    {
+      "name": "Mes Devoirs",
+      "url": "/",
+      "description": "Consulter les devoirs et évaluations"
+    }
+  ]
+}
