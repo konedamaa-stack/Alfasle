@@ -22,7 +22,8 @@ export interface Etablissement {
   id: string;
   name: string;
   code: string; // e.g. "ALF-LYC-01"
-  subdomain: string; // e.g. "polytech-kone", "lycee-excellence", "el-manar"
+  subdomain: string; // e.g. "polytech-kone", "lycee-excellence", "el-manar", "cherifla1"
+  customDomain?: string; // e.g. "cherifla1.solutionecoles.com", "portail.mon-ecole.com"
   type: "LYCEE" | "COLLEGE" | "UNIVERSITE" | "INSTITUT" | "ECOLE_PRIMAIRE" | "AUTRE";
   city: string;
   country: string;

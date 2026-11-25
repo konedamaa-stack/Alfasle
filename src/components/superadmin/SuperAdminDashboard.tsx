@@ -97,6 +97,7 @@ export function SuperAdminDashboard({
   const [newName, setNewName] = useState("");
   const [newCode, setNewCode] = useState("");
   const [newSubdomain, setNewSubdomain] = useState("");
+  const [newCustomDomain, setNewCustomDomain] = useState("");
   const [newType, setNewType] = useState<Etablissement["type"]>("LYCEE");
   const [newCity, setNewCity] = useState("Abidjan");
   const [newCountry, setNewCountry] = useState("Côte d'Ivoire");
@@ -138,6 +139,7 @@ export function SuperAdminDashboard({
   const [editEtabName, setEditEtabName] = useState("");
   const [editEtabCode, setEditEtabCode] = useState("");
   const [editEtabSubdomain, setEditEtabSubdomain] = useState("");
+  const [editEtabCustomDomain, setEditEtabCustomDomain] = useState("");
   const [editEtabType, setEditEtabType] = useState<Etablissement["type"]>("LYCEE");
   const [editEtabCity, setEditEtabCity] = useState("");
   const [editEtabCountry, setEditEtabCountry] = useState("");
@@ -362,6 +364,7 @@ export function SuperAdminDashboard({
     setNewName("");
     setNewCode("");
     setNewSubdomain("");
+    setNewCustomDomain("");
     setNewType("LYCEE");
     setNewCity("Abidjan");
     setNewCountry("Côte d'Ivoire");
@@ -402,6 +405,7 @@ export function SuperAdminDashboard({
       name: newName,
       code: generatedCode,
       subdomain: autoSubdomain,
+      customDomain: newCustomDomain.trim().toLowerCase() || undefined,
       type: newType,
       city: newCity,
       country: newCountry,
@@ -441,6 +445,7 @@ export function SuperAdminDashboard({
     setEditEtabName(etab.name);
     setEditEtabCode(etab.code);
     setEditEtabSubdomain(etab.subdomain);
+    setEditEtabCustomDomain(etab.customDomain || "");
     setEditEtabType(etab.type);
     setEditEtabCity(etab.city);
     setEditEtabCountry(etab.country);
@@ -470,6 +475,7 @@ export function SuperAdminDashboard({
       name: editEtabName.trim(),
       code: editEtabCode.trim().toUpperCase(),
       subdomain: cleanEditSubdomain,
+      customDomain: editEtabCustomDomain.trim().toLowerCase() || undefined,
       type: editEtabType,
       city: editEtabCity.trim(),
       country: editEtabCountry.trim(),
@@ -1318,10 +1324,16 @@ export function SuperAdminDashboard({
                               </div>
                             );
                           })()}
-                          <span className="flex items-center gap-1 font-mono text-blue-600">
+                          <a
+                            href={etab.customDomain ? `https://${etab.customDomain}` : `/e/${etab.subdomain}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 font-mono text-blue-600 hover:underline"
+                            title="Ouvrir le portail direct de cet établissement"
+                          >
                             <Globe2 className="w-3.5 h-3.5" />
-                            .{etab.subdomain}.alfasle.xyz
-                          </span>
+                            <span>{etab.customDomain ? etab.customDomain : `.${etab.subdomain}.solutionecoles.com`}</span>
+                          </a>
                         </div>
                       </div>
                     </div>
@@ -2384,14 +2396,30 @@ export function SuperAdminDashboard({
                           type="text"
                           value={newSubdomain}
                           onChange={(e) => setNewSubdomain(e.target.value)}
-                          placeholder="ex: polytech-kone"
+                          placeholder="ex: polytech-kone ou cherifla1"
                           className="w-full px-4 py-2.5 rounded-l-xl bg-white border border-slate-200 text-amber-600 font-mono lowercase focus:outline-none focus:border-amber-500 text-xs"
                         />
                         <span className="px-2.5 py-2.5 bg-slate-100 border border-l-0 border-slate-200 text-slate-400 text-xs rounded-r-xl font-mono">
-                          .alfasle.xyz
+                          .solutionecoles.com
                         </span>
                       </div>
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-600 font-semibold mb-1">
+                      Nom de Domaine Propre de l&apos;Établissement (Optionnel)
+                    </label>
+                    <input
+                      type="text"
+                      value={newCustomDomain}
+                      onChange={(e) => setNewCustomDomain(e.target.value)}
+                      placeholder="ex: cherifla1.solutionecoles.com ou portail.mon-ecole.ci"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 font-mono lowercase focus:outline-none focus:border-amber-500 text-xs"
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      Permet à l&apos;école d&apos;utiliser directement son propre domaine ou sous-domaine complet.
+                    </p>
                   </div>
 
                   <div>
@@ -2733,10 +2761,26 @@ export function SuperAdminDashboard({
                       className="w-full px-4 py-2.5 rounded-l-xl bg-white border border-slate-200 text-amber-600 font-mono lowercase focus:outline-none focus:border-amber-500 text-xs"
                     />
                     <span className="px-2.5 py-2.5 bg-slate-100 border border-l-0 border-slate-200 text-slate-400 text-xs rounded-r-xl font-mono">
-                      .alfasle.xyz
+                      .solutionecoles.com
                     </span>
                   </div>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-semibold mb-1">
+                  Nom de Domaine Propre de l&apos;Établissement (Optionnel)
+                </label>
+                <input
+                  type="text"
+                  value={editEtabCustomDomain}
+                  onChange={(e) => setEditEtabCustomDomain(e.target.value)}
+                  placeholder="ex: cherifla1.solutionecoles.com ou portail.mon-ecole.ci"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 font-mono lowercase focus:outline-none focus:border-amber-500 text-xs"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Permet à l&apos;école d&apos;utiliser directement son propre nom de domaine ou sous-domaine complet.
+                </p>
               </div>
 
               <div className="grid grid-cols-3 gap-3">

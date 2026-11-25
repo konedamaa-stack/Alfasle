@@ -3,12 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
+     * Match all request paths except for:
      * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - static asset files with extensions (.svg, .png, .jpg, etc.)
+     * - static asset files with extensions (.svg, .png, .jpg, .apk, etc.)
      */
     "/((?!api|_next/static|_next/image|favicon.ico|.*\\.[\\w]+$).*)",
   ],
@@ -42,21 +42,25 @@ export default function middleware(req: NextRequest) {
   else if (rootDomain && hostWithoutPort.endsWith(`.${rootDomain}`)) {
     subdomain = hostWithoutPort.replace(`.${rootDomain}`, "");
   }
-  // 4. Fallback for custom multi-part domains: "subdomain.example.com"
+  // 4. Subdomains on solutionecoles.com or other multi-tenant SaaS domains: e.g. "cherifla1.solutionecoles.com"
   else if (hostWithoutPort.includes(".")) {
     const parts = hostWithoutPort.split(".");
-    if (parts.length >= 3) {
+    if (parts.length >= 3 && parts[0] !== "www") {
       subdomain = parts[0];
+    } else {
+      // 5. Direct custom domain assigned to an establishment: e.g. "ecole-cherifla.com" or "portail-annour.ci"
+      subdomain = hostWithoutPort.replace(/^www\./, "");
     }
   }
 
-  // Exclude system subdomains like "www", "app", "api", "admin"
-  if (subdomain === "www" || subdomain === "app" || subdomain === "api") {
+  // Exclude system subdomains and the root SaaS domains
+  const systemNames = ["www", "app", "api", "admin", "mail", rootDomain, "solutionecoles.com"];
+  if (systemNames.includes(subdomain)) {
     subdomain = "";
   }
 
-  // If a valid school subdomain is detected, rewrite internally to /e/[subdomain]
-  if (subdomain && !url.pathname.startsWith("/e/") && !url.pathname.startsWith("/super-admin")) {
+  // If a valid school subdomain or custom domain is detected, rewrite internally to /e/[subdomain]
+  if (subdomain && !url.pathname.startsWith("/e/") && !url.pathname.startsWith("/super-admin") && !url.pathname.startsWith("/api/")) {
     return NextResponse.rewrite(
       new URL(`/e/${subdomain}${url.pathname === "/" ? "" : url.pathname}`, req.url)
     );

@@ -26,15 +26,16 @@ export default function SubdomainSchoolPage() {
 
   const subdomain = (params?.subdomain as string) || "";
 
-  // 1. Check in local store
+  // 1. Check in local store (by subdomain, id, code, or custom domain)
   const localEtab = etablissements.find(
     (e) =>
       e.subdomain?.toLowerCase() === subdomain.toLowerCase() ||
       e.id.toLowerCase() === subdomain.toLowerCase() ||
-      e.code.toLowerCase() === subdomain.toLowerCase()
+      e.code.toLowerCase() === subdomain.toLowerCase() ||
+      e.customDomain?.toLowerCase() === subdomain.toLowerCase()
   );
 
-  // 2. If not found in local store, fetch directly from Supabase by subdomain
+  // 2. If not found in local store, fetch directly from Supabase by subdomain or custom domain
   useEffect(() => {
     if (localEtab) {
       setIsCheckingCloud(false);
@@ -50,7 +51,7 @@ export default function SubdomainSchoolPage() {
         const { data, error } = await supabase
           .from("etablissements")
           .select("*")
-          .or(`subdomain.ilike.${subdomain},id.ilike.${subdomain},code.ilike.${subdomain}`)
+          .or(`subdomain.ilike.${subdomain},id.ilike.${subdomain},code.ilike.${subdomain},custom_domain.ilike.${subdomain}`)
           .maybeSingle();
 
         if (data && !error) {
