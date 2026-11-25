@@ -1,11 +1,10 @@
 "use client";
 
-import { School } from "lucide-react";
-
 import React, { useState, useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { MainAppLayout } from "@/components/layout/MainAppLayout";
 import { AuthLandingView } from "@/components/auth/AuthLandingView";
+import { DomainGatewayView } from "@/components/auth/DomainGatewayView";
 import { SuperAdminLoginView } from "@/components/auth/SuperAdminLoginView";
 import { SchoolSubdomainPortal } from "@/components/auth/SchoolSubdomainPortal";
 import { JoinClassModal } from "@/components/classes/JoinClassModal";
@@ -30,6 +29,9 @@ export default function Home() {
     }
     return true;
   });
+
+  // State to toggle between the Domain Gateway (default) and the full multi-role login form
+  const [showStandardAuthView, setShowStandardAuthView] = useState(false);
   const [showSuperAdminView, setShowSuperAdminView] = useState<boolean>(false);
   const [selectedSubdomainSchool, setSelectedSubdomainSchool] = useState<Etablissement | null>(null);
   const [isJoinClassOpen, setIsJoinClassOpen] = useState(false);
@@ -114,23 +116,34 @@ export default function Home() {
     );
   }
 
-  // If landing / auth view is active
+  // If landing / auth view is active on the root domain (e.g. solutionecoles.com)
   if (showLandingView) {
-    return (
-      <>
-        <AuthLandingView
-          onLoginSuccess={handleLoginSuccess}
-          onOpenJoinClassModal={() => setIsJoinClassOpen(true)}
-          onOpenSuperAdmin={() => setShowSuperAdminView(true)}
-          onSelectSubdomainSchool={(etab) => setSelectedSubdomainSchool(etab)}
-        />
+    if (showStandardAuthView) {
+      return (
+        <>
+          <AuthLandingView
+            onLoginSuccess={handleLoginSuccess}
+            onOpenJoinClassModal={() => setIsJoinClassOpen(true)}
+            onOpenSuperAdmin={() => setShowSuperAdminView(true)}
+            onSelectSubdomainSchool={(etab) => setSelectedSubdomainSchool(etab)}
+          />
 
-        <JoinClassModal
-          isOpen={isJoinClassOpen}
-          onClose={() => setIsJoinClassOpen(false)}
-          onSuccessNavigateToCourses={handleLoginSuccess}
-        />
-      </>
+          <JoinClassModal
+            isOpen={isJoinClassOpen}
+            onClose={() => setIsJoinClassOpen(false)}
+            onSuccessNavigateToCourses={handleLoginSuccess}
+          />
+        </>
+      );
+    }
+
+    // Default: Domain Gateway View (Direct input for school domain / subdomain)
+    return (
+      <DomainGatewayView
+        onSelectSubdomainSchool={(etab) => setSelectedSubdomainSchool(etab)}
+        onOpenSuperAdmin={() => setShowSuperAdminView(true)}
+        onOpenStandardLogin={() => setShowStandardAuthView(true)}
+      />
     );
   }
 
