@@ -19,6 +19,7 @@ import {
   ExternalLink,
   Users,
   Award,
+  Download,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { PreRegistrationModal } from "@/components/inscriptions/PreRegistrationModal";
@@ -413,6 +414,16 @@ export function SchoolSubdomainPortal({
 
         <div className="flex items-center gap-2 flex-wrap justify-end">
           <ThemeToggle />
+
+          <a
+            href="/an-nour.apk"
+            download="جامعة_النور_الإسلامية.apk"
+            className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition-all transform hover:-translate-y-0.5 cursor-pointer whitespace-nowrap"
+            title="Télécharger l'application mobile Android (APK)"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Télécharger l&apos;APK</span>
+          </a>
 
           <button
             type="button"

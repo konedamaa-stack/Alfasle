@@ -15,6 +15,7 @@ import {
   ExternalLink,
   Sparkles,
   Building2,
+  Download,
 } from "lucide-react";
 
 interface DomainGatewayViewProps {
@@ -147,6 +148,16 @@ export function DomainGatewayView({
         </div>
 
         <div className="flex items-center gap-2">
+          <a
+            href="/Alfasle.apk"
+            download="Alfasle.apk"
+            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold shadow-xs transition-all cursor-pointer"
+            title="Télécharger l'application mobile Android (APK)"
+          >
+            <Download className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Télécharger l&apos;APK</span>
+          </a>
+
           {onOpenSuperAdmin && (
             <button
               type="button"

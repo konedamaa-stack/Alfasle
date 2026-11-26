@@ -18,6 +18,7 @@ import {
   Globe,
   ExternalLink,
   Building2,
+  Download,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { PreRegistrationModal } from "@/components/inscriptions/PreRegistrationModal";
@@ -479,6 +480,16 @@ export function AuthLandingView({
         {/* Quick buttons */}
         <div className="flex items-center gap-1.5 sm:gap-2.5 flex-wrap justify-end">
           <ThemeToggle />
+
+          <a
+            href="/Alfasle.apk"
+            download="Alfasle.apk"
+            className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-300 text-xs font-bold shadow-sm transition-all transform hover:-translate-y-0.5 cursor-pointer whitespace-nowrap"
+            title="Télécharger l'application mobile Android (APK)"
+          >
+            <Download className="w-3.5 h-3.5 text-indigo-600" />
+            <span className="inline font-bold">Télécharger l&apos;APK</span>
+          </a>
 
           <button
             type="button"
