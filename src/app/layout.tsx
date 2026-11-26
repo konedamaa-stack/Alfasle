@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "AlFasle",
+    title: "جامعة النور الإسلامية",
   },
 };
 
@@ -39,7 +39,7 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="AlFasle" />
+        <meta name="apple-mobile-web-app-title" content="جامعة النور الإسلامية" />
       </head>
       <body className="antialiased min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-500/20 selection:text-indigo-900">
         <StoreProvider>

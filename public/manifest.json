@@ -1,7 +1,7 @@
 {
-  "name": "Ecole",
-  "short_name": "Ecole",
-  "description": "Application de gestion scolaire et portail éducatif pour les élèves, professeurs et parents.",
+  "name": "جامعة النور الإسلامية",
+  "short_name": "جامعة النور الإسلامية",
+  "description": "Application et portail éducatif de l'Université Islamique An-Nour (جامعة النور الإسلامية).",
   "start_url": "/",
   "scope": "/",
   "id": "/",
@@ -9,8 +9,8 @@
   "orientation": "any",
   "background_color": "#ffffff",
   "theme_color": "#059669",
-  "lang": "fr",
-  "dir": "ltr",
+  "lang": "ar",
+  "dir": "rtl",
   "categories": ["education", "productivity"],
   "icons": [
     {
